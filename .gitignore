@@ -1,0 +1,27 @@
+# Local reference clones have their own Git history.
+/sources/
+/artifacts/
+.env
+.env.*
+!.env.example
+*.log
+*.o
+*.obj
+*.d
+*.gch
+*.py[cod]
+__pycache__/
+.venv/
+venv/
+build/
+CMakeFiles/
+CMakeCache.txt
+/server/nginx
+/server/app/link_obj/
+/server/app/dep/
+*.faiss
+*.pkl
+*.npy
+.vscode/
+.idea/
+*.tmp

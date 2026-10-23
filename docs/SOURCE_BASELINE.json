@@ -1,0 +1,22 @@
+{
+  "recorded_date": "2026-10-23",
+  "repositories": [
+    {
+      "name": "Learn_EpollServer",
+      "url": "https://github.com/jack1415926/Learn_EpollServer.git",
+      "commit": "cda1f36a44fba8fe970b4469568c8bfaa959df2c",
+      "local_reference": "sources/Learn_EpollServer",
+      "imported_paths": ["server/", "sql/", "testscript/", "epoll_mcp/", "requirements-mcp.txt"],
+      "documentation": "Upstream docs/*.md copied to docs/upstream/; upstream AGENTS.md preserved as EPOLL_REPOSITORY_GUIDELINES.md",
+      "source_changes_at_import": false
+    },
+    {
+      "name": "KBrag-V6",
+      "url": "https://github.com/jack1415926/KBrag-V6.git",
+      "commit": "472a69940e61fd38c70d12c727419286e24742a8",
+      "local_reference": "sources/KBrag-V6",
+      "imported_paths": [],
+      "status": "Reference only; diagnostic adaptation deferred to stage 5"
+    }
+  ]
+}
