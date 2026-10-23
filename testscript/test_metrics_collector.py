@@ -206,7 +206,7 @@ class MetricsCollectorTests(unittest.TestCase):
         self.assertEqual(self.collect()["reason"], "directory_unavailable")
         self.metrics.chmod(0o700)
 
-    def collect_during_change(self, pid, change):
+    def collect_during_change(self, pid, change, age=3000):
         # A synthetic /proc FIFO pauses the actual reader at the first Worker check.
         # Restore a regular stat file before resuming so later identity reads proceed.
         file = self.proc / str(pid) / "stat"
@@ -225,11 +225,53 @@ class MetricsCollectorTests(unittest.TestCase):
                 errors.append(error)
         thread = threading.Thread(target=writer, daemon=True)
         thread.start()
-        result = self.collect()
+        result = self.collect(age=age)
         thread.join(5)
         self.assertFalse(thread.is_alive())
         self.assertEqual(errors, [])
         return result
+
+    def test_directory_symlink_suffixes_are_rejected(self):
+        link = self.root / "link"
+        link.symlink_to(self.metrics, target_is_directory=True)
+        for suffix in ("", "/", "/.", "/./"):
+            manifest = str(link) + suffix + "/" + self.manifest.name
+            with self.subTest(suffix=suffix):
+                self.assertEqual(self.collect(manifest=manifest)["reason"], "directory_unavailable")
+
+    def test_expiry_during_final_identity_check_discards_sums(self):
+        # Pause the second Worker, replace the first stat with a FIFO, then delay
+        # only its final identity check. No production /proc file is modified.
+        first = self.proc / "101/stat"
+        text = first.read_bytes()
+        errors = []
+        threads = []
+        def final_check():
+            try:
+                with first.open("wb", buffering=0) as stream:
+                    time.sleep(0.25)
+                    first.unlink()
+                    first.write_bytes(text)
+                    stream.write(text)
+            except Exception as error:
+                errors.append(error)
+        def install_fifo():
+            # Refresh samples after the compiler/test runner's scheduling delays.
+            for file, sample in zip(self.worker_files, self.samples):
+                self.write(file, {**sample, "sampled_at_boottime_ms": self.now()})
+            first.unlink()
+            os.mkfifo(first, 0o600)
+            thread = threading.Thread(target=final_check, daemon=True)
+            thread.start()
+            threads.append(thread)
+        result = self.collect_during_change(102, install_fifo, age=200)
+        for thread in threads:
+            thread.join(5)
+            self.assertFalse(thread.is_alive())
+        self.assertEqual(errors, [])
+        self.assertEqual(result["status"], "instance_changed")
+        self.assertEqual(result["valid_workers"], 0)
+        self.assertIsNone(result["totals"]["connections_current"])
 
     def test_membership_change_during_read_discards_all_sums(self):
         result = self.collect_during_change(101, lambda: self.write(

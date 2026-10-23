@@ -15,7 +15,7 @@ public:
     // 成功 NGX_DB_OK；校验失败 NGX_DB_ERR_FAILED（用户名或密码错误）
     static int VerifyLogin(MYSQL *conn, const char *username, const char *password);
 
-    // 成功 NGX_DB_OK；无记录 NGX_DB_ERR_FAILED
+    // 成功 NGX_DB_OK；无记录 NGX_DB_NOT_FOUND；查询错误 NGX_DB_ERR_FAILED
     static int GetUserById(MYSQL *conn, int64_t userId, UserInfoDto &out);
 };
 

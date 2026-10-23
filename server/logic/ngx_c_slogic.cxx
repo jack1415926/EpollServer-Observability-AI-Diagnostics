@@ -501,10 +501,13 @@ bool CLogicSocket::_HandleGetUserInfo(lpngx_connection_t pConn, LPSTRUC_MSG_HEAD
         return true;
     }
 
-    if (m_pRedis != nullptr) {
-        CUserCacheService::SetNullUserCache(m_pRedis, userId, 0);
+    if (dbResult == NGX_DB_NOT_FOUND) {
+        if (m_pRedis != nullptr)
+            CUserCacheService::SetNullUserCache(m_pRedis, userId, 0);
+        SendGetUserInfoResponse(pMsgHeader, NGX_USER_NOT_FOUND, userId, nullptr);
+    } else {
+        SendGetUserInfoResponse(pMsgHeader, NGX_USER_ERR_BACKEND, userId, nullptr);
     }
-    SendGetUserInfoResponse(pMsgHeader, NGX_USER_NOT_FOUND, userId, nullptr);
     return false;
 }
 

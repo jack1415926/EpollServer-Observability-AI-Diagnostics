@@ -202,6 +202,9 @@ static int ExecGetUserByIdStmt(MYSQL *conn, int64_t userId, UserInfoDto &out)
     int fetch_code = mysql_stmt_fetch(stmt);
     mysql_stmt_close(stmt);
 
+    if (fetch_code == MYSQL_NO_DATA) {
+        return NGX_DB_NOT_FOUND;
+    }
     if (fetch_code != 0 || id_null || name_null) {
         return NGX_DB_ERR_FAILED;
     }

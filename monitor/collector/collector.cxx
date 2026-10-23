@@ -1,4 +1,5 @@
 #include "collector.h"
+#include "../../server/include/ngx_snapshot_directory.h"
 
 #include <cerrno>
 #include <chrono>
@@ -211,7 +212,7 @@ Json Collect(const std::filesystem::path &manifest, uint64_t maxAgeMs,
     try {
         if (maxAgeMs == 0 || maxAgeMs > 60000)
             throw Error("invalid_max_age");
-        const auto directory = manifest.has_parent_path() ? manifest.parent_path() : std::filesystem::path(".");
+        const auto directory = SnapshotDirectoryPath(manifest.has_parent_path() ? manifest.parent_path() : std::filesystem::path("."));
         Fd fd(open(directory.c_str(), O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC));
         struct stat info;
         if (fd.value == -1 || fstat(fd.value, &info) == -1 || info.st_uid != geteuid() ||
@@ -286,11 +287,13 @@ Json Collect(const std::filesystem::path &manifest, uint64_t maxAgeMs,
             CheckProcess(procRoot, masterPid, masterTicks);
             if (ReadFile(fd.value, manifest.filename().string(), 1024 * 1024) != original)
                 throw Error("changed");
+            for (const auto &row : result["workers"])
+                if (row["status"] == "fresh")
+                    CheckProcess(procRoot, row["pid"].get<int>(), row["process_start_ticks"].get<uint64_t>(), masterPid);
             const uint64_t finished = BootTimeMs();
             result["collected_at_boottime_ms"] = finished;
             for (auto &row : result["workers"])
                 if (row["status"] == "fresh") {
-                    CheckProcess(procRoot, row["pid"].get<int>(), row["process_start_ticks"].get<uint64_t>(), masterPid);
                     const auto sampled = row["sampled_at_boottime_ms"].get<uint64_t>();
                     if (sampled > finished || finished - sampled > maxAgeMs)
                         throw Error("changed");

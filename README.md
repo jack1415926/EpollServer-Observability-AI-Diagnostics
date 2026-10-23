@@ -2,11 +2,13 @@
 
 基于既有 Linux C++ TCP 服务，逐步开发运行指标采集、独立 HTTP 监控与 Python RAG 辅助故障诊断。
 
-**阶段 0 和阶段 1（用户确认的基础指标范围）已完成验收**。阶段 1 包含 Worker 快照、Master 名单、C++ 读取汇总与 CLI，支持身份核验、过期、部分失败和旧实例隔离；2026-10-24 通过 Linux 编译、30 项回归、5 场景端到端联调及 4 场景停机回归。采样默认关闭。小规模开关对照正式 36 万次 Ping 零失败，原负载口径的正式开销验收留待后续；CPU/内存、累计计数和数据库内部指标尚未实现。Drogon、Web 和 AI 尚未开始。
+**阶段 0、阶段 1（基础指标）和阶段 2（只读 HTTP 监控）已完成验收**。阶段 1 包含 Worker 快照、Master 名单、C++ 读取汇总与 CLI，支持身份核验、过期、部分失败和旧实例隔离；2026-10-24 通过 Linux 编译、30 项回归、5 场景端到端联调及 4 场景停机回归。采样默认关闭。小规模开关对照正式 36 万次 Ping 零失败，原负载口径的正式开销验收留待后续；CPU/内存、累计计数和数据库内部指标尚未实现。阶段 2 新增独立 Drogon 服务与 health、overview、workers、metrics 四接口，包含本机绑定、Bearer 鉴权、限流、后台采集和缓存失效；45 项合并回归及真实 TCP 故障隔离联调通过。TCP 健康状态仍明确为未主动探测；事件留待阶段 4，Web 和 AI 尚未开始。
 
 根据用户回传的 Ubuntu 验收输出，200 并发、6 个客户端进程、Redis Lua 开启的三轮 Ping 测试累计 600 万请求零失败，QPS 中位数为 32,203.656，抽样 P95 的三轮中位数为 9.411 ms。环境、完整口径和证据限制见 [本次 Linux 验收记录](docs/BASELINE_RESULTS_2026-10-23.md)。该结果是同机 Debug Ping 基线，不代表生产业务容量。
 
 ## 已确认的边界
+
+开发或 Code Review 中发现的问题，应简要记录现象、原因、修复方式及验证结果；未解决的注明状态。统一维护在 [开发问题与修复记录](docs/DEVELOPMENT_ISSUES.md)。
 
 - 独立新仓库，C++ 为主线，兼顾 Python 与 Agent/RAG。
 - 保留自定义 TCP 协议和现有业务；HTTP 只承担监控与诊断入口。
@@ -21,6 +23,7 @@
 | `server/`、`sql/` | 从固定提交原样导入的 TCP 服务与数据库初始化材料 |
 | `testscript/` | 原协议、集成、停机与压测脚本 |
 | `epoll_mcp/` | 原有只读 stdio 工具，不代表新诊断服务已完成 |
+| `monitor/` | C++ 快照读取器、CLI 及独立 Drogon HTTP 服务 |
 | `docs/upstream/` | 原服务器文档快照，历史结果不代表本项目已复测 |
 | `sources/` | 两个完整参考克隆，本地保留，不纳入新仓库 |
 | `docs/` | 原始规划、本次需求决策与阶段验收说明 |
@@ -45,6 +48,7 @@ cd epoll-observability
 5. 新增 Worker 快照的字段、故障语义和合并验收命令见 [阶段 1 第一批](docs/STAGE_1_WORKER_SNAPSHOT.md)。
 6. Master 名单字段、生命周期与最新合并验收见 [阶段 1 第二批](docs/STAGE_1_MASTER_MEMBERSHIP.md)。
 7. 当前完成标准、C++ CLI 构建使用、完整功能验收及小规模开销记录见 [阶段 1 收尾](docs/STAGE_1_COMPLETION.md)。
+8. HTTP 构建启动、四接口契约、鉴权与故障隔离验收见 [阶段 2 HTTP 监控](docs/STAGE_2_HTTP_MONITOR.md)。
 
 原服务依赖 Linux、G++ C++17、Make、pthread、MySQL client、hiredis 和 redis-plus-plus。构建沿用 Make：
 

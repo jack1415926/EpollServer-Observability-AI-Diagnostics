@@ -1,0 +1,48 @@
+# 开发问题与修复记录
+
+开发或 Code Review 发现问题时，在本页简要记录问题、修复方式和验证结果；未完成验证不能标记为已解决。历史验收记录保留当时结果。
+
+## 2026-10-24：阶段 0 / 1 Code Review
+
+编号沿用本次审查。1、2、3、5、6、8 为阶段 0 导入代码的问题，4、7 为阶段 1 新增代码的问题。
+
+| 编号 | 问题与原因 | 修复方式 | 状态 / 验证 |
+|---|---|---|---|
+| 1 | SQL 错误与查无记录共用返回码，导致故障写入空值缓存 | 区分无记录和后端错误，仅无记录写空值缓存 | 已修复：DAO 分支测试、真实服务 SQL 故障注入通过，连续请求返回后端错误且 Redis 无空值缓存 |
+| 2 | MySQL 坏连接补建失败后永久丢失容量 | 跟踪连接数，借用时补建缺失连接 | 已修复：补建失败再恢复，无需重启即可借用；停机期间新建连接被关闭 |
+| 3 | 接收队列无上限，出队后的 Redis 限流无法限制内存 | 每 Worker 入队上限 4096 条 / 64 MiB；拒绝时调用方释放消息并关闭连接 | 已修复：两种上限、出队恢复容量、拒绝内存归属及停机排空测试通过 |
+| 4 | 最终身份复核前获取时间，复核延迟后仍使用旧年龄 | 身份复核结束后统一检查新鲜度 | 已修复：最终身份检查期间跨过阈值，返回 instance_changed 且丢弃汇总 |
+| 5 | 手工拼接 / 宽松解析 JSON 使带引号用户名被截断 | 使用 USER_V1:id:username 可逆编码，旧 JSON 回源刷新，不增加 JSON 依赖 | 已修复：引号、反斜杠、换行、冒号、空名、中文、最长名往返及无效输入测试通过 |
+| 6 | MySQL 池持锁执行 ping / 重连，阻塞其他借用和归还 | 网络操作移到锁外，停机等待在途连接完成 | 已修复：阻塞一个连接的 ping 时仍能借用空闲连接；借出 / 新建连接与停机并发测试通过 |
+| 7 | O_NOFOLLOW 可被目录尾斜杠 / 点组件绕过 | 发布器与读取器复用尾部组件处理，不提前解析符号链接 | 已修复：link、link/、link/.、link/./ 拒绝测试通过 |
+| 8 | 主线程上下文切换 / 最近 CPU 被误作整个进程口径 | 字段更名为 main_thread_*，不增加遍历线程的采样成本 | 已修复：解析及输出字段测试通过；历史 JSON 不改写，新消费者须使用新字段名 |
+
+### 验证与边界
+
+本批服务 / C++ CLI 构建成功；37 项针对性回归、5 场景快照联调、4 场景停机回归全部通过，原有 C++ 线程池排空专项通过。新增测试只替换外部调用或暂停测试 procRoot，实际运行相关 C++ 实现；SQL 联调用 LD_PRELOAD 仅使独立测试实例的查询准备失败，未停止现有数据库、创建业务账号或修改业务数据。
+
+接收队列的条数 / 字节上限探针额外通过 AddressSanitizer、UndefinedBehaviorSanitizer 和泄漏检查，覆盖拒绝入队、出队恢复预算及停机排空。首次 LeakSanitizer 因沙箱 ptrace 限制无法运行，获准在沙箱外执行后两种场景均通过；这不是全服务 sanitizer 验收。
+
+复现入口（从项目根目录，MySQL / Redis 使用隔离开发环境）：
+
+```bash
+make -C server
+make -C monitor
+PYTHONPATH=testscript python3 -m unittest test_protocol test_tcp_stress test_performance_sampler test_worker_snapshot test_metrics_collector test_service_fixes -v
+python3 testscript/test_backend_failure_live.py --binary ./server/nginx
+python3 testscript/test_worker_snapshot_live.py --binary ./server/nginx --collector ./monitor/build/epoll-metrics
+python3 testscript/test_shutdown.py --binary ./server/nginx
+g++ -std=c++17 -pthread -Iserver/include testscript/test_threadpool_shutdown.cxx server/misc/ngx_c_memory.cxx -o /tmp/epoll-test-threadpool-shutdown
+/tmp/epoll-test-threadpool-shutdown
+```
+
+本次未重跑 600 万次压测或正式开销对照，也未执行真实数据库断网、磁盘故障、fork 失败和全服务 sanitizer 检查；不作性能无回归承诺。37 项回归不含可选 MCP 测试。队列预算仅覆盖排队的消息，不代表 Worker 总内存上限；MySQL 排队等待和新建连接超时分别计算，Destroy 要求调用方最终释放借出的连接。旧 JSON 缓存按未命中回源刷新，旧 NULL_USER 仍按原 TTL 到期，不批量删除 Redis 数据。
+
+## 2026-10-24：阶段 2 HTTP 开发
+
+| 问题与原因 | 处理 | 状态 / 验证 |
+|---|---|---|
+| Drogon 的 JsonCpp 命名空间与读取器使用的 Json 类型别名冲突，首次 HTTP 编译失败 | HTTP 文件改用 MonitorJson 别名，不改变读取器或序列化格式 | 已修复：-Wall -Wextra -Werror 编译成功，四接口真实数据测试通过 |
+| 请求体超限由 Drogon 解析器提前返回 413，应用错误处理器无法保证此时有 JSON 正文 | 保留框架的 1 KiB 提前拒绝；API 文档明确解析层边界，测试单独验证 413 状态与应用错误 JSON | 已确认框架行为：超大请求被拒绝，其他应用错误仍为统一 JSON；客户端需处理空正文 |
+
+合并验收 45 项通过；五秒慢读取注入验证 HTTP 继续响应、过期缓存被丢弃并可恢复。真实 TCP/Drogon 联调验证连接数、Worker 过期/恢复、名单权限失败、HTTP 崩溃与 TCP 故障隔离通过。沙箱 socket 限制导致首次原回归失败，获准在沙箱外重跑后全部通过。证据与复现入口见 [阶段 2 HTTP 监控](STAGE_2_HTTP_MONITOR.md)。

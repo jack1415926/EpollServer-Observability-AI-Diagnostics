@@ -22,7 +22,10 @@ public:
     bool Create(int threadNum);                     //创建该线程池中的所有线程
     void StopAll();                                 //使线程池中的所有线程退出
 
-    void inMsgRecvQueueAndSignal(char *buf);        //收到一个完整消息后，入消息队列，并触发线程池中线程来处理该消息
+    // Ownership transfers only on success; the caller releases rejected messages.
+    bool inMsgRecvQueueAndSignal(char *buf, size_t bytes);
+    static constexpr size_t MaxReceiveQueueBytes = 64 * 1024 * 1024;
+    static constexpr int MaxReceiveQueueMessages = 4096;
     void Call();                                    //来任务了，调一个线程池中的线程下来干活  
     int  getRecvMsgQueueCount(){return m_iRecvMsgQueueCount;} //获取接收消息队列大小
 
@@ -61,7 +64,9 @@ private:
     std::vector<ThreadItem *>  m_threadVector;      //线程 容器，容器里就是各个线程了 
 
     //接收消息队列相关
-    std::list<char *>          m_MsgRecvQueue;      //接收数据消息队列 
+    struct ReceiveMessage { char *buffer; size_t bytes; };
+    std::list<ReceiveMessage>  m_MsgRecvQueue;
+    size_t m_receiveQueueBytes = 0; // guarded by m_pthreadMutex
 	std::atomic<int>           m_iRecvMsgQueueCount;
 };
 

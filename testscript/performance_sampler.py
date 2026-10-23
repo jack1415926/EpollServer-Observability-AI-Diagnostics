@@ -51,7 +51,7 @@ def parse_stat(text):
     return {
         "ppid": int(fields[1]),
         "cpu_ticks": int(fields[11]) + int(fields[12]),
-        "processor": int(fields[36]) if len(fields) > 36 else None,
+        "main_thread_processor": int(fields[36]) if len(fields) > 36 else None,
     }
 
 
@@ -64,14 +64,15 @@ def parse_status(text):
     return {
         "rss_kib": int(values.get("VmRSS", "0 kB").split()[0]),
         "threads": int(values.get("Threads", "0")),
-        "voluntary_context_switches": int(values.get("voluntary_ctxt_switches", "0")),
-        "nonvoluntary_context_switches": int(
+        "main_thread_voluntary_context_switches": int(values.get("voluntary_ctxt_switches", "0")),
+        "main_thread_nonvoluntary_context_switches": int(
             values.get("nonvoluntary_ctxt_switches", "0")
         ),
     }
 
 
 def read_process(pid, proc_root=Path("/proc")):
+    # CPU ticks/RSS cover the process; status switch counts and processor cover its main thread.
     process_dir = proc_root / str(pid)
     stat = parse_stat((process_dir / "stat").read_text(encoding="ascii"))
     status = parse_status((process_dir / "status").read_text(encoding="ascii"))
@@ -133,9 +134,9 @@ def sample_processes(targets, previous, elapsed, clock_ticks, proc_root=Path("/p
             "cpu_percent": cpu_percent,
             "rss_kib": process["rss_kib"],
             "threads": process["threads"],
-            "processor": process["processor"],
-            "voluntary_context_switches": process["voluntary_context_switches"],
-            "nonvoluntary_context_switches": process["nonvoluntary_context_switches"],
+            "main_thread_processor": process["main_thread_processor"],
+            "main_thread_voluntary_context_switches": process["main_thread_voluntary_context_switches"],
+            "main_thread_nonvoluntary_context_switches": process["main_thread_nonvoluntary_context_switches"],
         })
     return samples, current
 

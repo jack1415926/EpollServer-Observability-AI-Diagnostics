@@ -13,6 +13,7 @@
 #define NGX_DB_ERR_DUPLICATE   1
 #define NGX_DB_ERR_FAILED      2
 #define NGX_DB_ERR_POOL        3
+#define NGX_DB_NOT_FOUND       4
 
 class CMysqlConnPool
 {
@@ -33,7 +34,7 @@ public:
     std::shared_ptr<MYSQL> GetConnection();
     void Destroy();
 
-    bool IsInited() const { return m_inited; }
+    bool IsInited() const { std::lock_guard<std::mutex> lock(m_mutex); return m_inited; }
 
 private:
     MYSQL *CreateConnection();
@@ -49,9 +50,10 @@ private:
     std::string m_dbname;
     unsigned int m_port;
     int m_poolSize;
+    int m_connectionCount = 0; // idle, borrowed, checking and being created
 
     std::queue<MYSQL *> m_idleQueue;
-    std::mutex m_mutex;
+    mutable std::mutex m_mutex;
     std::condition_variable m_cond;
 
     bool m_inited;

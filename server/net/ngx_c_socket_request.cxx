@@ -142,8 +142,7 @@ void CSocekt::ngx_read_request_handler(lpngx_connection_t pConn)
         }
     }  //end if(c->curStat == _PKG_HD_INIT)
 
-    // 因为我们注释掉了旧版 TestFlood，这里的 isflood 永远是 false
-    // 恶意用户判定已经推迟到 L2 Redis 去拦截，L2 发现后会写回到上方的 L1 黑名单里
+    // Flood 检测或接收队列拒绝入队时，关闭连接；Redis 限流仍在业务线程执行。
     if(isflood == true)
     {
         //客户端flood服务器，则直接把客户端踢掉
@@ -260,7 +259,12 @@ void CSocekt::ngx_wait_request_handler_proc_plast(lpngx_connection_t pConn,bool 
 
     if(isflood == false)
     {
-        g_threadpool.inMsgRecvQueueAndSignal(pConn->precvMemPointer); //入消息队列并触发线程处理消息
+        const auto header = reinterpret_cast<LPCOMM_PKG_HEADER>(pConn->precvMemPointer + m_iLenMsgHeader);
+        if (!g_threadpool.inMsgRecvQueueAndSignal(pConn->precvMemPointer,
+                                                m_iLenMsgHeader + ntohs(header->pkgLen))) {
+            CMemory::GetInstance()->FreeMemory(pConn->precvMemPointer);
+            isflood = true; // caller closes this connection after resetting the receive state
+        }
     }
     else
     {

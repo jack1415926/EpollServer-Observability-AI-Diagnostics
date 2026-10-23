@@ -41,10 +41,12 @@ void CThreadPool::clearMsgRecvQueue()
 	//尾声阶段，需要互斥？该退的都退出了，该停止的都停止了，应该不需要退出了
 	while(!m_MsgRecvQueue.empty())
 	{
-		sTmpMempoint = m_MsgRecvQueue.front();		
+		sTmpMempoint = m_MsgRecvQueue.front().buffer;
 		m_MsgRecvQueue.pop_front(); 
 		p_memory->FreeMemory(sTmpMempoint);
-	}	
+	}
+    m_receiveQueueBytes = 0;
+    m_iRecvMsgQueueCount = 0;
 }
 
 //创建线程池中的线程，要手工调用，不在构造函数里调用了
@@ -121,7 +123,8 @@ void* CThreadPool::ThreadFunc(void* threadData)
         }
 
         //走到这里，可以取得消息进行处理了【消息队列中必然有消息】,注意，目前还是互斥着呢
-        char *jobbuf = pThreadPoolObj->m_MsgRecvQueue.front();     //返回第一个元素但不检查元素存在与否
+        char *jobbuf = pThreadPoolObj->m_MsgRecvQueue.front().buffer;
+        pThreadPoolObj->m_receiveQueueBytes -= pThreadPoolObj->m_MsgRecvQueue.front().bytes;
         pThreadPoolObj->m_MsgRecvQueue.pop_front();                //移除第一个元素但不返回	
         --pThreadPoolObj->m_iRecvMsgQueueCount;                    //收消息队列数字-1
                
@@ -191,16 +194,23 @@ void CThreadPool::StopAll()
 
 //--------------------------------------------------------------------------------------
 //收到一个完整消息后，入消息队列，并触发线程池中线程来处理该消息
-void CThreadPool::inMsgRecvQueueAndSignal(char *buf)
+bool CThreadPool::inMsgRecvQueueAndSignal(char *buf, size_t bytes)
 {
     //互斥
     int err = pthread_mutex_lock(&m_pthreadMutex);     
     if(err != 0)
     {
         ngx_log_stderr(err,"CThreadPool::inMsgRecvQueueAndSignal()pthread_mutex_lock()失败，返回的错误码为%d!",err);
+        return false;
     }
-        
-    m_MsgRecvQueue.push_back(buf);	         //入消息队列
+
+    if (m_shutdown || m_iRecvMsgQueueCount >= MaxReceiveQueueMessages ||
+        bytes > MaxReceiveQueueBytes - m_receiveQueueBytes) {
+        pthread_mutex_unlock(&m_pthreadMutex);
+        return false;
+    }
+    m_MsgRecvQueue.push_back({buf, bytes});
+    m_receiveQueueBytes += bytes;
     ++m_iRecvMsgQueueCount;                  //收消息队列数字+1，个人认为用变量更方便一点，比 m_MsgRecvQueue.size()高效
 
     //取消互斥
@@ -212,7 +222,7 @@ void CThreadPool::inMsgRecvQueueAndSignal(char *buf)
 
     //可以激发一个线程来干活了
     Call();                                  
-    return;
+    return true;
 }
 
 //来任务了，调一个线程池中的线程下来干活

@@ -1,4 +1,5 @@
 #include "ngx_worker_snapshot.h"
+#include "ngx_snapshot_directory.h"
 
 #include <algorithm>
 #include <cerrno>
@@ -45,9 +46,10 @@ std::string BootId()
 
 int OpenDirectory(const std::string &directory)
 {
-    if (mkdir(directory.c_str(), 0700) == -1 && errno != EEXIST)
+    const auto path = SnapshotDirectoryPath(directory);
+    if (mkdir(path.c_str(), 0700) == -1 && errno != EEXIST)
         throw std::runtime_error("cannot create snapshot directory");
-    const int fd = open(directory.c_str(), O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
+    const int fd = open(path.c_str(), O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
     struct stat info;
     if (fd == -1 || fstat(fd, &info) == -1 || info.st_uid != geteuid() ||
         (info.st_mode & (S_IWGRP | S_IWOTH))) {

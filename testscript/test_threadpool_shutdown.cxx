@@ -36,7 +36,8 @@ int main()
     CThreadPool pool;
     if (!pool.Create(4)) return 1;
     for (int i = 0; i < 100; ++i)
-        pool.inMsgRecvQueueAndSignal(static_cast<char*>(CMemory::GetInstance()->AllocMemory(1, false)));
+        if (!pool.inMsgRecvQueueAndSignal(static_cast<char*>(CMemory::GetInstance()->AllocMemory(1, false)), 1))
+            return 2;
     std::thread release([] {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         std::lock_guard<std::mutex> lock(g_socket.mutex);

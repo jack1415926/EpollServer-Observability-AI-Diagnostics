@@ -70,10 +70,12 @@ bool CMysqlConnPool::Init(const char *host, unsigned int port,
                 MYSQL *c = m_idleQueue.front();
                 m_idleQueue.pop();
                 mysql_close(c);
+                --m_connectionCount;
             }
             return false;
         }
         m_idleQueue.push(conn);
+        ++m_connectionCount;
     }
 
     m_inited = true;
@@ -125,26 +127,37 @@ std::shared_ptr<MYSQL> CMysqlConnPool::GetConnection()
     MYSQL *raw = nullptr;
 
     {
-        // unique_lock 比 lock_guard 灵活：可配合 condition_variable::wait / wait_for
         std::unique_lock<std::mutex> lock(m_mutex);
-
-        if (!m_inited || m_shuttingDown) {
-            return std::shared_ptr<MYSQL>();
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+        while (m_inited && !m_shuttingDown) {
+            if (!m_idleQueue.empty()) {
+                raw = m_idleQueue.front();
+                m_idleQueue.pop();
+                break;
+            }
+            if (m_connectionCount < m_poolSize) {
+                // Reserve capacity before unlocking; concurrent borrowers cannot overfill the pool.
+                ++m_connectionCount;
+                lock.unlock();
+                raw = CreateConnection();
+                lock.lock();
+                if (!raw || m_shuttingDown) {
+                    lock.unlock();
+                    if (raw) mysql_close(raw);
+                    lock.lock();
+                    --m_connectionCount;
+                    m_cond.notify_all();
+                    return {};
+                }
+                break;
+            }
+            if (m_cond.wait_until(lock, deadline) == std::cv_status::timeout) {
+                ngx_log_stderr(0, "CMysqlConnPool::GetConnection() 等待连接超时");
+                return {};
+            }
         }
-
-        // 等待空闲连接；最多等 5 秒，避免业务线程永久阻塞
-        const auto timeout = std::chrono::seconds(5);
-        const bool got = m_cond.wait_for(lock, timeout, [this]() {
-            return m_shuttingDown || !m_idleQueue.empty();
-        });
-
-        if (m_shuttingDown || !got || m_idleQueue.empty()) {
-            ngx_log_stderr(0, "CMysqlConnPool::GetConnection() 等待连接超时或池已关闭");
-            return std::shared_ptr<MYSQL>();
-        }
-
-        raw = m_idleQueue.front();
-        m_idleQueue.pop();
+        if (!raw)
+            return {};
     }
 
     // --- RAII 核心：自定义删除器 ---
@@ -164,59 +177,40 @@ void CMysqlConnPool::ReturnConnection(MYSQL *conn)
         return;
     }
 
+    // Keep this slot reserved while checking it, but do not block other borrowers.
+    const bool healthy = PingConnection(conn);
+    if (!healthy)
+        ngx_log_stderr(0, "CMysqlConnPool::ReturnConnection() 丢弃坏连接，后续借用按需补建");
     std::unique_lock<std::mutex> lock(m_mutex);
-
-    if (m_shuttingDown) {
+    if (!healthy || m_shuttingDown) {
+        lock.unlock();
         mysql_close(conn);
-        return;
+        lock.lock();
+        --m_connectionCount;
+    } else {
+        m_idleQueue.push(conn);
     }
-
-    // 坏连接：ping 失败则关闭并尝试补一条新连接，避免把废连接还给别人
-    if (!PingConnection(conn)) {
-        ngx_log_stderr(0, "CMysqlConnPool::ReturnConnection() 检测到坏连接，尝试重建");
-        mysql_close(conn);
-        conn = CreateConnection();
-        if (conn == nullptr) {
-            ngx_log_stderr(0, "CMysqlConnPool::ReturnConnection() 重建连接失败");
-            return;
-        }
-    }
-
-    m_idleQueue.push(conn);
-    // 唤醒一个在 GetConnection() 里 wait 的线程
-    m_cond.notify_one();
+    m_cond.notify_all();
 }
 
 void CMysqlConnPool::Destroy()
 {
     std::unique_lock<std::mutex> lock(m_mutex);
-
-    if (!m_inited && m_idleQueue.empty()) {
-        if (m_mysqlLibraryInited) {
-            mysql_library_end();
-            m_mysqlLibraryInited = false;
-        }
-        return;
-    }
-
     m_shuttingDown = true;
     m_inited = false;
-
-    // 唤醒所有等待 GetConnection 的线程，避免进程退出时挂死
     m_cond.notify_all();
-
     while (!m_idleQueue.empty()) {
         MYSQL *conn = m_idleQueue.front();
         m_idleQueue.pop();
+        lock.unlock();
         mysql_close(conn);
+        lock.lock();
+        --m_connectionCount;
     }
-
-    lock.unlock();
-
+    // Borrowed/being-created/being-checked connections must finish before library teardown.
+    m_cond.wait(lock, [this] { return m_connectionCount == 0; });
     if (m_mysqlLibraryInited) {
         mysql_library_end();
         m_mysqlLibraryInited = false;
     }
-
-    m_shuttingDown = false;
 }

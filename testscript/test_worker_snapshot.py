@@ -110,6 +110,10 @@ class WorkerSnapshotTests(unittest.TestCase):
             for master in (False, True):
                 with self.subTest(path=path.name, master=master):
                     self.assertEqual(self.start(path, master).wait(timeout=5), 2)
+        for suffix in ("/", "/.", "/./"):
+            for master in (False, True):
+                with self.subTest(suffix=suffix, master=master):
+                    self.assertEqual(self.start(str(link) + suffix, master).wait(timeout=5), 2)
         self.assertEqual(target.read_text(), "keep")
 
     def test_write_failure_and_recovery(self):

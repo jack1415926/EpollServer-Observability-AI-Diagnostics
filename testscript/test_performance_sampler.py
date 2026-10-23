@@ -24,7 +24,8 @@ class PerformanceSamplerTests(unittest.TestCase):
             process_dir.mkdir()
             (process_dir / "comm").write_text("nginx\n", encoding="utf-8")
             (process_dir / "status").write_text(
-                "VmRSS:\t2048 kB\nThreads:\t5\n", encoding="ascii"
+                "VmRSS:\t2048 kB\nThreads:\t5\nvoluntary_ctxt_switches:\t17\n"
+                "nonvoluntary_ctxt_switches:\t3\n", encoding="ascii"
             )
             (process_dir / "stat").write_text(
                 "123 (worker process) S 1 0 0 0 0 0 0 0 0 0 30 20 0 0 0\n",
@@ -37,6 +38,9 @@ class PerformanceSamplerTests(unittest.TestCase):
             self.assertIsNone(first[0]["cpu_percent"])
             self.assertEqual(first[0]["rss_kib"], 2048)
             self.assertEqual(first[0]["threads"], 5)
+            self.assertEqual(first[0]["main_thread_voluntary_context_switches"], 17)
+            self.assertEqual(first[0]["main_thread_nonvoluntary_context_switches"], 3)
+            self.assertNotIn("voluntary_context_switches", first[0])
 
             (process_dir / "stat").write_text(
                 "123 (worker process) S 1 0 0 0 0 0 0 0 0 0 70 30 0 0 0\n",
@@ -80,13 +84,13 @@ class PerformanceSamplerTests(unittest.TestCase):
 
     def test_individual_parsers_reject_or_default(self):
         self.assertEqual(parse_stat("1 (x y) S 0 0 0 0 0 0 0 0 0 0 2 3"), {
-            "ppid": 0, "cpu_ticks": 5, "processor": None,
+            "ppid": 0, "cpu_ticks": 5, "main_thread_processor": None,
         })
         self.assertEqual(parse_status("Name:\ttest\n"), {
             "rss_kib": 0,
             "threads": 0,
-            "voluntary_context_switches": 0,
-            "nonvoluntary_context_switches": 0,
+            "main_thread_voluntary_context_switches": 0,
+            "main_thread_nonvoluntary_context_switches": 0,
         })
         with self.assertRaises(ValueError):
             parse_stat("invalid")

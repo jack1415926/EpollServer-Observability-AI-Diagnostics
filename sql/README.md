@@ -87,8 +87,10 @@ mysql -u epoll_user -pepoll_pass -e "SELECT id,username,created_at FROM epoll_db
 
 **Redis 键**（与 L2 限流 `RateLimit:{ip}` 隔离）：
 
-- 正常：`user:info:{userId}` → JSON `{"id":1001,"username":"alice"}`，TTL 默认 3600s（`[Cache] UserInfoCacheTtlSec`）
+- 正常：`user:info:{userId}` → `USER_V1:1001:alice`，末尾用户名原样保存（包括引号、冒号等），TTL 默认 3600s（`[Cache] UserInfoCacheTtlSec`）。旧 JSON 视为未命中，回源后刷新，无需批量删除缓存。
 - 穿透保护：值 `NULL_USER`，TTL 默认 60s（`NullUserCacheTtlSec`）
+
+SQL 错误返回后端故障，不写 `NULL_USER`；只有成功执行查询且确实无记录才缓存空值。MySQL 池失效槽位在后续借用时按需补建；排队等待最多 5 秒，新建连接另受 MySQL 连接超时限制。停机须在业务线程结束后执行 `Destroy()`，该函数等待已借出及在途连接完成，随后才关闭 MySQL 库。
 
 ```bash
 # 在仓库根目录执行；先确保 users 表有数据

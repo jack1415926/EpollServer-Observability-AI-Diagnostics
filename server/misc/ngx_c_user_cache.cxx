@@ -4,6 +4,7 @@
 #include "ngx_c_conf.h"
 #include "ngx_func.h"
 
+#include <charconv>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
@@ -33,34 +34,33 @@ static std::string BuildCacheKey(int64_t userId)
     return std::string(buf);
 }
 
-static bool BuildUserJson(const UserInfoDto &info, std::string &jsonOut)
+// A versioned prefix and a single numeric delimiter preserve username bytes without a JSON dependency.
+static bool EncodeUserCache(const UserInfoDto &info, std::string &encoded)
 {
-    char buf[256] = {0};
-    int n = snprintf(buf, sizeof(buf) - 1,
-                     "{\"id\":%lld,\"username\":\"%s\"}",
-                     (long long)info.id,
-                     info.username);
-    if (n <= 0 || n >= static_cast<int>(sizeof(buf))) {
+    const size_t length = strnlen(info.username, sizeof(info.username));
+    if (info.id <= 0 || length == sizeof(info.username))
         return false;
-    }
-    jsonOut.assign(buf);
+    encoded = "USER_V1:" + std::to_string(info.id) + ":" + std::string(info.username, length);
     return true;
 }
 
-static bool ParseUserJson(const std::string &json, UserInfoDto &out)
+static bool DecodeUserCache(const std::string &encoded, UserInfoDto &out)
 {
-    long long id = 0;
-    char username[56] = {0};
-    int matched = sscanf(json.c_str(),
-                         "{\"id\":%lld,\"username\":\"%55[^\"]\"}",
-                         &id,
-                         username);
-    if (matched < 2) {
+    constexpr size_t prefixLength = 8;
+    if (encoded.compare(0, prefixLength, "USER_V1:") != 0)
+        return false; // Old JSON values are cache misses and are refreshed from MySQL.
+    const auto separator = encoded.find(':', prefixLength);
+    if (separator == std::string::npos)
         return false;
-    }
+    int64_t id = 0;
+    const auto parsed = std::from_chars(encoded.data() + prefixLength, encoded.data() + separator, id);
+    const size_t length = encoded.size() - separator - 1;
+    if (parsed.ec != std::errc{} || parsed.ptr != encoded.data() + separator || id <= 0 ||
+        length >= sizeof(out.username) || encoded.find('\0', separator + 1) != std::string::npos)
+        return false;
+    out = {};
     out.id = id;
-    strncpy(out.username, username, sizeof(out.username) - 1);
-    out.username[sizeof(out.username) - 1] = '\0';
+    memcpy(out.username, encoded.data() + separator + 1, length);
     return true;
 }
 
@@ -88,8 +88,8 @@ bool CUserCacheService::TryGetFromCache(sw::redis::Redis *redis, int64_t userId,
             return false;
         }
 
-        if (!ParseUserJson(*val, out)) {
-            ngx_log_stderr(0, "TryGetFromCache: JSON 解析失败 key=%s", key.c_str());
+        if (!DecodeUserCache(*val, out) || out.id != userId) {
+            ngx_log_stderr(0, "TryGetFromCache: 缓存编码无效 key=%s", key.c_str());
             return false;
         }
         return true;
@@ -109,14 +109,14 @@ void CUserCacheService::SetUserCache(sw::redis::Redis *redis, int64_t userId,
         ttlSec = GetUserInfoCacheTtlSec();
     }
 
-    std::string json;
-    if (!BuildUserJson(info, json)) {
+    std::string encoded;
+    if (info.id != userId || !EncodeUserCache(info, encoded)) {
         return;
     }
 
     try {
         const std::string key = BuildCacheKey(userId);
-        redis->set(key, json, std::chrono::seconds(ttlSec));
+        redis->set(key, encoded, std::chrono::seconds(ttlSec));
     } catch (const sw::redis::Error &e) {
         ngx_log_stderr(0, "SetUserCache Redis 异常: %s", e.what());
     }
