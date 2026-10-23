@@ -25,6 +25,17 @@
 
 ## 从哪里开始
 
+在 Ubuntu 中拉取当前项目：
+
+```bash
+mkdir -p ~/projects
+cd ~/projects
+git clone https://github.com/jack1415926/EpollServer-Observability-AI-Diagnostics.git epoll-observability
+cd epoll-observability
+```
+
+后续在工作目录没有本地修改时更新：`git pull --ff-only`。
+
 1. 阅读 [阶段 0 验收说明](docs/STAGE_0_BASELINE.md)，先回传 Ubuntu 环境检查与构建结果。
 2. 设计边界及对规划书的调整见 [需求与实施决策](docs/DECISIONS.md)。
 3. 上游地址、提交和导入范围见 [源码来源记录](docs/SOURCE_BASELINE.json)。
@@ -41,4 +52,4 @@ cd server
 
 `nginx.conf` 按当前工作目录加载。现有用户认证仍有明文密码和注册响应回传密码的问题；本阶段仅用于隔离开发环境，公开部署前另行修复。
 
-新仓库尚未配置远端。原参考克隆的 `origin` 仍指向原仓库，后续成果在当前根仓库维护。
+项目远端为 [jack1415926/EpollServer-Observability-AI-Diagnostics](https://github.com/jack1415926/EpollServer-Observability-AI-Diagnostics)。原参考克隆的 `origin` 仍指向原仓库，后续成果在当前根仓库维护。克隆新项目即可取得当前阶段所需源码；两个参考仓库不是构建依赖，KBrag 诊断模块尚未导入。

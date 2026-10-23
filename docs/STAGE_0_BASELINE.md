@@ -20,7 +20,7 @@ Windows 首次受限运行出现模拟 TCP 连接超时；相同协议测试在�
 
 ## 下一小批：环境检查与构建
 
-把当前项目复制到 Ubuntu 的本地 Linux 文件系统，如 `~/projects/epoll-observability`。不需要复制 `sources/`，也不要复制 Windows 虚拟环境。建议目录名不带空格：旧 Makefile 使用未加引号的路径，带空格的构建路径尚未验证。
+按根目录 README 的命令，从 GitHub 克隆到 Ubuntu 的本地 Linux 文件系统，如 `~/projects/epoll-observability`。不需要复制 `sources/`，也不要复制 Windows 虚拟环境。建议目录名不带空格：旧 Makefile 使用未加引号的路径，带空格的构建路径尚未验证。
 
 先回传下面两段命令的输出；出现错误就先处理该错误，不继续运行后续集成测试。
 
