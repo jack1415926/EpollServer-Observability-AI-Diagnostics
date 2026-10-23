@@ -18,7 +18,7 @@
 #include "ngx_worker_snapshot.h"
 
 //函数声明
-static void ngx_start_worker_processes(int threadnums);
+static std::vector<std::pair<int, int>> ngx_start_worker_processes(int threadnums);
 static int ngx_spawn_process(int threadnums,const char *pprocname);
 static void ngx_worker_process_cycle(int inum,const char *pprocname);
 static void ngx_worker_process_init(int inum);
@@ -79,7 +79,14 @@ int ngx_master_process_cycle()
     //从配置文件中读取要创建的worker进程数量
     CConfig *p_config = CConfig::GetInstance(); //单例类
     int workprocess = p_config->GetIntDefault("WorkerProcesses",1); //从配置文件中得到要创建的worker进程数量
-    ngx_start_worker_processes(workprocess);  //这里要创建worker子进程
+    const auto members = ngx_start_worker_processes(workprocess);
+    // Create the publisher only after the last fork; children must not own its files.
+    CMasterSnapshot membership;
+    if (p_config->GetIntDefault("WorkerSnapshotEnable", 0) == 1) {
+        const char *directory = p_config->GetString("WorkerSnapshotDirectory");
+        membership.Start(directory ? directory : "worker-metrics", members, workprocess);
+        membership.Update(worker_pids, worker_start_failed || worker_pids.empty());
+    }
 
     // Signals remain blocked outside sigsuspend: checking flags and sleeping is atomic.
     sigemptyset(&set);
@@ -92,6 +99,7 @@ int ngx_master_process_cycle()
         if (ngx_shutdown && !stopping)
         {
             stopping = true;
+            membership.Update(worker_pids, true);
             g_socket.CloseListeningSockets();
             for (pid_t pid : worker_pids)
                 if (kill(pid, SIGTERM) == -1 && errno != ESRCH)
@@ -100,8 +108,10 @@ int ngx_master_process_cycle()
         ngx_reap = 0;
         int status;
         pid_t pid;
+        bool membershipChanged = false;
         while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
         {
+            membershipChanged = true;
             worker_pids.erase(std::remove(worker_pids.begin(), worker_pids.end(), pid),
                               worker_pids.end());
             ngx_log_error_core(NGX_LOG_NOTICE, 0, "Worker %P reaped, status=%d", pid, status);
@@ -112,8 +122,12 @@ int ngx_master_process_cycle()
                 ngx_shutdown = 1;
             }
         }
-        if (pid == -1 && errno == ECHILD)
+        if (pid == -1 && errno == ECHILD) {
+            membershipChanged = membershipChanged || !worker_pids.empty();
             worker_pids.clear();
+        }
+        if (membershipChanged)
+            membership.Update(worker_pids, stopping || ngx_shutdown);
         if (worker_pids.empty())
             break;
         if (ngx_shutdown && !stopping)
@@ -126,16 +140,20 @@ int ngx_master_process_cycle()
 
 //描述：根据给定的参数创建指定数量的子进程，因为以后可能要扩展功能，增加参数，所以单独写成一个函数
 //threadnums:要创建的子进程数量
-static void ngx_start_worker_processes(int threadnums)
+static std::vector<std::pair<int, int>> ngx_start_worker_processes(int threadnums)
 {
+    std::vector<std::pair<int, int>> members;
     int i;
     for (i = 0; i < threadnums; i++)  //master进程在走这个循环，来创建若干个子进程
     {
         int pid = ngx_spawn_process(i,"worker process");
-        if (pid > 0) worker_pids.push_back(pid);
+        if (pid > 0) {
+            worker_pids.push_back(pid);
+            members.emplace_back(i, pid);
+        }
         else worker_start_failed = true;
     } //end for
-    return;
+    return members;
 }
 
 //描述：产生一个子进程

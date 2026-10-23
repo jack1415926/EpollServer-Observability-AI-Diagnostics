@@ -1,6 +1,7 @@
 """Linux-only publisher tests; no running server, MySQL or Redis required."""
 import json
 import os
+import select
 from pathlib import Path
 import stat
 import subprocess
@@ -42,15 +43,17 @@ class WorkerSnapshotTests(unittest.TestCase):
         self.addCleanup(self.directory.cleanup)
         self.root = Path(self.directory.name)
 
-    def start(self, path):
-        proc = subprocess.Popen([str(self.binary), str(path)], stdin=subprocess.PIPE,
-                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    def start(self, path, master=False):
+        proc = subprocess.Popen([str(self.binary), str(path)] + (["--master"] if master else []), stdin=subprocess.PIPE,
+                                stdout=subprocess.PIPE if master else subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                 text=True)
         def cleanup():
             if proc.poll() is None:
                 proc.kill()
             proc.wait(timeout=5)
             proc.stdin.close()
+            if proc.stdout is not None:
+                proc.stdout.close()
         self.addCleanup(cleanup)
         return proc
 
@@ -104,8 +107,9 @@ class WorkerSnapshotTests(unittest.TestCase):
         unsafe.mkdir(mode=0o777)
         unsafe.chmod(0o777)
         for path in (target, link, unsafe):
-            with self.subTest(path=path.name):
-                self.assertEqual(self.start(path).wait(timeout=5), 2)
+            for master in (False, True):
+                with self.subTest(path=path.name, master=master):
+                    self.assertEqual(self.start(path, master).wait(timeout=5), 2)
         self.assertEqual(target.read_text(), "keep")
 
     def test_write_failure_and_recovery(self):
@@ -132,6 +136,67 @@ class WorkerSnapshotTests(unittest.TestCase):
         files = wait_for(lambda: list(path.glob("*.json")) if len(list(path.glob("*.json"))) == 2 else None)
         snapshots = [json.loads(file.read_text()) for file in files]
         self.assertEqual({value["pid"] for value in snapshots}, {first["pid"], second_proc.pid})
+
+    def test_master_lifecycle_failure_recovery_and_cleanup(self):
+        path = self.root / "metrics"
+        proc = self.start(path, master=True)
+        def snapshot():
+            files = list(path.glob("master-*.json"))
+            return json.loads(files[0].read_text()) if files else None
+        first = wait_for(snapshot)
+        self.assertEqual(first["schema_version"], 1)
+        self.assertEqual(first["master_pid"], proc.pid)
+        self.assertEqual(first["state"], "running")
+        self.assertEqual(first["expected_workers"], 2)
+        self.assertEqual(first["boot_id"], Path("/proc/sys/kernel/random/boot_id").read_text().strip())
+        ticks = int(Path(f"/proc/{proc.pid}/stat").read_text().rsplit(")", 1)[1].split()[19])
+        self.assertEqual(first["master_start_ticks"], ticks)
+        self.assertEqual(first["workers"], [{"worker_index": 7, "pid": proc.pid, "process_start_ticks": ticks}])
+        file = next(path.glob("master-*.json"))
+        self.assertEqual(file.name, f"master-{first['boot_id']}-{proc.pid}-{ticks}.json")
+        self.assertEqual(stat.S_IMODE(file.stat().st_mode), 0o600)
+        for _ in range(20):
+            proc.stdin.write("stopping\n")
+            proc.stdin.flush()
+            # Reopen and parse the atomically replaced file while the writer runs.
+            def replaced():
+                self.assertGreaterEqual(snapshot()["sequence"], first["sequence"])
+                self.assertIsNone(proc.poll())
+                return select.select([proc.stdout], [], [], 0)[0]
+            wait_for(replaced)
+            self.assertEqual(proc.stdout.readline().strip(), "updated")
+        self.assertEqual(snapshot()["state"], "stopping")
+        self.assertEqual(snapshot()["workers"], first["workers"])
+        # Observe a failed lifecycle publication, then recovery on the next update.
+        file.unlink()
+        file.mkdir()
+        proc.stdin.write("stopping\n")
+        proc.stdin.flush()
+        self.assertTrue(select.select([proc.stdout], [], [], 5)[0])
+        self.assertEqual(proc.stdout.readline().strip(), "updated")
+        self.assertEqual(list(path.glob("*.tmp")), [])
+        file.rmdir()
+        proc.stdin.write("empty\n")
+        proc.stdin.flush()
+        final = wait_for(snapshot)
+        self.assertEqual(final["state"], "stopping")
+        self.assertEqual(final["workers"], [])
+        self.assertEqual(final["write_failures_total"], 1)
+        self.assertGreater(final["sequence"], first["sequence"])
+        proc.stdin.write("quit\n")
+        proc.stdin.flush()
+        self.assertEqual(proc.wait(timeout=5), 0)
+        self.assertEqual(list(path.iterdir()), [])
+
+    def test_master_crash_retains_distinct_instance_file(self):
+        path = self.root / "metrics"
+        first = self.start(path, master=True)
+        wait_for(lambda: list(path.glob("master-*.json")))
+        first.kill()
+        first.wait(timeout=5)
+        second = self.start(path, master=True)
+        files = wait_for(lambda: list(path.glob("master-*.json")) if len(list(path.glob("master-*.json"))) == 2 else None)
+        self.assertEqual({json.loads(file.read_text())["master_pid"] for file in files}, {first.pid, second.pid})
 
 
 if __name__ == "__main__":

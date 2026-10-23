@@ -1,6 +1,7 @@
 # Local reference clones have their own Git history.
 /sources/
 /artifacts/
+/.deps/
 .env
 .env.*
 !.env.example

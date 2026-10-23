@@ -2,7 +2,7 @@
 
 基于既有 Linux C++ TCP 服务，逐步开发运行指标采集、独立 HTTP 监控与 Python RAG 辅助故障诊断。
 
-**阶段 0 的 TCP 功能与性能基线验收已完成**。阶段 1 第一批 Worker 基础快照代码已实现，Linux 编译及运行验收待执行；采样默认关闭。Drogon、Web 页面和 AI 诊断服务尚未实现。
+**阶段 0 和阶段 1（用户确认的基础指标范围）已完成验收**。阶段 1 包含 Worker 快照、Master 名单、C++ 读取汇总与 CLI，支持身份核验、过期、部分失败和旧实例隔离；2026-10-24 通过 Linux 编译、30 项回归、5 场景端到端联调及 4 场景停机回归。采样默认关闭。小规模开关对照正式 36 万次 Ping 零失败，原负载口径的正式开销验收留待后续；CPU/内存、累计计数和数据库内部指标尚未实现。Drogon、Web 和 AI 尚未开始。
 
 根据用户回传的 Ubuntu 验收输出，200 并发、6 个客户端进程、Redis Lua 开启的三轮 Ping 测试累计 600 万请求零失败，QPS 中位数为 32,203.656，抽样 P95 的三轮中位数为 9.411 ms。环境、完整口径和证据限制见 [本次 Linux 验收记录](docs/BASELINE_RESULTS_2026-10-23.md)。该结果是同机 Debug Ping 基线，不代表生产业务容量。
 
@@ -11,7 +11,7 @@
 - 独立新仓库，C++ 为主线，兼顾 Python 与 Agent/RAG。
 - 保留自定义 TCP 协议和现有业务；HTTP 只承担监控与诊断入口。
 - 第一版保留原故障策略：Worker 意外退出会触发整个 TCP 服务退出，不做自动补起。
-- 使用现有 Ubuntu 虚拟机，由项目所有者执行 Linux 验收并回传结果。
+- 使用现有 Ubuntu 虚拟机；阶段 0 由项目所有者执行并回传结果，本批由助手在该 Linux 工作区直接执行验收。
 - 每批交付一个小目标，验收后再进入下一批。
 
 ## 目录
@@ -43,6 +43,8 @@ cd epoll-observability
 3. 上游地址、提交和导入范围见 [源码来源记录](docs/SOURCE_BASELINE.json)。
 4. [原始规划书](docs/PROJECT_PLAN_V1.0_ORIGINAL.md)原文保留；发生冲突时以已确认决策为准。
 5. 新增 Worker 快照的字段、故障语义和合并验收命令见 [阶段 1 第一批](docs/STAGE_1_WORKER_SNAPSHOT.md)。
+6. Master 名单字段、生命周期与最新合并验收见 [阶段 1 第二批](docs/STAGE_1_MASTER_MEMBERSHIP.md)。
+7. 当前完成标准、C++ CLI 构建使用、完整功能验收及小规模开销记录见 [阶段 1 收尾](docs/STAGE_1_COMPLETION.md)。
 
 原服务依赖 Linux、G++ C++17、Make、pthread、MySQL client、hiredis 和 redis-plus-plus。构建沿用 Make：
 
