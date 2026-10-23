@@ -15,6 +15,7 @@
 #include "ngx_macro.h"
 #include "ngx_c_conf.h"
 #include "ngx_c_mysql_connpool.h"
+#include "ngx_worker_snapshot.h"
 
 //函数声明
 static void ngx_start_worker_processes(int threadnums);
@@ -179,11 +180,22 @@ static void ngx_worker_process_cycle(int inum,const char *pprocname)
     ngx_setproctitle(pprocname); //设置标题   
     ngx_log_error_core(NGX_LOG_NOTICE,0,"%s %P 【worker进程】启动并开始运行......!",pprocname,ngx_pid); //设置标题时顺便记录下来进程名，进程id等信息到日志
 
+    CWorkerSnapshot snapshots;
+    CConfig *config = CConfig::GetInstance();
+    if (config->GetIntDefault("WorkerSnapshotEnable", 0) == 1) {
+        const char *directory = config->GetString("WorkerSnapshotDirectory");
+        snapshots.Start(directory ? directory : "worker-metrics", inum, [] {
+            return SWorkerMetrics{g_socket.GetCurrentConnectionCount(),
+                                  g_threadpool.getRecvMsgQueueCount(),
+                                  g_socket.GetSendQueueCount()};
+        });
+    }
 
     while (!ngx_shutdown)
         ngx_process_events_and_timers();
 
     g_socket.StopReceiving();
+    snapshots.Stop(); // join before any sampled objects are torn down
     g_threadpool.StopAll(); // drain accepted jobs; backend pools are still alive
     if (!g_socket.DrainSendQueue(5000))
         ngx_log_error_core(NGX_LOG_WARN, 0, "Worker send drain timed out; dropping pending responses");

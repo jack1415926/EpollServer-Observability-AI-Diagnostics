@@ -2,7 +2,9 @@
 
 基于既有 Linux C++ TCP 服务，逐步开发运行指标采集、独立 HTTP 监控与 Python RAG 辅助故障诊断。
 
-当前为**阶段 0：基线准备**。尚未实现指标快照、Drogon、Web 页面或 AI 诊断服务。
+**阶段 0 的 TCP 功能与性能基线验收已完成**。阶段 1 第一批 Worker 基础快照代码已实现，Linux 编译及运行验收待执行；采样默认关闭。Drogon、Web 页面和 AI 诊断服务尚未实现。
+
+根据用户回传的 Ubuntu 验收输出，200 并发、6 个客户端进程、Redis Lua 开启的三轮 Ping 测试累计 600 万请求零失败，QPS 中位数为 32,203.656，抽样 P95 的三轮中位数为 9.411 ms。环境、完整口径和证据限制见 [本次 Linux 验收记录](docs/BASELINE_RESULTS_2026-10-23.md)。该结果是同机 Debug Ping 基线，不代表生产业务容量。
 
 ## 已确认的边界
 
@@ -36,10 +38,11 @@ cd epoll-observability
 
 后续在工作目录没有本地修改时更新：`git pull --ff-only`。
 
-1. 阅读 [阶段 0 验收说明](docs/STAGE_0_BASELINE.md)，先回传 Ubuntu 环境检查与构建结果。
+1. 当前进度见 [本次 Linux 验收记录](docs/BASELINE_RESULTS_2026-10-23.md)；复现步骤见 [阶段 0 验收说明](docs/STAGE_0_BASELINE.md)，已有通过项无需重复执行。
 2. 设计边界及对规划书的调整见 [需求与实施决策](docs/DECISIONS.md)。
 3. 上游地址、提交和导入范围见 [源码来源记录](docs/SOURCE_BASELINE.json)。
 4. [原始规划书](docs/PROJECT_PLAN_V1.0_ORIGINAL.md)原文保留；发生冲突时以已确认决策为准。
+5. 新增 Worker 快照的字段、故障语义和合并验收命令见 [阶段 1 第一批](docs/STAGE_1_WORKER_SNAPSHOT.md)。
 
 原服务依赖 Linux、G++ C++17、Make、pthread、MySQL client、hiredis 和 redis-plus-plus。构建沿用 Make：
 

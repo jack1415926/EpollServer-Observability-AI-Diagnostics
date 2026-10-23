@@ -19,6 +19,7 @@ CMakeCache.txt
 /server/nginx
 /server/app/link_obj/
 /server/app/dep/
+worker-metrics/
 *.faiss
 *.pkl
 *.npy

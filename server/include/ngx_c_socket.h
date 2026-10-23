@@ -115,6 +115,8 @@ public:
 	void CloseListeningSockets(); // also used by Master (no Worker locks needed)
 
 	void printTDInfo();                                                   //打印统计信息
+	int GetCurrentConnectionCount() const { return m_onlineUserCount.load(std::memory_order_relaxed); }
+	int GetSendQueueCount() const { return m_iSendMsgQueueCount.load(std::memory_order_relaxed); }
 
 public:
 	virtual void threadRecvProcFunc(char *pMsgBuf);                       //处理客户端请求，虚函数，因为将来可以考虑自己来写子类继承本类
