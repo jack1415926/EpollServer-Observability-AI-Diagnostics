@@ -319,6 +319,7 @@ def main():
                 "validation_mode": args.validation_mode,
                 "socket_mode": args.socket_mode,
                 "latency_mode": args.latency_mode,
+                "timeout_sec": args.timeout,
                 "latency_sample_every": (
                     args.latency_sample_every if args.latency_mode == "sampled" else None
                 ),
@@ -333,6 +334,7 @@ def main():
                 "qps": round(successful / duration, 3) if duration else 0,
                 "latency_ms": {
                     "sample_count": len(ordered),
+                    "mean": round(sum(ordered) / len(ordered), 3) if ordered else None,
                     "p50": percentile(ordered, 50),
                     "p95": percentile(ordered, 95),
                     "p99": percentile(ordered, 99),

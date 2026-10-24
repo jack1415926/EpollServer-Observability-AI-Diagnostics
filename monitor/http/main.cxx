@@ -1,4 +1,6 @@
 #include "collector.h"
+#include "experiments.h"
+#include "web_assets.h"
 #include <drogon/drogon.h>
 #include <charconv>
 #include <chrono>
@@ -126,7 +128,8 @@ int main(int argc, char **argv)
     if (argc == 2 && std::string(argv[1]) == "--help") {
         std::cout << "Usage: epoll-monitor ABSOLUTE_MASTER_MANIFEST [PORT=8080]\n"
                      "Required environment: EPOLL_MONITOR_TOKEN (32..256 characters: letters, digits, -._~+/=)\n"
-                     "Binds 127.0.0.1 only. Read-only /api/v1/{health,overview,workers,metrics}.\n";
+                     "Binds 127.0.0.1 only. Dashboard: /; metrics and experiment APIs: /api/v1/.\n"
+                     "Optional MySQL: EPOLL_MONITOR_DB_NAME, _HOST, _PORT, _USER, _PASSWORD.\n";
         return 0;
     }
     const char *rawToken = std::getenv("EPOLL_MONITOR_TOKEN");
@@ -144,12 +147,15 @@ int main(int argc, char **argv)
         if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() || port == 0 || port > 65535)
             return 64;
     }
+    std::unique_ptr<epoll_monitor::ExperimentStore> experiments;
+    try { experiments = std::make_unique<epoll_monitor::ExperimentStore>(); }
+    catch (const std::exception &) { std::cerr << "Invalid monitoring database configuration\n"; return 64; }
     Sampler sampler(argv[1]);
     RateLimit rate;
     auto &app = drogon::app();
     app.addListener("127.0.0.1", static_cast<uint16_t>(port)).setThreadNum(2)
         .setMaxConnectionNum(64).setMaxConnectionNumPerIP(64)
-        .setClientMaxBodySize(1024).setClientMaxMemoryBodySize(1024)
+        .setClientMaxBodySize(131072).setClientMaxMemoryBodySize(131072)
         .setIdleConnectionTimeout(5).setKeepaliveRequestsNumber(100)
         .setPipeliningRequestsNumber(4).setFileTypes({}).setImplicitPageEnable(false)
         .disableSession();
@@ -159,12 +165,35 @@ int main(int argc, char **argv)
             response->addHeader("Retry-After", "1");
             return response;
         }
+        const std::string path = request->path();
+        for (const auto &asset : epoll_monitor::WebAssets) {
+            if (path != asset.path) continue;
+            if (request->method() != drogon::Get) return Response(405, "method_not_allowed", nullptr);
+            if (!request->body().empty() || !request->query().empty()) return Response(400, "unexpected_input", nullptr);
+            auto response = drogon::HttpResponse::newHttpResponse();
+            response->setBody(std::string(asset.body));
+            response->addHeader("Content-Type", std::string(asset.type));
+            response->addHeader("Cache-Control", "no-store");
+            response->addHeader("X-Content-Type-Options", "nosniff");
+            response->addHeader("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'");
+            response->addHeader("Referrer-Policy", "no-referrer");
+            return response;
+        }
         if (!Matches(request->getHeader("authorization"), "Bearer " + token)) {
             auto response = Response(401, "unauthorized", nullptr);
             response->addHeader("WWW-Authenticate", "Bearer");
             return response;
         }
-        const std::string path = request->path();
+        const bool experiment = path == "/api/v1/experiments" || path.rfind("/api/v1/experiments/", 0) == 0;
+        if (request->body().size() > (experiment ? 65536 : 1024)) return Response(413, "body_too_large", nullptr);
+        if (experiment) {
+            const bool post = path == "/api/v1/experiments/compare" ||
+                              (path == "/api/v1/experiments" && request->method() == drogon::Post);
+            if (request->method() != (post ? drogon::Post : drogon::Get))
+                return Response(405, "method_not_allowed", nullptr);
+            if (!post && !request->body().empty()) return Response(400, "unexpected_input", nullptr);
+            return nullptr;
+        }
         if (path != "/api/v1/health" && path != "/api/v1/overview" &&
             path != "/api/v1/workers" && path != "/api/v1/metrics")
             return Response(404, "not_found", nullptr);
@@ -174,6 +203,12 @@ int main(int argc, char **argv)
             return Response(400, "unexpected_input", nullptr);
         return nullptr;
     });
+    app.registerHandlerViaRegex("/api/v1/experiments(?:/[^/]+)?",
+        [&](const drogon::HttpRequestPtr &request, std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
+            experiments->Handle(request, [callback](int status, const std::string &code, const MonitorJson &data) {
+                callback(Response(status, code, data, status < 300 ? "stored" : "unavailable", status < 300));
+            });
+        });
     for (const std::string endpoint : {"health", "overview", "workers", "metrics"}) {
         app.registerHandler("/api/v1/" + endpoint,
             [&, endpoint](const drogon::HttpRequestPtr &, std::function<void(const drogon::HttpResponsePtr &)> &&callback) {

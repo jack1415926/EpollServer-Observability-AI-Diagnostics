@@ -108,3 +108,9 @@ redis-cli TTL user:info:99999
 - 预处理语句 `MYSQL_STMT`：防 SQL 注入
 - fork 后 per-worker 独立连接池
 - Cache-Aside：先 `GET user:info:{id}`，未命中查库后 `SET`；无用户写 `NULL_USER` 短 TTL 防穿透
+
+## 10. 独立监控实验表（阶段 3）
+
+`sql/monitor.sql` 由管理员应用到独立监控数据库，创建 `monitor_experiment`，不修改上述业务表。HTTP 监控账号仅需该表的 SELECT、INSERT，不需要 CREATE、UPDATE 或 DELETE。监控服务通过 `EPOLL_MONITOR_DB_*` 环境变量连接，不读取 TCP 业务凭据；未配置数据库仍可使用实时监控。
+
+初始化、启动、实验导入和查询方法见 [阶段 3 Web 与性能实验](../docs/STAGE_3_WEB_EXPERIMENTS.md)。

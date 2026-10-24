@@ -10,6 +10,11 @@ import subprocess
 import tempfile
 import time
 import unittest
+import copy
+try:
+    from .experiment_fixture import valid_report
+except ImportError:
+    from experiment_fixture import valid_report
 
 ROOT = Path(__file__).resolve().parents[1]
 TOKEN = "test-monitor-token-0123456789abcdef"
@@ -246,6 +251,52 @@ int openat(int fd, const char *path, int flags, ...) {
             self.assertEqual(run.returncode, 64)
             self.assertNotIn(TOKEN, run.stderr)
         self.assertEqual(subprocess.run([str(self.binary), "--help"], capture_output=True).returncode, 0)
+        for invalid in ({"EPOLL_MONITOR_DB_NAME": "test db"},
+                        {"EPOLL_MONITOR_DB_NAME": "test", "EPOLL_MONITOR_DB_USER": "bad user"},
+                        {"EPOLL_MONITOR_DB_NAME": "test", "EPOLL_MONITOR_DB_PASSWORD": "bad\npassword"}):
+            run = subprocess.run([str(self.binary), str(self.manifest)],
+                                 env={**os.environ, "EPOLL_MONITOR_TOKEN": TOKEN, **invalid},
+                                 capture_output=True, text=True, timeout=5)
+            self.assertEqual(run.returncode, 64)
+            self.assertNotIn("bad", run.stderr)
+
+    def test_public_dashboard_assets_and_api_auth(self):
+        for path in ("/", "/app.js", "/style.css"):
+            connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=3)
+            try:
+                connection.request("GET", path)
+                response = connection.getresponse()
+                self.assertEqual(response.status, 200)
+                self.assertGreater(len(response.read()), 100)
+                self.assertIn("frame-ancestors 'none'", response.getheader("Content-Security-Policy"))
+            finally:
+                connection.close()
+        self.assertEqual(request(self.port, "experiments", token=None)[0], 401)
+        self.assertEqual(request(self.port, "experiments")[1]["code"], "experiment_store_disabled")
+
+    def test_experiment_import_validation_and_body_limits(self):
+        fixture = valid_report()
+        self.assertEqual(request(self.port, "experiments", method="POST", body=json.dumps(fixture))[1]["code"], "experiment_store_disabled")
+        fixture["benchmark"]["git_commit"] = "f03f3f3"
+        self.assertEqual(request(self.port, "experiments", method="POST", body=json.dumps(fixture))[1]["code"], "experiment_store_disabled")
+        cases = ["{", '{"name":"a","name":"b"}', '[' * 25 + '0' + ']' * 25]
+        for path, value in [("name", "x" * 129), ("unexpected_config", {"password": "do-not-store"})]:
+            invalid = copy.deepcopy(fixture)
+            invalid[path] = value
+            cases.append(json.dumps(invalid))
+        for key, value in [("failed", -1), ("successful", True), ("attempted", 11), ("qps", "10")]:
+            invalid = copy.deepcopy(fixture)
+            invalid["benchmark"]["result"][key] = value
+            cases.append(json.dumps(invalid))
+        invalid = copy.deepcopy(fixture)
+        invalid["resources"]["client_exit_code"] = 18446744073709551615
+        cases.append(json.dumps(invalid))
+        for body in cases:
+            self.assertEqual(request(self.port, "experiments", method="POST", body=body)[0], 400)
+        self.assertEqual(request(self.port, "experiments", method="POST", body="x" * 65537)[0], 413)
+        self.assertEqual(request(self.port, "experiments", method="POST", body="x" * 131073, raw=True)[0], 413)
+        self.assertEqual(request(self.port, "experiments/compare", method="POST", body='{"baseline":"../../etc/passwd"}')[0], 400)
+        self.assertEqual(request(self.port, "experiments?path=elsewhere")[0], 400)
 
 
 if __name__ == "__main__":
