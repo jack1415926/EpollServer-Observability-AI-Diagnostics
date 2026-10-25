@@ -276,7 +276,7 @@ bool CSocekt::ngx_open_listening_sockets()
         if (setsockopt(isock, SOL_SOCKET, SO_REUSEPORT,(const void *) &reuseport, sizeof(int))== -1) //端口复用需要内核支持
         {
             //失败就失败吧，失败顶多是惊群，但程序依旧可以正常运行，所以仅仅提示一下即可
-            ngx_log_stderr(errno,"CSocekt::Initialize()中setsockopt(SO_REUSEPORT)失败",i);
+            ngx_log_stderr(errno,"CSocekt::Initialize()中setsockopt(SO_REUSEPORT)失败,i=%d",i);
         }
 
         //设置该socket为非阻塞
@@ -497,7 +497,10 @@ void CSocekt::printTDInfo()
         int tmpsmqc = m_iSendMsgQueueCount; //atomic做个中转，直接打印atomic类型报错；
         ngx_log_stderr(0,"------------------------------------begin--------------------------------------");
         ngx_log_stderr(0,"当前在线人数/总人数(%d/%d)。",tmpoLUC,m_worker_connections);        
-        ngx_log_stderr(0,"连接池中空闲连接/总连接/要释放的连接(%d/%d/%d)。",m_freeconnectionList.size(),m_connectionList.size(),m_recyconnectionList.size());
+        ngx_log_stderr(0,"连接池中空闲连接/总连接/要释放的连接(%ui/%ui/%ui)。",
+                       static_cast<uintptr_t>(m_freeconnectionList.size()),
+                       static_cast<uintptr_t>(m_connectionList.size()),
+                       static_cast<uintptr_t>(m_recyconnectionList.size()));
         {
             CLock timerLock(&m_timequeueMutex);
             ngx_log_stderr(0,"当前时间队列大小(%d)。",static_cast<int>(m_timerQueuemap.size()));

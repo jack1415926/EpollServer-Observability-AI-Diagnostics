@@ -2,12 +2,12 @@
 """Real MySQL persistence, experiment comparisons, and optional retained browser QA instance."""
 import argparse
 import concurrent.futures
+from contextlib import ExitStack
 import json
 import os
 import pwd
 from pathlib import Path
 import secrets
-import signal
 import subprocess
 import shutil
 import tempfile
@@ -18,6 +18,7 @@ from import_experiment import upload
 from protocol import require
 from run_monitor_experiments import run_experiments
 from test_http_monitor import TOKEN, free_port, request, wait_for
+from process_group import start_process_group, stop_process_group
 from test_shutdown import children
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,31 +31,35 @@ class TestDatabase:
         # Ubuntu's shipped MySQL AppArmor profile permits owner files under /tmp.
         self.root = Path(tempfile.mkdtemp(prefix="epoll-monitor-mysql-"))
         self.process = None
+        self.initializing = False
 
     def __enter__(self):
-        self.evidence.mkdir(mode=0o700)
-        data = self.root / "data"
-        user = pwd.getpwuid(os.geteuid()).pw_name
-        result = subprocess.run(["mysqld", "--no-defaults", f"--user={user}", "--initialize-insecure", f"--datadir={data}",
-                                 f"--log-error={self.root / 'init.log'}"], capture_output=True, timeout=90)
-        (self.root / "init-console.log").write_bytes(result.stdout + result.stderr)
-        if result.returncode != 0:
-            self.__exit__(None, None, None)
-            raise ValueError(f"private MySQL initialization failed; see {self.evidence}")
-        port = free_port()
-        self.socket = self.root / "mysql.sock"
-        self.process = subprocess.Popen(["mysqld", "--no-defaults", f"--user={user}", f"--datadir={data}", "--bind-address=127.0.0.1",
-                                         f"--port={port}", f"--socket={self.socket}", f"--pid-file={self.root / 'mysql.pid'}",
-                                         f"--log-error={self.root / 'mysql.log'}", "--mysqlx=0", "--skip-log-bin",
-                                         "--innodb-buffer-pool-size=32M", "--performance-schema=OFF", "--secure-file-priv=NULL"],
-                                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        command = ["mysql", "--protocol=socket", "--connect-timeout=2", "-S", str(self.socket), "-u", "root", "--skip-password"]
-        self.admin = command
-        def ready():
-            require(self.process.poll() is None, f"private MySQL exited; see {self.root / 'mysql.log'}")
-            result = subprocess.run([*command, "-Nse", "SELECT 1"], capture_output=True, timeout=5)
-            return result.returncode == 0
         try:
+            self.evidence.mkdir(mode=0o700)
+            data = self.root / "data"
+            user = pwd.getpwuid(os.geteuid()).pw_name
+            self.initializing = True
+            with (self.root / "init-console.log").open("wb") as output:
+                self.process = subprocess.Popen(
+                    ["mysqld", "--no-defaults", f"--user={user}", "--initialize-insecure", f"--datadir={data}",
+                     f"--log-error={self.root / 'init.log'}"], stdout=output, stderr=subprocess.STDOUT)
+                self.process.wait(timeout=90)
+            require(self.process.returncode == 0, f"private MySQL initialization failed; see {self.evidence}")
+            port = free_port()
+            self.socket = self.root / "mysql.sock"
+            command = ["mysql", "--protocol=socket", "--connect-timeout=2", "-S", str(self.socket), "-u", "root", "--skip-password"]
+            self.admin = command
+            self.process = subprocess.Popen(
+                ["mysqld", "--no-defaults", f"--user={user}", f"--datadir={data}", "--bind-address=127.0.0.1",
+                 f"--port={port}", f"--socket={self.socket}", f"--pid-file={self.root / 'mysql.pid'}",
+                 f"--log-error={self.root / 'mysql.log'}", "--mysqlx=0", "--skip-log-bin",
+                 "--innodb-buffer-pool-size=32M", "--performance-schema=OFF", "--secure-file-priv=NULL"],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            self.initializing = False
+            def ready():
+                require(self.process.poll() is None, f"private MySQL exited; see {self.root / 'mysql.log'}")
+                result = subprocess.run([*command, "-Nse", "SELECT 1"], capture_output=True, timeout=5)
+                return result.returncode == 0
             wait_for(ready, timeout=30)
             password = secrets.token_hex(24)
             sql = "CREATE DATABASE epoll_monitor_test CHARACTER SET utf8mb4; USE epoll_monitor_test;\n" + (ROOT / "sql/monitor.sql").read_text()
@@ -74,6 +79,9 @@ class TestDatabase:
 
     def __exit__(self, *_):
         if self.process is not None and self.process.poll() is None:
+            if self.initializing:
+                # Initialization has no SQL endpoint; retain its handle and data if still alive.
+                raise RuntimeError(f"private MySQL initializer still running: pid={self.process.pid}; directory preserved: {self.root}")
             # Ubuntu AppArmor can deny signals to mysqld even from the same UID.
             subprocess.run([*self.admin, "--execute=SHUTDOWN"], capture_output=True, timeout=10, check=True)
             self.process.wait(timeout=30)
@@ -82,28 +90,59 @@ class TestDatabase:
         shutil.rmtree(self.root)
 
 
+def cleanup_stage3(database, monitor, tcp, config):
+    def stop_monitor():
+        if monitor is not None and monitor.poll() is None:
+            monitor.terminate()
+            try:
+                monitor.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                monitor.kill()
+                monitor.wait(timeout=5)
+
+    def stop_tcp():
+        if tcp is not None:
+            stop_process_group(tcp)
+        config.unlink(missing_ok=True)
+
+    # ExitStack attempts every independent cleanup even when an earlier callback raises.
+    with ExitStack() as cleanup:
+        cleanup.callback(database.__exit__, None, None, None)
+        cleanup.callback(stop_tcp)
+        cleanup.callback(stop_monitor)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--hold", action="store_true", help="wait for stdin newline before cleaning up browser QA servers")
     parser.add_argument("--reports", type=Path, help="reuse a previously generated experiment evidence directory")
+    parser.add_argument("--database-only", action="store_true", help="check private MySQL startup/cleanup only; no TCP or load")
+    parser.add_argument("--build-mode", choices=("debug", "release", "unknown"), default="unknown")
     args = parser.parse_args()
+    if args.database_only and (args.hold or args.reports):
+        parser.error("--database-only cannot be combined with --hold or --reports")
     root = Path(tempfile.mkdtemp(prefix="stage3-live-", dir=ROOT / "artifacts"))
     print(f"Evidence: {root}", flush=True)
     database = TestDatabase(root / "database")
     environment = database.__enter__()
+    if args.database_only:
+        database.__exit__(None, None, None)
+        require(database.process.poll() is not None and not database.root.exists(), "private MySQL cleanup incomplete")
+        print("PASS: private MySQL initialized, started, shut down and removed its directory", flush=True)
+        return
     tcp = monitor = None
     workers = []
     config = root / "nginx.conf"
     try:
-        reports = sorted(args.reports.glob("round-*-experiment.json")) if args.reports else run_experiments(ROOT / "server/nginx", root / "experiments")
+        reports = sorted(args.reports.glob("round-*-experiment.json")) if args.reports else run_experiments(ROOT / "server/nginx", root / "experiments", args.build_mode)
         require(len(reports) == 6, "expected six real measured runs")
         tcp_port, http_port = free_port(), free_port()
         config = root / "nginx.conf"
         config.write_text(configuration((ROOT / "server/nginx.conf").read_text(), tcp_port, True))
         config.chmod(0o600)
         with (root / "tcp-console.log").open("wb") as tcp_log, (root / "http-console.log").open("wb") as http_log:
-            tcp = subprocess.Popen([str(ROOT / "server/nginx")], cwd=root, stdout=tcp_log,
-                                   stderr=subprocess.STDOUT, start_new_session=True)
+            tcp = start_process_group([str(ROOT / "server/nginx")], cwd=root, stdout=tcp_log,
+                                   stderr=subprocess.STDOUT)
             def ready():
                 require(tcp.poll() is None, "TCP exited during startup")
                 return len(list((root / "metrics").glob("worker-*.json"))) == 2
@@ -173,21 +212,7 @@ def main():
             if args.hold:
                 input("Press Enter to clean up QA servers.\n")
     finally:
-        if monitor is not None and monitor.poll() is None:
-            monitor.terminate()
-            try: monitor.wait(timeout=10)
-            except subprocess.TimeoutExpired: monitor.kill(); monitor.wait(timeout=5)
-        if tcp is not None:
-            if tcp.poll() is None:
-                tcp.terminate()
-                try: tcp.wait(timeout=30)
-                except subprocess.TimeoutExpired: os.killpg(tcp.pid, signal.SIGKILL)
-            if any(Path(f"/proc/{pid}").exists() for pid in workers):
-                try: os.killpg(tcp.pid, signal.SIGKILL)
-                except ProcessLookupError: pass
-            tcp.wait(timeout=5)
-        config.unlink(missing_ok=True)
-        database.__exit__(None, None, None)
+        cleanup_stage3(database, monitor, tcp, config)
         print("CLEANUP: private MySQL exited before its directory was removed; TCP/HTTP processes stopped", flush=True)
 
 

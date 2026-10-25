@@ -1,14 +1,17 @@
 """Run a load-test command while sampling EpollServer and Redis resources."""
 
 import argparse
+from contextlib import ExitStack
 import json
 import os
 import re
-import subprocess
+import signal
 import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+from process_group import start_process_group, stop_process_group
 
 
 QUEUE_RE = re.compile(
@@ -287,70 +290,76 @@ def main():
 
     started_utc = datetime.now(timezone.utc).isoformat()
     started = time.monotonic()
-    try:
-        client = subprocess.Popen(args.command)
-    except OSError as exc:
-        print(f"FAIL: cannot start load-test command: {exc}", file=sys.stderr)
-        return 2
-    redis_pids = find_redis_pids()
-    clock_ticks = os.sysconf("SC_CLK_TCK")
-    previous = {}
-    previous_system = None
-    previous_time = started
-    samples = []
+    def terminate(signum, _frame):
+        raise SystemExit(128 + signum)
 
-    try:
-        while True:
-            now = time.monotonic()
-            workers = child_pids(args.master_pid)
-            targets = [("master", args.master_pid)]
-            targets.extend(("worker", pid) for pid in workers)
-            targets.append(("client", client.pid))
-            targets.extend(
-                ("client_worker", pid) for pid in descendant_pids(client.pid)
-            )
-            targets.extend(("redis", pid) for pid in redis_pids)
-            processes, previous = sample_processes(
-                targets, previous, now - previous_time, clock_ticks
-            )
-            current_system = read_system()
-            samples.append({
-                "elapsed_sec": round(now - started, 3),
-                "processes": processes,
-                "system": system_delta(
-                    current_system, previous_system, now - previous_time
-                ),
-            })
-            previous_system = current_system
-            previous_time = now
-            if client.poll() is not None:
-                break
-            time.sleep(args.interval)
-    except KeyboardInterrupt:
-        client.send_signal(2)
-        client.wait()
+    with ExitStack() as cleanup:
+        previous_handler = signal.signal(signal.SIGTERM, terminate)
+        cleanup.callback(signal.signal, signal.SIGTERM, previous_handler)
+        try:
+            client = start_process_group(args.command)
+        except OSError as exc:
+            print(f"FAIL: cannot start load-test command: {exc}", file=sys.stderr)
+            return 2
+        cleanup.callback(stop_process_group, client, timeout=1)
+        redis_pids = find_redis_pids()
+        clock_ticks = os.sysconf("SC_CLK_TCK")
+        previous = {}
+        previous_system = None
+        previous_time = started
+        samples = []
 
-    queue_events, _ = read_queue_events(args.log, log_offset)
-    result = {
-        "label": args.label,
-        "started_utc": started_utc,
-        "duration_sec": round(time.monotonic() - started, 3),
-        "interval_sec": args.interval,
-        "command": args.command,
-        "client_exit_code": client.returncode,
-        "master_pid": args.master_pid,
-        "initial_redis_pids": redis_pids,
-        "samples": samples,
-        "process_summary": process_summary(samples),
-        "system_summary": system_summary(samples),
-        "queue_log_events": queue_events,
-    }
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-    print(f"Resource samples written to {args.output}")
-    return client.returncode
+        try:
+            while True:
+                now = time.monotonic()
+                workers = child_pids(args.master_pid)
+                targets = [("master", args.master_pid)]
+                targets.extend(("worker", pid) for pid in workers)
+                targets.append(("client", client.pid))
+                targets.extend(
+                    ("client_worker", pid) for pid in descendant_pids(client.pid)
+                )
+                targets.extend(("redis", pid) for pid in redis_pids)
+                processes, previous = sample_processes(
+                    targets, previous, now - previous_time, clock_ticks
+                )
+                current_system = read_system()
+                samples.append({
+                    "elapsed_sec": round(now - started, 3),
+                    "processes": processes,
+                    "system": system_delta(
+                        current_system, previous_system, now - previous_time
+                    ),
+                })
+                previous_system = current_system
+                previous_time = now
+                if client.poll() is not None:
+                    break
+                time.sleep(args.interval)
+        except KeyboardInterrupt:
+            stop_process_group(client, timeout=1)
+
+        queue_events, _ = read_queue_events(args.log, log_offset)
+        result = {
+            "label": args.label,
+            "started_utc": started_utc,
+            "duration_sec": round(time.monotonic() - started, 3),
+            "interval_sec": args.interval,
+            "command": args.command,
+            "client_exit_code": client.returncode,
+            "master_pid": args.master_pid,
+            "initial_redis_pids": redis_pids,
+            "samples": samples,
+            "process_summary": process_summary(samples),
+            "system_summary": system_summary(samples),
+            "queue_log_events": queue_events,
+        }
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(
+            json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        print(f"Resource samples written to {args.output}")
+        return client.returncode
 
 
 if __name__ == "__main__":

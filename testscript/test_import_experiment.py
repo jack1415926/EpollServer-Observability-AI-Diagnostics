@@ -16,6 +16,8 @@ class ImportExperimentTests(unittest.TestCase):
             result, resources = root / "result.json", root / "resources.json"
             result.write_text(json.dumps(fixture["benchmark"]))
             resources.write_text(json.dumps({"label": "fixture", "samples": ["raw samples remain local"],
+                                              "started_utc": "2026-10-23T23:59:59+00:00",
+                                              "command": ["test-only", "fixture"],
                                               **fixture["resources"]}))
             report = prepare_report("import check", result, resources, fixture["context"])
             self.assertEqual(report["benchmark"], fixture["benchmark"])
@@ -24,6 +26,22 @@ class ImportExperimentTests(unittest.TestCase):
             resources.write_text(resources.read_text().replace('"fixture"', '"other-run"'))
             with self.assertRaises(ValueError):
                 prepare_report("import check", result, resources, fixture["context"])
+
+    def test_rejects_same_label_from_another_run(self):
+        fixture = valid_report()
+        raw = {"label": "fixture", "started_utc": "2026-10-23T23:59:59+00:00",
+               "command": ["test-only", "fixture"], **fixture["resources"]}
+        with tempfile.TemporaryDirectory() as directory:
+            result, resources = Path(directory) / "result.json", Path(directory) / "resources.json"
+            result.write_text(json.dumps(fixture["benchmark"]))
+            for key, value in (("started_utc", "2000-01-01T00:00:00+00:00"),
+                               ("started_utc", "2026-10-25T00:00:00+00:00"),
+                               ("started_utc", "2026-10-23T23:59:59"),
+                               ("command", ["different-command"]), ("duration_sec", -1)):
+                changed = {**raw, key: value}
+                resources.write_text(json.dumps(changed))
+                with self.subTest(key=key, value=value), self.assertRaises(ValueError):
+                    prepare_report("wrong pairing", result, resources, fixture["context"])
 
     def test_duplicate_keys_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

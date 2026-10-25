@@ -202,7 +202,8 @@ void CLogicSocket::threadRecvProcFunc(char *pMsgBuf)
 		int calccrc = CCRC32::GetInstance()->Get_CRC((unsigned char *)pPkgBody,pkglen-m_iLenPkgHeader); //计算纯包体的crc值
 		if(calccrc != pPkgHeader->crc32) //服务器端根据包体计算crc值，和客户端传递过来的包头中的crc32信息比较
 		{
-            ngx_log_stderr(0,"CLogicSocket::threadRecvProcFunc()中CRC错误[服务器:%d/客户端:%d]，丢弃数据!",calccrc,pPkgHeader->crc32);    //正式代码中可以干掉这个信息
+            ngx_log_stderr(0,"CLogicSocket::threadRecvProcFunc()中CRC错误[服务器:%ud/客户端:%ud]，丢弃数据!",
+                           static_cast<unsigned int>(calccrc), static_cast<unsigned int>(pPkgHeader->crc32));
 			return; //crc错，直接丢弃
 		}
         else

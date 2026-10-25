@@ -71,7 +71,7 @@ void ngx_log_stderr(int err, const char *fmt, ...)
         //因为上边已经把err信息显示出来了，所以这里就不要显示了，否则显示重复了
         err = 0;    //不要再次把错误信息弄到字符串里，否则字符串里重复了
         p--;*p = 0; //把原来末尾的\n干掉，因为到ngx_log_err_core中还会加这个\n 
-        ngx_log_error_core(NGX_LOG_STDERR,err,(const char *)errstr); 
+        ngx_log_error_core(NGX_LOG_STDERR,err,"%s",(const char *)errstr);
     }    
     return;
 }

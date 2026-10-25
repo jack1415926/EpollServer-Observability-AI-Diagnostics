@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Prepare/import one tcp_stress_test result and matching resource summary."""
 import argparse
+from datetime import datetime
 import hashlib
 import json
 import os
 from pathlib import Path
+import shlex
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -30,9 +32,19 @@ def prepare_report(name, result_path, resource_path, context):
     resources, resource_hash = read_json(resource_path)
     if benchmark["label"] != resources["label"]:
         raise ValueError("benchmark/resource labels do not match")
+    if shlex.split(context["command"]) != resources["command"]:
+        raise ValueError("resource command does not match the experiment context")
+    started = datetime.fromisoformat(resources["started_utc"])
+    finished = datetime.fromisoformat(benchmark["timestamp_utc"])
+    duration = resources["duration_sec"]
+    if (started.tzinfo is None or finished.tzinfo is None or
+            not isinstance(duration, (int, float)) or isinstance(duration, bool) or
+            not 0 <= duration <= 1e15 or
+            not -0.001 <= (finished - started).total_seconds() <= duration + 0.001):
+        raise ValueError("benchmark timestamp is outside the resource sampling window")
     report = {"name": name, "benchmark": benchmark,
               "context": {**context, "result_sha256": result_hash, "resources_sha256": resource_hash},
-              "resources": {key: resources[key] for key in ("duration_sec", "interval_sec", "client_exit_code", "process_summary", "system_summary")}}
+              "resources": {key: resources[key] for key in ("started_utc", "duration_sec", "interval_sec", "client_exit_code", "process_summary", "system_summary")}}
     if len((json.dumps(report, ensure_ascii=False, indent=2) + "\n").encode()) > 65536:
         raise ValueError("prepared report exceeds 64 KiB")
     return report

@@ -36,7 +36,7 @@
 | unavailable | 名单/身份不可用，或 running 但无有效 Worker | 3 |
 | instance_changed | 读取期间身份、名单或新鲜度变化，拒绝本轮汇总 | 3 |
 
-参数错误退出 64，`--help` 退出 0。Worker 行的 `status` 包含 fresh、missing、stale、dead、process_unavailable、identity_mismatch、collection_failed、future_sample、invalid_fields、invalid_json、unsupported_schema、invalid_file、unreadable。顶层 `reason` 给出失败类别；不会输出原始输入正文或配置内容。
+参数错误退出 64，`--help` 退出 0。Worker 行的 `status` 包含 fresh、missing、stale、dead、process_unavailable、identity_mismatch、snapshot_identity_mismatch、collection_failed、future_sample、invalid_fields、invalid_json、unsupported_schema、invalid_file、unreadable。identity_mismatch 表示实际进程身份或父进程不符，snapshot_identity_mismatch 表示快照字段身份不符；后者不证明进程异常。顶层 `reason` 给出失败类别；不会输出原始输入正文或配置内容。
 
 ## 构建与使用
 
@@ -98,8 +98,10 @@ MCP 离线测试未纳入本阶段 TCP/指标验收（本机未安装可选 mcp 
 复现入口：
 
 ```bash
-python3 testscript/benchmark_worker_snapshot.py --binary ./server/nginx --output ./artifacts
+python3 testscript/benchmark_worker_snapshot.py --binary ./server/nginx --build-mode debug --output ./artifacts
 ```
+
+构建模式通过 `--build-mode debug|release|unknown` 显式记录，省略时为 `unknown`。脚本不从二进制路径推断构建模式；测试 TCP 与客户端均使用私有进程组，确认整组退出后才删除临时配置，清理失败保留现场。
 
 本次目录：`artifacts/stage1-completion-20261024/small-ab-4cex820j/`。同一个 Debug 二进制，只改变快照开关；独立临时配置与端口，2 Worker × 4 业务线程，服务端固定 CPU 0–1、客户端 CPU 2–3，Redis Lua 开启、窗口 60 秒、阈值 1 亿。客户端 2 进程、20 并发、每连接 3000 Ping；strict/into/kernel-timeout，超时 5 秒，延迟每 100 次抽样。每轮预热 1 万次，再正式 6 万次，顺序 off/on/on/off/off/on，每种条件 3 轮；每轮均记录资源采样，开启组确认发布器多次采样，退出与快照清理通过。
 

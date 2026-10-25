@@ -196,12 +196,17 @@ void CSocekt::inRecyConnectQueue(lpngx_connection_t pConn)
 void* CSocekt::ServerRecyConnectionThread(void* threadData)
 {
     auto socket = static_cast<ThreadItem*>(threadData)->_pThis;
+    time_t lastBlacklistCleanup = 0;
     while (g_stopEvent == 0)
     {
         usleep(200 * 1000);
+        const time_t now = time(nullptr);
+        if (now != lastBlacklistCleanup) {
+            socket->PruneIpBlacklist(now);
+            lastBlacklistCleanup = now;
+        }
         std::lock_guard<std::recursive_mutex> ioLock(socket->m_ioMutex);
         CLock lock(&socket->m_recyconnqueueMutex);
-        const time_t now = time(nullptr);
         auto pos = socket->m_recyconnectionList.begin();
         while (pos != socket->m_recyconnectionList.end())
         {

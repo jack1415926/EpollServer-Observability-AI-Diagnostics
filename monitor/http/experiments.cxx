@@ -124,6 +124,11 @@ nlohmann::json ValidateExperiment(const J &report)
     Number(result.at("qps"));
     Require(Number(result.at("success_rate_percent")) <= 100);
     const auto attempted = Count(result.at("attempted")), successful = Count(result.at("successful"));
+    // Both duration and QPS are rounded to three decimals by tcp_stress_test.py.
+    const double duration = Number(result["duration_sec"]), qps = Number(result["qps"]);
+    Require(qps + 0.0005 >= successful / (duration + 0.0005));
+    if (duration > 0.0005) Require(qps - 0.0005 <= successful / (duration - 0.0005));
+    if (successful == 0) Require(qps == 0);
     Require(successful + Count(result.at("failed")) == attempted);
     Require(attempted + Count(result.at("not_attempted")) == Count(load["requested"]));
     Require(std::abs(Number(result["success_rate_percent"]) - successful * 100.0 / Count(load["requested"])) <= 0.001);
@@ -132,6 +137,12 @@ nlohmann::json ValidateExperiment(const J &report)
     const auto samples = Count(latency.at("sample_count"));
     Require(samples <= successful && (load["latency_mode"] != "off" || samples == 0));
     if (load["latency_mode"] == "all") Require(samples == successful);
+    if (load["latency_mode"] == "sampled") {
+        const auto every = Count(load["latency_sample_every"]);
+        Require(samples >= (successful + every - 1) / every);
+        Require(samples <= Count(load["concurrency"]) *
+                ((Count(load["requests_per_client"]) + every - 1) / every));
+    }
     for (const char *key : {"p50", "p95", "p99", "max"}) {
         Number(latency.at(key), true);
         Require(samples == 0 ? latency[key].is_null() : latency[key].is_number());
@@ -140,6 +151,7 @@ nlohmann::json ValidateExperiment(const J &report)
     if (latency.contains("mean")) {
         Number(latency["mean"], true);
         Require(samples == 0 ? latency["mean"].is_null() : latency["mean"].is_number());
+        if (samples > 0) Require(latency["mean"] <= latency["max"]);
     }
     Require(result.at("errors").is_object() && result["errors"].size() <= 32);
     uint64_t errors = 0;
@@ -153,7 +165,8 @@ nlohmann::json ValidateExperiment(const J &report)
     Require(context.at("snapshot_enabled").is_boolean());
     for (const char *key : {"redis_window_sec", "redis_max_requests"}) Require(Count(context.at(key)) > 0);
     const auto &resources = report.at("resources");
-    Keys(resources, {"duration_sec", "interval_sec", "client_exit_code", "process_summary", "system_summary"});
+    Keys(resources, {"started_utc", "duration_sec", "interval_sec", "client_exit_code", "process_summary", "system_summary"});
+    if (resources.contains("started_utc")) Text(resources["started_utc"]);
     Number(resources.at("duration_sec")); Number(resources.at("interval_sec"));
     const auto &exitCode = resources.at("client_exit_code");
     Require(exitCode.is_number_integer());
@@ -205,10 +218,10 @@ nlohmann::json CompareExperiments(const J &left, const J &right)
             {"interpretation", "observed_difference_only_no_causal_claim"}};
 }
 
-ExperimentStore::ExperimentStore()
+drogon::orm::DbClientPtr MonitoringDatabase()
 {
     const auto database = Env("EPOLL_MONITOR_DB_NAME");
-    if (database.empty()) return;
+    if (database.empty()) return nullptr;
     const auto port = Env("EPOLL_MONITOR_DB_PORT", "3306");
     Require(!port.empty() && port.find_first_not_of("0123456789") == std::string::npos && port.size() <= 5);
     Require(std::stoul(port) > 0 && std::stoul(port) <= 65535);
@@ -216,9 +229,12 @@ ExperimentStore::ExperimentStore()
     const std::string connection = "host=" + ConnectionWord(Env("EPOLL_MONITOR_DB_HOST", "127.0.0.1")) + " port=" + port +
         " dbname=" + ConnectionWord(database) + " user=" + ConnectionWord(Env("EPOLL_MONITOR_DB_USER", "epoll_monitor")) +
         " client_encoding=utf8mb4 password=" + Quote(Env("EPOLL_MONITOR_DB_PASSWORD"));
-    db_ = drogon::orm::DbClient::newMysqlClient(connection, 1);
-    db_->setTimeout(2);
+    auto db = drogon::orm::DbClient::newMysqlClient(connection, 1);
+    db->setTimeout(2);
+    return db;
 }
+
+ExperimentStore::ExperimentStore() : db_(MonitoringDatabase()) {}
 
 void ExperimentStore::Handle(const drogon::HttpRequestPtr &request, Reply reply)
 {

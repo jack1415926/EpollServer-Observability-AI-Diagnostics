@@ -62,7 +62,7 @@ export MARIADB_PLUGIN_DIR="$PWD/.deps/usr/lib/$(g++ -dumpmachine)/libmariadb3/pl
 从项目根目录执行，需要已有开发 MySQL / Redis 供隔离 TCP 实例启动，不创建业务用户：
 
 ```bash
-python3 testscript/run_monitor_experiments.py --binary ./server/nginx --output ./artifacts
+python3 testscript/run_monitor_experiments.py --binary ./server/nginx --build-mode debug --output ./artifacts
 ```
 
 脚本启动独立 2 Worker × 4 业务线程 TCP 实例，启用快照和 Redis Lua 高阈值限流，固定服务端前两个可用 CPU、客户端随后两个 CPU。预热 5000 次，然后按并发 10、20、20、10、10、20 顺序执行，每个客户端 2000 次 Ping，2 个客户端进程，strict/into/kernel-timeout，超时 5 秒，延迟全量采集；每 0.2 秒采样进程及系统资源。每轮输出：
@@ -83,7 +83,9 @@ python3 testscript/import_experiment.py --name '并发 10，第一轮' \
 # 增加 --url http://127.0.0.1:8080 可直接导入，令牌来自环境。
 ```
 
-导入器限制单个输入文件 8 MiB，检查结果与资源 label 一致、拒绝重复 JSON 键，报告最多 64 KiB。服务器验证固定字段集合、类型、计数与请求数关系、成功率、延迟分位数/样本数、哈希长度、嵌套深度等，不通过 HTTP 暴露原始文件。
+导入器限制单个输入文件 8 MiB，检查结果与资源 label 一致、资源命令与 context 命令一致、结果时间落在资源采样窗口内，拒绝重复 JSON 键，报告最多 64 KiB。新生成的 label 带每轮唯一 UUID，资源摘要保留 started_utc；旧原始文件具备命令和时间元数据时仍可导入，缺少这些核验材料时拒绝重新配对。已有存储报告无需迁移。服务器验证固定字段集合、类型、计数与请求数关系、成功率、延迟分位数/样本数、哈希长度、嵌套深度等，不通过 HTTP 暴露原始文件。
+
+构建模式通过 `--build-mode debug|release|unknown` 显式记录，默认 `unknown`；`test_stage3_live.py` 生成新负载时也支持该参数，不从任意二进制猜测 Debug。
 
 兼容原脚本 7～40 位十六进制提交号，旧结果没有均值时保留缺失，不从 P50/P95 推算。mean 是**已采集延迟样本均值**，全量模式才覆盖所有成功请求。每次导入新增 UUID，重复导入会产生副本；SQL 超时不保证取消已执行的写入，重试前先查询记录。
 
@@ -142,3 +144,40 @@ git diff --check
 首次测试清理在信号被拒绝后由 TemporaryDirectory 提前删除数据目录，导致存活的 MySQL 写错误日志耗尽临时目录配额。这是本批测试脚本问题；环境恢复后确认旧进程不存在、空间恢复。脚本已改为 SHUTDOWN、等待退出、最后删除，后续真实联调确认清理成功；未修改系统 AppArmor 或原有 MySQL。
 
 未执行生产部署、远程 TLS、长时间数据库/磁盘故障、全服务 sanitizer 或原 200 并发的正式监控开销验收。历史 API 仅查最近 100 条，长期归档由管理员管理。未扩展事件、CPU/内存实时指标或 AI。
+
+## 2026-10-25 收尾补充
+
+阶段 3 功能已通过提交 `f1cee32` 推送。本批按用户确认继续修复测试生命周期，不扩展阶段 4 功能。
+
+初始化进程现由 Popen 跟踪，启动失败进入统一清理；初始化超时且进程仍存活时，保留句柄和目录并报错，不触发自动目录删除。HTTP/TCP 清理失败后仍会尝试其他独立资源的清理；未确认 TCP 退出时保留其配置。
+
+独立验收顺序：
+
+```bash
+# 先验证失败分支，不启动服务或数据库
+PYTHONPATH=testscript python3 -m unittest test_stage3_lifecycle test_import_experiment -v
+# 再只验证私有 MySQL 的真实启动、退出和目录清理
+python3 testscript/test_stage3_live.py --database-only
+# 最后复用已有报告联调，不重新压测，也不启动浏览器
+python3 testscript/test_stage3_live.py --reports /absolute/path/to/existing-experiments
+```
+
+本次 8 项生命周期测试和 3 项导入器测试通过；真实数据库预检及复用六份原报告的读写/对比/重启/故障与过载隔离/退出清理通过。证据目录为 `artifacts/stage3-live-s9n1qyhu/`、`artifacts/stage3-live-tn1e4z9j/`。未将旧负载结果表述为新性能测试，未重跑原 50 项功能回归或浏览器验收。正式监控库仍未初始化，本批收尾修改尚未提交或推送。
+
+
+## 2026-10-25：阶段 2 / 3 Review 修复
+
+本批修复审查发现的五项问题：压测超时残留客户端、Master 就绪前退出时遗漏 Worker、矛盾统计值通过导入、跨运行资源文件误配和构建模式固定为 Debug。
+
+测试进程使用私有 Linux 会话，记录组长启动身份，清理时核验进程组/会话和同用户成员。先 SIGTERM，再有界等待及必要的 SIGKILL；即使组长已经退出也检查残留成员。只有组内无活动进程且组长已回收后才删除配置，失败保留现场。孤儿僵尸已退出、不再持有文件或端口，其最终回收由系统父进程负责。相同采样器超时修复也应用于阶段 1 小规模对照入口。
+
+导入校验新增 QPS 与成功数/时长关系（容许三位小数舍入）、均值不超过最大延迟、抽样模式样本数上下界。缺失均值继续保持缺失。报告生成器使用唯一 label，并核验原始资源命令、带时区时间窗口，保留资源开始时间。
+
+本次 38 项针对性测试通过：原相关回归、新增统计校验、错配拒绝、进程组真实短进程故障路径与生成器条件记录。HTTP 以原 Make 构建成功，Python 语法及 diff 检查通过。六份原真实报告经新导入器重新准备后，在私有 MySQL 中完成精确读回、对比、HTTP 重启持久化、数据库故障/过载隔离与退出清理，证据为 `artifacts/stage3-live-8tfsenjv/`。该联调不重新压测、不启动浏览器；原业务库及本机配置保持不变。本批未提交、推送或部署，正式监控开销验收仍未完成。
+
+复现针对性检查：
+
+```bash
+PYTHONPATH=testscript python3 -m unittest test_stage3_lifecycle test_import_experiment \
+  test_tcp_stress test_performance_sampler test_http_monitor test_process_group test_monitor_experiments -v
+```

@@ -24,6 +24,7 @@ class MetricsCollectorTests(unittest.TestCase):
                         "-I" + str(ROOT / "monitor/collector"),
                         "-I" + os.environ.get("JSON_INCLUDE", str(ROOT / ".deps/usr/include")),
                         str(ROOT / "monitor/collector/collector.cxx"),
+                        str(ROOT / "monitor/collector/event_rules.cxx"),
                         str(ROOT / "testscript/collector_probe.cxx"), "-o", str(cls.binary)], check=True, timeout=90)
 
     def setUp(self):
@@ -121,12 +122,23 @@ class MetricsCollectorTests(unittest.TestCase):
                            ("pid", 999), ("process_start_ticks", 999), ("worker_index", 1)]:
             with self.subTest(key=key):
                 self.write(self.worker_files[0], {**self.samples[0], key: value})
-                self.assert_partial(self.collect(), "identity_mismatch")
+                self.assert_partial(self.collect(), "snapshot_identity_mismatch")
         self.write(self.worker_files[0], self.samples[0])
         self.process(101, 999, 100)
         self.assert_partial(self.collect(), "identity_mismatch")
         self.process(101, 11, 999)
         self.assert_partial(self.collect(), "identity_mismatch")
+
+    def test_event_rules_distinguish_snapshot_and_process_identity(self):
+        def events():
+            output = subprocess.check_output([str(self.binary), str(self.manifest), "3000",
+                                              str(self.proc), "events"], text=True, timeout=5)
+            return {event["rule"] for event in json.loads(output)}
+        self.write(self.worker_files[0], {**self.samples[0], "master_start_ticks": 999})
+        self.assertEqual(events(), {"collection_unavailable"})
+        self.write(self.worker_files[0], self.samples[0])
+        self.process(101, 999, 100)
+        self.assertEqual(events(), {"collection_unavailable", "worker_process_anomaly"})
 
     def test_expired_future_and_collection_failed(self):
         for changes, status in [({"sampled_at_boottime_ms": self.now() - 10000}, "stale"),

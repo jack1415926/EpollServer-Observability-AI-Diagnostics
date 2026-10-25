@@ -48,7 +48,7 @@ static int ExecRegisterStmt(MYSQL *conn, const char *username, const char *passw
 
     if (mysql_stmt_execute(stmt) != 0) {
         unsigned int err = mysql_stmt_errno(stmt);
-        ngx_log_stderr(0, "RegisterUser: execute 失败(%u): %s", err, mysql_stmt_error(stmt));
+        ngx_log_stderr(0, "RegisterUser: execute 失败(%ud): %s", err, mysql_stmt_error(stmt));
         mysql_stmt_close(stmt);
         if (err == 1062) {
             return NGX_DB_ERR_DUPLICATE;

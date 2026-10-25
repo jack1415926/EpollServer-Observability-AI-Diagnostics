@@ -17,6 +17,7 @@ from epoll_mcp.server import (
     epoll_search_docs,
     epoll_tail_log,
     mcp,
+    _document_paths,
 )
 
 
@@ -60,6 +61,12 @@ def packet(code: int = 0, body: bytes = b"", corrupt_crc: bool = False) -> bytes
 
 
 class McpToolTests(unittest.TestCase):
+    def test_project_entrypoints_are_indexed(self):
+        root = Path(__file__).resolve().parents[1]
+        paths = _document_paths()
+        self.assertIn(root / "README.md", paths)
+        self.assertIn(root / "AGENTS.md", paths)
+
     def test_tool_registration_and_read_only_annotations(self):
         tools = asyncio.run(mcp.list_tools())
         self.assertEqual(

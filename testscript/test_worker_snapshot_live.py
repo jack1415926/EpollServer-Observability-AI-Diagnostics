@@ -13,6 +13,7 @@ import tempfile
 import time
 
 from protocol import recv_pkg, require, send_pkg
+from process_group import start_process_group, stop_process_group
 from test_shutdown import children, configure, connect
 from test_worker_snapshot import wait_for
 
@@ -35,6 +36,7 @@ def run_case(binary, source, root, name, collector=None):
     config = directory / "nginx.conf"
     config.write_text(base + f"\nWorkerSnapshotEnable = {int(name != 'disabled')}\n"
                       f"WorkerSnapshotDirectory = {metrics}\n", encoding="utf-8")
+    config.chmod(0o600)
     proc = None
     worker_pids = []
     log = directory / "server.log"
@@ -42,8 +44,8 @@ def run_case(binary, source, root, name, collector=None):
         return [json.loads(file.read_text()) for file in metrics.glob("worker-*.json")]
     try:
         with (directory / "console.log").open("wb") as output:
-            proc = subprocess.Popen([str(binary)], cwd=directory, stdout=output,
-                                    stderr=subprocess.STDOUT, start_new_session=True)
+            proc = start_process_group([str(binary)], cwd=directory, stdout=output,
+                                       stderr=subprocess.STDOUT)
             def ready():
                 require(proc.poll() is None, f"{name}: server exited during startup; see {directory}")
                 return log.exists() and log.read_text(errors="replace").count("【worker进程】启动") == 2
@@ -177,12 +179,7 @@ def run_case(binary, source, root, name, collector=None):
             print(f"PASS: {name}", flush=True)
     finally:
         if proc is not None:
-            if proc.poll() is None or any(Path(f"/proc/{pid}").exists() for pid in worker_pids):
-                try:
-                    os.killpg(proc.pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
-            proc.wait(timeout=5)
+            stop_process_group(proc)
         config.unlink(missing_ok=True)
 
 

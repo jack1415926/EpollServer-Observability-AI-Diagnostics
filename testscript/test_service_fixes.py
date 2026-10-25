@@ -33,6 +33,17 @@ class ServiceFixTests(unittest.TestCase):
         self.compile_run("cache", ["testscript/test_cache_codec.cxx"],
                          ["-ffunction-sections", "-fdata-sections", "-Wl,--gc-sections"])
 
+    def test_registration_errors_and_literal_log_text(self):
+        symbols = ["init", "prepare", "close", "bind_param", "execute", "errno", "error"]
+        self.compile_run("registration-logging", ["testscript/test_registration_logging.cxx",
+                         "server/misc/ngx_c_mysql_dao.cxx", "server/app/ngx_log.cxx", "server/app/ngx_printf.cxx"],
+                         ["-ffunction-sections", "-fdata-sections", "-Wl,--gc-sections", "-lmysqlclient",
+                          *("-Wl,--wrap=mysql_stmt_" + name for name in symbols)])
+
+    def test_blacklist_expiry_without_revisits_and_capacity(self):
+        self.compile_run("blacklist", ["testscript/test_blacklist.cxx", "server/net/ngx_c_socket_request.cxx"],
+                         ["-ffunction-sections", "-fdata-sections", "-Wl,--gc-sections"])
+
     def test_receive_queue_message_limit_and_shutdown(self):
         self.compile_run("queue", ["testscript/test_threadpool_limits.cxx", "server/misc/ngx_c_memory.cxx"])
 

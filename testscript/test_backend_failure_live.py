@@ -12,6 +12,7 @@ import subprocess
 import tempfile
 
 from protocol import recv_pkg, require, send_pkg
+from process_group import start_process_group, stop_process_group
 from test_shutdown import children, configure, connect
 from test_worker_snapshot import wait_for
 
@@ -57,8 +58,8 @@ int mysql_stmt_prepare(void *statement, const char *query, unsigned long length)
     workers = []
     try:
         with (root / "console.log").open("wb") as output:
-            proc = subprocess.Popen([str(binary)], cwd=root, stdout=output, stderr=subprocess.STDOUT,
-                                    start_new_session=True, env={**os.environ, "LD_PRELOAD": str(library)})
+            proc = start_process_group([str(binary)], cwd=root, stdout=output, stderr=subprocess.STDOUT,
+                                       env={**os.environ, "LD_PRELOAD": str(library)})
             log = root / "server.log"
             def ready():
                 require(proc.poll() is None, "isolated server exited during startup")
@@ -82,12 +83,7 @@ int mysql_stmt_prepare(void *statement, const char *query, unsigned long length)
             print("PASS: query errors return backend failure, never write NULL_USER, and Ping remains available")
     finally:
         if proc is not None:
-            if proc.poll() is None or any(Path(f"/proc/{pid}").exists() for pid in workers):
-                try:
-                    os.killpg(proc.pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
-            proc.wait(timeout=5)
+            stop_process_group(proc)
         config.unlink(missing_ok=True)
 
 

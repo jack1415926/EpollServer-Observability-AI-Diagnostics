@@ -161,7 +161,8 @@ def epoll_ping_server(
 
 def _document_paths() -> list[Path]:
     fixed = [
-        PROJECT_ROOT / "readme.md",
+        PROJECT_ROOT / "README.md",
+        PROJECT_ROOT / "AGENTS.md",
         PROJECT_ROOT / "CLAUDE.md",
         PROJECT_ROOT / "sql" / "README.md",
         PROJECT_ROOT / "qt-client" / "README.md",

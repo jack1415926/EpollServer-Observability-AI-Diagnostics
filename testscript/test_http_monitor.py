@@ -11,6 +11,7 @@ import tempfile
 import time
 import unittest
 import copy
+from process_group import start_process_group, stop_process_group, remove_process_directory
 try:
     from .experiment_fixture import valid_report
 except ImportError:
@@ -84,11 +85,15 @@ int openat(int fd, const char *path, int flags, ...) {
                         str(source), "-ldl", "-o", str(cls.preload)], check=True, timeout=30)
 
     def setUp(self):
-        self.directory = tempfile.TemporaryDirectory(prefix="epoll-http-test-")
-        self.addCleanup(self.directory.cleanup)
-        self.root = Path(self.directory.name)
-        self.workers = [subprocess.Popen(["sleep", "60"]) for _ in range(2)]
-        self.addCleanup(self.stop_workers)
+        self.root = Path(tempfile.mkdtemp(prefix="epoll-http-test-"))
+        self.processes = []
+        self.addCleanup(remove_process_directory, self.root, self.processes)
+        self.workers = []
+        for _ in range(2):
+            worker = start_process_group(["sleep", "60"])
+            self.workers.append(worker)
+            self.processes.append(worker)
+            self.addCleanup(stop_process_group, worker, timeout=1)
         boot = Path("/proc/sys/kernel/random/boot_id").read_text().strip()
         ticks = identity(os.getpid())
         self.master = {"schema_version": 1, "boot_id": boot, "master_pid": os.getpid(),
@@ -114,13 +119,14 @@ int openat(int fd, const char *path, int flags, ...) {
         self.port = free_port()
         self.log = (self.root / "monitor.log").open("wb")
         self.addCleanup(self.log.close)
-        self.monitor = subprocess.Popen([str(self.binary), str(self.manifest), str(self.port)],
+        self.monitor = start_process_group([str(self.binary), str(self.manifest), str(self.port)],
                                         cwd=self.root, stdout=self.log, stderr=subprocess.STDOUT,
                                         env={**os.environ, "EPOLL_MONITOR_TOKEN": TOKEN,
                                              "LD_PRELOAD": str(self.preload),
                                              "EPOLL_TEST_BLOCK": str(self.root / "block"),
                                              "EPOLL_TEST_ENTERED": str(self.root / "entered")})
-        self.addCleanup(self.stop_monitor)
+        self.processes.append(self.monitor)
+        self.addCleanup(stop_process_group, self.monitor, timeout=1)
         def ready():
             self.assertIsNone(self.monitor.poll(), self.root.joinpath("monitor.log").read_text())
             try:
@@ -128,17 +134,6 @@ int openat(int fd, const char *path, int flags, ...) {
             except OSError:
                 return False
         wait_for(ready)
-
-    def stop_workers(self):
-        for worker in self.workers:
-            if worker.poll() is None:
-                worker.terminate()
-            worker.wait(timeout=5)
-
-    def stop_monitor(self):
-        if self.monitor.poll() is None:
-            self.monitor.terminate()
-        self.monitor.wait(timeout=10)
 
     @staticmethod
     def write(path, value):
@@ -169,7 +164,10 @@ int openat(int fd, const char *path, int flags, ...) {
             ("health", None, "GET", None, 401),
             ("health", "wrong", "GET", None, 401),
             ("../secret.txt", TOKEN, "GET", None, 404),
-            ("events", TOKEN, "GET", None, 404),
+            ("events", TOKEN, "GET", None, 503),
+            ("events", None, "GET", None, 401),
+            ("events", TOKEN, "POST", None, 405),
+            ("events?limit=1000", TOKEN, "GET", None, 400),
             ("overview", TOKEN, "POST", None, 405),
             ("overview?manifest=elsewhere", TOKEN, "GET", None, 400),
             ("overview", TOKEN, "GET", "{}", 400),
@@ -253,7 +251,11 @@ int openat(int fd, const char *path, int flags, ...) {
         self.assertEqual(subprocess.run([str(self.binary), "--help"], capture_output=True).returncode, 0)
         for invalid in ({"EPOLL_MONITOR_DB_NAME": "test db"},
                         {"EPOLL_MONITOR_DB_NAME": "test", "EPOLL_MONITOR_DB_USER": "bad user"},
-                        {"EPOLL_MONITOR_DB_NAME": "test", "EPOLL_MONITOR_DB_PASSWORD": "bad\npassword"}):
+                        {"EPOLL_MONITOR_DB_NAME": "test", "EPOLL_MONITOR_DB_PASSWORD": "bad\npassword"},
+                        {"EPOLL_MONITOR_EVENT_TRIGGER_MS": "0"},
+                        {"EPOLL_MONITOR_EVENT_RECOVERY_MS": "60001"},
+                        {"EPOLL_MONITOR_RECEIVE_QUEUE_THRESHOLD": "-1"},
+                        {"EPOLL_MONITOR_SEND_QUEUE_THRESHOLD": "2147483648"}):
             run = subprocess.run([str(self.binary), str(self.manifest)],
                                  env={**os.environ, "EPOLL_MONITOR_TOKEN": TOKEN, **invalid},
                                  capture_output=True, text=True, timeout=5)
@@ -273,6 +275,30 @@ int openat(int fd, const char *path, int flags, ...) {
                 connection.close()
         self.assertEqual(request(self.port, "experiments", token=None)[0], 401)
         self.assertEqual(request(self.port, "experiments")[1]["code"], "experiment_store_disabled")
+
+    def test_experiment_statistics_consistency(self):
+        def check(report, expected):
+            self.assertEqual(request(self.port, "experiments", method="POST", body=json.dumps(report))[0], expected)
+
+        for key, value in (("qps", 1e12), ("qps", 0)):
+            report = valid_report()
+            report["benchmark"]["result"][key] = value
+            check(report, 400)
+        report = valid_report()
+        report["benchmark"]["result"]["latency_ms"]["mean"] = 999999
+        check(report, 400)
+        report = valid_report()
+        load = report["benchmark"]["load"]
+        load["latency_mode"], load["latency_sample_every"] = "sampled", 1
+        latency = report["benchmark"]["result"]["latency_ms"]
+        latency.update(sample_count=0, mean=None, p50=None, p95=None, p99=None, max=None)
+        check(report, 400)
+        report = valid_report()
+        report["benchmark"]["result"].update(duration_sec=0.001, qps=round(10 / 0.00149, 3))
+        check(report, 503)  # Valid rounding; this fixture has no database configured.
+        report = valid_report()
+        del report["benchmark"]["result"]["latency_ms"]["mean"]
+        check(report, 503)  # Old reports without a mean remain valid.
 
     def test_experiment_import_validation_and_body_limits(self):
         fixture = valid_report()

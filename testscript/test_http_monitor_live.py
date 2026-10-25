@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Drogon/TCP fault isolation acceptance; uses existing local MySQL and Redis."""
 import argparse
+from contextlib import ExitStack
 import json
 import os
 from pathlib import Path
@@ -8,6 +9,7 @@ import signal
 import subprocess
 import tempfile
 
+from process_group import start_process_group, stop_process_group
 from protocol import recv_pkg, require, send_pkg
 from test_shutdown import children, configure, connect
 from test_http_monitor import TOKEN, free_port, request, wait_for
@@ -31,8 +33,7 @@ def main():
     workers = []
     try:
         with (root / "tcp-console.log").open("wb") as tcp_log, (root / "http-console.log").open("wb") as http_log:
-            tcp = subprocess.Popen([str(binary)], cwd=root, stdout=tcp_log, stderr=subprocess.STDOUT,
-                                   start_new_session=True)
+            tcp = start_process_group([str(binary)], cwd=root, stdout=tcp_log, stderr=subprocess.STDOUT)
             def ready():
                 require(tcp.poll() is None, "TCP exited during startup")
                 log = root / "server.log"
@@ -109,17 +110,19 @@ def main():
             print("PASS: TCP Worker crash retains fail-stop; HTTP remains available", flush=True)
             print(f"Evidence: {root}", flush=True)
     finally:
-        if monitor is not None and monitor.poll() is None:
-            monitor.kill()
-            monitor.wait(timeout=5)
-        if tcp is not None:
-            if tcp.poll() is None or any(Path(f"/proc/{pid}").exists() for pid in workers):
-                try:
-                    os.killpg(tcp.pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
-            tcp.wait(timeout=5)
-        config.unlink(missing_ok=True)
+        def stop_tcp():
+            if tcp is not None:
+                stop_process_group(tcp)
+            config.unlink(missing_ok=True)
+
+        def stop_monitor():
+            if monitor is not None and monitor.poll() is None:
+                monitor.kill()
+                monitor.wait(timeout=5)
+
+        with ExitStack() as cleanup:
+            cleanup.callback(stop_tcp)
+            cleanup.callback(stop_monitor)
 
 
 if __name__ == "__main__":

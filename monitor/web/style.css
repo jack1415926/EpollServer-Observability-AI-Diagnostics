@@ -60,6 +60,8 @@ dl div:last-child{border:0}
 dt{color:#617566;font-size:12px}
 dd{margin:0;font-size:12px;text-align:right;overflow-wrap:anywhere;max-width:70%;font-variant-numeric:tabular-nums}
 .table-wrap{overflow-x:auto}
+.table-wrap:focus-visible{outline:3px solid #88b98e;outline-offset:3px}
+#event-rows td:last-child{white-space:normal;min-width:220px;max-width:300px;overflow-wrap:anywhere}
 table{border-collapse:collapse;width:100%;font-size:12px;text-align:left;white-space:nowrap}
 th{font-weight:500;color:#5d7162;background:#f6f8f5}
 th,td{padding:15px 12px;border-bottom:1px solid #e9efea}
@@ -115,3 +117,15 @@ header{min-height:58px}
 .main-footer{flex-direction:column;gap:5px}
 th,td{padding:12px 9px}
 }
+/* Diagnosis output is plain text; evidence excerpts remain keyboard accessible. */
+#diagnosis-form { display: grid; gap: 12px; }
+#diagnosis-question { width: 100%; max-width: 100%; padding: 12px; font: inherit; color: inherit; background: #fff; border: 1px solid #87929e; border-radius: 8px; resize: vertical; }
+#diagnosis-submit { justify-self: start; }
+#diagnosis-report { margin-top: 20px; overflow-wrap: anywhere; }
+#diagnosis-report h3 { margin-top: 24px; }
+#diagnosis-report pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto; }
+#diagnosis-report details { margin: 12px 0; }
+#diagnoses table { table-layout: fixed; }
+#diagnoses th:first-child { width: 66%; }
+#diagnosis-rows td:first-child { white-space: normal; overflow-wrap: anywhere; }
+#diagnosis-question:focus-visible { outline: 3px solid #88b98e; outline-offset: 3px; }

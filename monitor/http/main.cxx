@@ -1,5 +1,7 @@
 #include "collector.h"
 #include "experiments.h"
+#include "events.h"
+#include "diagnoses.h"
 #include "web_assets.h"
 #include <drogon/drogon.h>
 #include <charconv>
@@ -129,7 +131,9 @@ int main(int argc, char **argv)
         std::cout << "Usage: epoll-monitor ABSOLUTE_MASTER_MANIFEST [PORT=8080]\n"
                      "Required environment: EPOLL_MONITOR_TOKEN (32..256 characters: letters, digits, -._~+/=)\n"
                      "Binds 127.0.0.1 only. Dashboard: /; metrics and experiment APIs: /api/v1/.\n"
-                     "Optional MySQL: EPOLL_MONITOR_DB_NAME, _HOST, _PORT, _USER, _PASSWORD.\n";
+                     "Optional MySQL: EPOLL_MONITOR_DB_NAME, _HOST, _PORT, _USER, _PASSWORD.\n"
+                     "Events: EPOLL_MONITOR_EVENT_TRIGGER_MS / _RECOVERY_MS (default 3000),\n"
+                     "EPOLL_MONITOR_RECEIVE_QUEUE_THRESHOLD / EPOLL_MONITOR_SEND_QUEUE_THRESHOLD (default 1024).\n";
         return 0;
     }
     const char *rawToken = std::getenv("EPOLL_MONITOR_TOKEN");
@@ -151,7 +155,15 @@ int main(int argc, char **argv)
     try { experiments = std::make_unique<epoll_monitor::ExperimentStore>(); }
     catch (const std::exception &) { std::cerr << "Invalid monitoring database configuration\n"; return 64; }
     Sampler sampler(argv[1]);
+    std::unique_ptr<epoll_monitor::EventService> events;
+    try {
+        events = std::make_unique<epoll_monitor::EventService>(epoll_monitor::ReadEventConfig(),
+            std::filesystem::path(argv[1]).lexically_normal().string(), [&] { return sampler.Read(); });
+    } catch (const std::exception &) { std::cerr << "Invalid event configuration\n"; return 64; }
     RateLimit rate;
+    std::unique_ptr<epoll_monitor::DiagnosisProxy> diagnoses;
+    try { diagnoses = std::make_unique<epoll_monitor::DiagnosisProxy>(); }
+    catch (const std::exception &) { std::cerr << "Invalid diagnosis configuration\n"; return 64; }
     auto &app = drogon::app();
     app.addListener("127.0.0.1", static_cast<uint16_t>(port)).setThreadNum(2)
         .setMaxConnectionNum(64).setMaxConnectionNumPerIP(64)
@@ -185,7 +197,9 @@ int main(int argc, char **argv)
             return response;
         }
         const bool experiment = path == "/api/v1/experiments" || path.rfind("/api/v1/experiments/", 0) == 0;
-        if (request->body().size() > (experiment ? 65536 : 1024)) return Response(413, "body_too_large", nullptr);
+        const bool diagnosis = path == "/api/v1/diagnoses" || path.rfind("/api/v1/diagnoses/", 0) == 0;
+        if (request->body().size() > (experiment ? 65536 : diagnosis ? 4096 : 1024)) return Response(413, "body_too_large", nullptr);
+        if (diagnosis) return nullptr;
         if (experiment) {
             const bool post = path == "/api/v1/experiments/compare" ||
                               (path == "/api/v1/experiments" && request->method() == drogon::Post);
@@ -195,7 +209,7 @@ int main(int argc, char **argv)
             return nullptr;
         }
         if (path != "/api/v1/health" && path != "/api/v1/overview" &&
-            path != "/api/v1/workers" && path != "/api/v1/metrics")
+            path != "/api/v1/workers" && path != "/api/v1/metrics" && path != "/api/v1/events")
             return Response(404, "not_found", nullptr);
         if (request->method() != drogon::Get)
             return Response(405, "method_not_allowed", nullptr);
@@ -203,6 +217,18 @@ int main(int argc, char **argv)
             return Response(400, "unexpected_input", nullptr);
         return nullptr;
     });
+    app.registerHandlerViaRegex("/api/v1/diagnoses(?:/[^/]+)?",
+        [&](const drogon::HttpRequestPtr &request, std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
+            diagnoses->Handle(request, [callback](int status, const std::string &code, const MonitorJson &data) {
+                callback(Response(status, code, data, status < 300 ? "stored" : "unavailable", status < 300));
+            });
+        });
+    app.registerHandler("/api/v1/events",
+        [&](const drogon::HttpRequestPtr &request, std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
+            events->Handle(request, [callback](int status, const std::string &code, const MonitorJson &data) {
+                callback(Response(status, code, data, status < 300 ? "stored" : "unavailable", status < 300));
+            });
+        }, {drogon::Get});
     app.registerHandlerViaRegex("/api/v1/experiments(?:/[^/]+)?",
         [&](const drogon::HttpRequestPtr &request, std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
             experiments->Handle(request, [callback](int status, const std::string &code, const MonitorJson &data) {

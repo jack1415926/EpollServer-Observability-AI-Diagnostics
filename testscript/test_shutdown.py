@@ -14,6 +14,7 @@ import tempfile
 import time
 
 from protocol import recv_pkg, require, send_pkg
+from process_group import start_process_group, stop_process_group
 
 
 def configure(source, port):
@@ -70,12 +71,13 @@ def run_case(binary, source, root, name, signo, crash=False):
         port = reservation.getsockname()[1]
     config = directory / "nginx.conf"
     config.write_text(configure(source, port), encoding="utf-8")
+    config.chmod(0o600)
     proc = None
     worker_pids = []
     try:
         with (directory / "console.log").open("wb") as output:
-            proc = subprocess.Popen([str(binary)], cwd=directory, stdout=output,
-                                    stderr=subprocess.STDOUT, start_new_session=True)
+            proc = start_process_group([str(binary)], cwd=directory, stdout=output,
+                                       stderr=subprocess.STDOUT)
             deadline = time.monotonic() + 30
             while time.monotonic() < deadline:
                 require(proc.poll() is None, f"{name}: server exited during startup")
@@ -114,13 +116,7 @@ def run_case(binary, source, root, name, signo, crash=False):
             print(f"PASS: {name}, Workers reaped, port released")
     finally:
         if proc is not None:
-            # Only the isolated process group created by this test is targeted.
-            if proc.poll() is None or any(Path(f"/proc/{pid}").exists() for pid in worker_pids):
-                try:
-                    os.killpg(proc.pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
-            proc.wait(timeout=5)
+            stop_process_group(proc)
         config.unlink(missing_ok=True) # don't retain copied database credentials
 
 

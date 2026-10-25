@@ -15,6 +15,8 @@
       <a href="#overview" data-page="overview" aria-current="page">运行总览 <span>01</span></a>
       <a href="#workers" data-page="workers">Worker 状态 <span>02</span></a>
       <a href="#experiments" data-page="experiments">性能实验 <span>03</span></a>
+      <a href="#events" data-page="events">异常事件 <span>04</span></a>
+      <a href="#diagnoses" data-page="diagnoses">AI 诊断 <span>05</span></a>
     </nav>
     <div class="aside-note"><span class="dot"></span> 本机监控服务<p>实时数据来自 C++ 快照。<br>实验结果存储于 MySQL。</p></div>
     <footer>EPOLL SERVER<br><span>Observability &amp; Diagnostics</span></footer>
@@ -54,6 +56,21 @@
         <form id="compare-form"><label>基准实验<select id="baseline" required><option value="">选择基准</option></select></label><label>候选实验<select id="candidate" required><option value="">选择候选</option></select></label><button class="primary" type="submit">比较结果</button></form>
         <div id="comparison" hidden><p id="comparison-conditions" class="notice"></p><div class="table-wrap"><table><thead><tr><th>指标</th><th>基准</th><th>候选</th><th>差值</th><th>变化</th></tr></thead><tbody id="comparison-rows"></tbody></table></div><p class="subtle">以上仅为两次运行的观测差异，不能据此认定因果或性能提升。P95 与均值按该次延迟采样模式解读；未采集的均值显示「—」。</p></div>
       </article>
+    </section>
+    <section id="events" class="page" hidden aria-labelledby="events-heading">
+      <article class="panel"><div class="panel-title"><div><h2 id="events-heading">异常事件</h2><p>最近 100 条持久化事件 · 持续异常去重，有效观测后自动恢复</p></div><span class="subtle">DETERMINISTIC RULES</span></div>
+        <p id="event-notice" role="status" aria-live="polite">连接后读取事件记录。</p>
+        <p>检测采集缺失或过期、Worker 进程异常、收发队列持续积压。数据缺失及正常停机不作为恢复证据；待恢复观测表示尚未观测到恢复。TCP 业务健康未主动探测。</p>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="异常事件表，可横向滚动"><table><thead><tr><th>触发 / 恢复时间</th><th>规则 / 实例</th><th>Worker</th><th>状态</th><th>观测值 / 阈值 / 窗口</th></tr></thead><tbody id="event-rows"></tbody></table></div>
+      </article>
+    </section>
+    <section id="diagnoses" class="page" hidden aria-labelledby="diagnoses-heading">
+      <article class="panel"><div class="panel-title"><div><h2 id="diagnoses-heading">有证据的 AI 诊断</h2><p>结合当前观测、历史实验与技术文档分析，建议步骤需人工验证。</p></div><span class="subtle">READ ONLY</span></div>
+        <form id="diagnosis-form"><label for="diagnosis-question">故障或问题描述</label><textarea id="diagnosis-question" rows="3" maxlength="1000" required placeholder="例如：Worker 指标过期，应该检查哪些证据？"></textarea><button id="diagnosis-submit" class="primary" type="submit">提交诊断</button></form>
+        <p id="diagnosis-notice" role="status" aria-live="polite">连接后可提交诊断。任务异步执行，结果保留 7 天。</p>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="诊断任务表，可横向滚动"><table><thead><tr><th>问题 / 提交时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="diagnosis-rows"></tbody></table></div>
+      </article>
+      <article id="diagnosis-report" class="panel" hidden aria-label="诊断报告"></article>
     </section>
     <footer class="main-footer"><span>数据面与监控面独立运行</span><span id="updated">尚未采集</span></footer>
   </main>

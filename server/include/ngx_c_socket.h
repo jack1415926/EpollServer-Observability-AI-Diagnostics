@@ -138,6 +138,8 @@ protected:
 	//新增L1n防护相关变量e和方法
 	std::unordered_map<std::string, time_t>m_localBlacklist;              //本地黑名单：IP->到期时间戳
 	std::mutex                             m_blacklistMutex;              //黑名单互斥量
+	static constexpr size_t MaxBlacklistEntries = 4096;
+	void PruneIpBlacklist(time_t now);
 	//获取对端信息相关                                              
 	size_t ngx_sock_ntop(struct sockaddr *sa,int port,u_char *text,size_t len);  //根据参数1给定的信息，获取地址端口字符串，返回这个字符串的长度
 

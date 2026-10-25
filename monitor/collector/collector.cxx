@@ -250,7 +250,7 @@ Json Collect(const std::filesystem::path &manifest, uint64_t maxAgeMs,
                     Number(snapshot, "pid", 1, INT_MAX) != static_cast<uint64_t>(pid) ||
                     Number(snapshot, "process_start_ticks", 1) != ticks ||
                     Number(snapshot, "worker_index", 0, 4095) != worker["worker_index"].get<uint64_t>())
-                    throw Error("identity_mismatch");
+                    throw Error("snapshot_identity_mismatch");
                 Number(snapshot, "sequence", 1);
                 Number(snapshot, "write_failures_total");
                 Number(snapshot, "sampled_at_unix_ms");

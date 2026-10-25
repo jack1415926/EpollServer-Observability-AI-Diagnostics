@@ -5,6 +5,7 @@
 #include <atomic>
 
 namespace epoll_monitor {
+drogon::orm::DbClientPtr MonitoringDatabase();
 nlohmann::json ValidateExperiment(const nlohmann::json &report);
 nlohmann::json CompareExperiments(const nlohmann::json &left, const nlohmann::json &right);
 

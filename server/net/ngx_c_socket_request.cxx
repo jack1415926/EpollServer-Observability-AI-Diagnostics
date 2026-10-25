@@ -37,7 +37,20 @@ bool CSocekt::IsIpBlacklisted(const std::string& ip) {
 
 void CSocekt::AddIpToBlacklist(const std::string& ip, int expire_seconds) {
     std::lock_guard<std::mutex> lock(m_blacklistMutex); // 加锁保护黑名单访问
-    m_localBlacklist[ip] = time(nullptr) + expire_seconds; // 将IP添加到黑名单中，设置过期时间
+    auto it = m_localBlacklist.find(ip);
+    if (it != m_localBlacklist.end())
+        it->second = time(nullptr) + expire_seconds;
+    else if (m_localBlacklist.size() < MaxBlacklistEntries)
+        m_localBlacklist.emplace(ip, time(nullptr) + expire_seconds);
+    // At capacity keep existing bans; Redis still rejects new over-limit sources.
+}
+
+void CSocekt::PruneIpBlacklist(time_t now) {
+    std::lock_guard<std::mutex> lock(m_blacklistMutex);
+    for (auto it = m_localBlacklist.begin(); it != m_localBlacklist.end();) {
+        if (it->second <= now) it = m_localBlacklist.erase(it);
+        else ++it;
+    }
 }
 
 //来数据时候的处理，当连接上有数据来的时候，本函数会被ngx_epoll_process_events()所调用  ,官方的类似函数为ngx_http_wait_request_handler();

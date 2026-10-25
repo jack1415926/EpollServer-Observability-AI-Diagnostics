@@ -1,8 +1,82 @@
 "use strict";
+const diagnosisStates = {queued: "排队中", running: "分析中", succeeded: "已完成", failed: "失败", timed_out: "超时", interrupted: "执行中断"};
+function renderDiagnosis(task) {
+  const target = $("diagnosis-report"), signature = `${generation}:${task.id}:${task.status}:${task.updated_at_unix_ms}`;
+  if (!target.hidden && target.childElementCount && target.dataset.signature === signature) return;
+  target.dataset.signature = signature; target.hidden = false; target.replaceChildren(text("h2", task.question));
+  target.append(text("p", `${diagnosisStates[task.status] || task.status}${task.error_code ? ` · ${task.error_code}` : ""}`));
+  if (!task.report) return;
+  const report = task.report, analysis = report.analysis;
+  if (report.target?.instance) target.append(text("p", `诊断时的实例：${report.target.instance}`, "subtle"));
+  target.append(text("p", analysis.conclusion === "insufficient_evidence" ? "证据不足，无法确定根因。" : "以下原因属于待验证推测。"), text("p", analysis.summary));
+  for (const [label, values] of [["已确认事实", analysis.facts], ["可能原因", analysis.possible_causes], ["尚未确认", analysis.unknowns], ["后续验证建议", analysis.next_steps]]) {
+    target.append(text("h3", label)); const list = document.createElement("ul");
+    for (const value of values) list.append(text("li", typeof value === "string" ? value : `${value.text} [${value.evidence_ids.join(", ")}]`));
+    target.append(list);
+  }
+  target.append(text("h3", "证据与来源"));
+  for (const evidence of report.evidence) {
+    const detail = document.createElement("details");
+    detail.append(text("summary", `${evidence.id} · ${evidence.source} · ${evidence.scope} · ${new Date(evidence.retrieved_at_unix_ms).toLocaleString("zh-CN")}`));
+    const excerpt = text("pre", evidence.excerpt); excerpt.tabIndex = 0;
+    detail.append(text("p", `SHA-256 ${evidence.sha256}${evidence.truncated ? " · 内容已截断" : ""}`), excerpt); target.append(detail);
+  }
+  target.append(text("p", report.limits.join("；"), "subtle"));
+}
+async function refreshDiagnoses() {
+  if (!token || diagnosesRefreshing) return;
+  diagnosesRefreshing = true; const current = generation;
+  try {
+    const value = await api("diagnoses");
+    if (current !== generation) return;
+    const rows = $("diagnosis-rows"), signature = `${current}:${JSON.stringify(value.data.tasks)}`;
+    if (rows.dataset.signature !== signature || (value.data.tasks.length && !rows.childElementCount)) {
+      rows.dataset.signature = signature;
+      rows.replaceChildren(...value.data.tasks.map(task => {
+      const row = document.createElement("tr"), question = text("span", task.question);
+      question.append(text("small", new Date(task.created_at_unix_ms).toLocaleString("zh-CN")));
+      const button = text("button", "查看报告"); button.type = "button";
+      button.addEventListener("click", async () => {
+        const started = generation; selectedDiagnosis = task.id;
+        try { const detail = await api(`diagnoses/${task.id}`); if (started === generation && selectedDiagnosis === task.id) renderDiagnosis(detail.data); }
+        catch (error) { if (started === generation) $("diagnosis-notice").textContent = error.message; }
+      });
+      cells(row, [question, diagnosisStates[task.status] || task.status, button]); return row;
+      }));
+    }
+    $("diagnosis-notice").textContent = `${value.data.tasks.length} 条任务 · 结果保留 7 天，建议需人工验证。`;
+    if (selectedDiagnosis) {
+      const selected = selectedDiagnosis, detail = await api(`diagnoses/${selected}`);
+      if (current === generation && selectedDiagnosis === selected) renderDiagnosis(detail.data);
+    }
+  } catch (error) {
+    if (current === generation) {
+      $("diagnosis-rows").replaceChildren(); $("diagnosis-report").replaceChildren(); $("diagnosis-report").hidden = true;
+      $("diagnosis-notice").textContent = `诊断服务不可用：${error.message}。`;
+      if (error.status === 401) disconnect("令牌无效，请重新连接。");
+    }
+  } finally { diagnosesRefreshing = false; }
+}
+document.addEventListener("DOMContentLoaded", () => {
+  $("diagnosis-form").addEventListener("submit", async event => {
+    event.preventDefault(); const current = generation;
+    if (!token) { $("diagnosis-notice").textContent = "请先连接监控服务。"; return; }
+    $("diagnosis-submit").disabled = true;
+    try {
+      const value = await api("diagnoses", {method: "POST", body: JSON.stringify({question: $("diagnosis-question").value})});
+      if (current !== generation) return;
+      selectedDiagnosis = value.data.id;
+      $("diagnosis-report").replaceChildren(); $("diagnosis-report").hidden = true;
+      $("diagnosis-notice").textContent = "任务已提交，正在等待分析。";
+      await refreshDiagnoses();
+    } catch (error) { if (current === generation) $("diagnosis-notice").textContent = error.message; }
+    finally { $("diagnosis-submit").disabled = false; }
+  });
+});
 const $ = id => document.getElementById(id);
-let token = "", generation = 0, timer = null, refreshing = false, experiments = [];
-const descriptions = {overview: ["运行总览", "观察当前实例的连接、队列与采集状态。"], workers: ["Worker 状态", "查看当前实例的进程身份、指标与数据有效性。"], experiments: ["性能实验", "保存运行证据，在明确条件下比较实验结果。"]};
-const labels = {complete: "采集完整", partial: "部分数据", stopping: "实例停止中", unavailable: "指标不可用", instance_changed: "实例变化", fresh: "有效", stale: "已过期", dead: "进程已退出", missing: "快照缺失", invalid_json: "快照损坏", collection_failed: "采集失败"};
+let token = "", generation = 0, timer = null, refreshing = false, experiments = [], eventsRefreshing = false, diagnosesRefreshing = false, selectedDiagnosis = null;
+const descriptions = {diagnoses: ["AI 诊断", "用当前观测与技术资料分析故障，核对证据与待验证假设。"], overview: ["运行总览", "观察当前实例的连接、队列与采集状态。"], workers: ["Worker 状态", "查看当前实例的进程身份、指标与数据有效性。"], experiments: ["性能实验", "保存运行证据，在明确条件下比较实验结果。"], events: ["异常事件", "查询确定性检测证据、触发时间与自动恢复记录。"]};
+const labels = {complete: "采集完整", partial: "部分数据", stopping: "实例停止中", unavailable: "指标不可用", instance_changed: "实例变化", fresh: "有效", stale: "已过期", dead: "进程已退出", missing: "快照缺失", invalid_json: "快照损坏", collection_failed: "采集失败", identity_mismatch: "进程身份不符", snapshot_identity_mismatch: "快照身份不符"};
 const fmt = (value, digits = 0) => value == null || !Number.isFinite(Number(value)) ? "—" : Number(value).toLocaleString("zh-CN", {maximumFractionDigits: digits});
 function text(tag, value, className) { const el = document.createElement(tag); el.textContent = value; if (className) el.className = className; return el; }
 function badge(status) { return text("span", labels[status] || status, `badge ${status === "complete" || status === "fresh" ? "good" : status === "partial" || status === "stopping" ? "warn" : "bad"}`); }
@@ -61,6 +135,36 @@ function disconnect(message = "已断开。输入有效令牌后可重新连接�
   $("connection").textContent = "未连接"; $("connection").className = "badge"; clearLive(); experiments = []; renderExperiments();
   $("comparison").hidden = true; $("comparison-rows").replaceChildren(); $("comparison-conditions").textContent = "";
   $("detail").close(); $("detail-body").textContent = ""; notice(message);
+  $("event-rows").replaceChildren(); $("event-notice").textContent = "连接后读取事件记录。";
+  selectedDiagnosis = null; $("diagnosis-rows").replaceChildren(); $("diagnosis-report").replaceChildren(); $("diagnosis-report").hidden = true; $("diagnosis-notice").textContent = "连接后可提交诊断。";
+}
+async function refreshEvents() {
+  if (!token || eventsRefreshing) return;
+  const current = generation;
+  eventsRefreshing = true;
+  const ruleNames = {collection_unavailable: "采集缺失 / 过期", worker_process_anomaly: "Worker 进程异常", receive_queue_backlog: "接收队列积压", send_queue_backlog: "发送队列积压"};
+  try {
+    const value = await api("events");
+    if (current !== generation) return;
+    const {events, detection} = value.data;
+    $("event-rows").replaceChildren(...events.map(item => {
+      const row = document.createElement("tr"), time = text("span", new Date(item.triggered_at_unix_ms).toLocaleString("zh-CN"));
+      time.append(text("small", item.resolved_at_unix_ms == null ? "尚未观测到恢复" : `恢复于 ${new Date(item.resolved_at_unix_ms).toLocaleString("zh-CN")}`));
+      const rule = text("span", ruleNames[item.rule] || item.rule);
+      rule.append(text("small", `${item.instance}${item.instance === detection.instance ? " · 当前实例" : " · 历史实例"}`));
+      const observed = typeof item.observed === "object" ? JSON.stringify(item.observed) : String(item.observed);
+      const evidence = text("span", `${observed} / ${item.threshold}`);
+      evidence.append(text("small", `触发 ${item.trigger_window_ms} ms · 恢复 ${item.recovery_window_ms} ms`));
+      cells(row, [time, rule, item.worker == null ? "实例级" : `${item.worker.worker_index} / PID ${item.worker.pid} / ticks ${item.worker.process_start_ticks}`,
+        text("span", item.status === "resolved" ? "已恢复" : "待恢复观测", `badge ${item.status === "resolved" ? "good" : "warn"}`), evidence]);
+      return row;
+    }));
+    $("event-notice").textContent = `${events.length} 条已存储事件 · 检测 ${detection.status} · 存储 ${detection.store_status} · 待写 ${detection.pending_writes}/${detection.capacity}。${detection.backpressure ? "写入积压已暂停状态转换；恢复后重新计时。" : ""}`;
+  } catch (error) {
+    if (current !== generation) return;
+    $("event-rows").replaceChildren(); $("event-notice").textContent = `事件记录不可用：${error.message}。实时监控独立运行。`;
+    if (error.status === 401) disconnect("令牌无效，请重新连接。");
+  } finally { eventsRefreshing = false; }
 }
 function renderExperiments() {
   $("experiment-rows").replaceChildren(...experiments.map(item => {
@@ -94,16 +198,21 @@ function navigate() {
   for (const link of document.querySelectorAll("nav a")) { if (link.dataset.page === page) link.setAttribute("aria-current", "page"); else link.removeAttribute("aria-current"); }
   $("page-title").textContent = $("breadcrumb").textContent = descriptions[page][0]; $("page-description").textContent = descriptions[page][1];
   if (page === "experiments") refreshExperiments();
+  if (page === "events") refreshEvents();
+  if (page === "diagnoses") refreshDiagnoses();
 }
 $("auth-form").addEventListener("submit", async event => {
   event.preventDefault(); const submitted = $("token").value;
   disconnect(); token = submitted; const current = generation; $("disconnect").hidden = false; $("refresh").disabled = false;
   notice("正在连接监控服务…");
   await refreshLive();
-  if (token && current === generation) { timer = setInterval(refreshLive, 2000); await refreshExperiments(); }
+  if (token && current === generation) {
+    timer = setInterval(() => { refreshLive(); if (location.hash === "#events") refreshEvents(); if (location.hash === "#diagnoses") refreshDiagnoses(); }, 2000);
+    await Promise.all([refreshExperiments(), refreshEvents()]);
+  }
 });
 $("disconnect").addEventListener("click", () => disconnect());
-$("refresh").addEventListener("click", () => { refreshLive(); refreshExperiments(); });
+$("refresh").addEventListener("click", () => { refreshLive(); refreshExperiments(); refreshEvents(); refreshDiagnoses(); });
 $("compare-form").addEventListener("submit", async event => {
   event.preventDefault(); if (!token) { $("experiment-notice").textContent = "请先连接监控服务。"; return; }
   const current = generation;

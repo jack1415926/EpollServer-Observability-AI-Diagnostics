@@ -9,6 +9,7 @@ import sys
 import tempfile
 import time
 import unittest
+from process_group import start_process_group, stop_process_group, remove_process_directory
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -39,21 +40,22 @@ class WorkerSnapshotTests(unittest.TestCase):
         ], check=True, timeout=60)
 
     def setUp(self):
-        self.directory = tempfile.TemporaryDirectory(prefix="epoll-snapshot-test-")
-        self.addCleanup(self.directory.cleanup)
-        self.root = Path(self.directory.name)
+        self.root = Path(tempfile.mkdtemp(prefix="epoll-snapshot-test-"))
+        self.processes = []
+        self.addCleanup(remove_process_directory, self.root, self.processes)
 
     def start(self, path, master=False):
-        proc = subprocess.Popen([str(self.binary), str(path)] + (["--master"] if master else []), stdin=subprocess.PIPE,
+        proc = start_process_group([str(self.binary), str(path)] + (["--master"] if master else []), stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE if master else subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                 text=True)
+        self.processes.append(proc)
         def cleanup():
-            if proc.poll() is None:
-                proc.kill()
-            proc.wait(timeout=5)
-            proc.stdin.close()
-            if proc.stdout is not None:
-                proc.stdout.close()
+            try:
+                stop_process_group(proc, timeout=1)
+            finally:
+                proc.stdin.close()
+                if proc.stdout is not None:
+                    proc.stdout.close()
         self.addCleanup(cleanup)
         return proc
 
