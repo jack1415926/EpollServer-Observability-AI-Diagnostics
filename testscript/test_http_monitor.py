@@ -153,7 +153,7 @@ int openat(int fd, const char *path, int flags, ...) {
             self.assertEqual(result["data"]["tcp_health"], "not_probed")
             if endpoint in ("overview", "metrics"):
                 self.assertEqual(result["data"]["totals"]["connections_current"], 3)
-                self.assertIn("cpu_memory", result["data"]["unsupported_metrics"])
+                self.assertIn("cpu_utilization", result["data"]["unsupported_metrics"])
             if endpoint == "workers":
                 self.assertEqual(len(result["data"]["workers"]), 2)
         self.assertNotIn(str(self.root), json.dumps(result))

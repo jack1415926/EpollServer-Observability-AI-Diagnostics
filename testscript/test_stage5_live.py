@@ -55,11 +55,17 @@ def main():
     parser.add_argument('--smoke', action='store_true')
     parser.add_argument('--hold', action='store_true')
     parser.add_argument('--report', type=Path, help='reuse a saved diagnosis.json for browser QA; requires --smoke')
+    parser.add_argument('--reports', type=Path, help='existing experiment report directory; required for full TCP acceptance')
     args = parser.parse_args()
     if args.report and not args.smoke:
         parser.error('--report requires --smoke; no TCP fault or new model call is performed')
     if args.hold and not sys.stdin.isatty():
         parser.error('--hold requires an interactive terminal (PTY)')
+    reports = sorted(args.reports.glob('round-*-experiment.json')) if args.reports else []
+    if not args.smoke and len(reports) < 2:
+        parser.error('full acceptance requires --reports with at least two existing round-*-experiment.json files')
+    if args.smoke and args.reports:
+        parser.error('--reports is only used by full acceptance')
     load_environment()
     evidence = Path(tempfile.mkdtemp(prefix='stage5-live-', dir=ROOT/'artifacts'))
     evidence.chmod(0o700)
@@ -128,7 +134,7 @@ def main():
         diag = None
 
         def start_diag(env=environment):
-            process = subprocess.Popen([str(ROOT/'.venv/bin/python'), '-m', 'diagnosis.service'],
+            process = subprocess.Popen([sys.executable, '-m', 'diagnosis.service'],
                 cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT)
             processes.append(process); cleanup.callback(stop, process)
 
@@ -147,11 +153,9 @@ def main():
             require(request(http_port, endpoint, token, method, body)[0] == expected, 'diagnosis boundary failed')
         paused = None
         if not args.smoke:
-            reports = sorted((ROOT/'artifacts/stage3-live-dvpeok8b/experiments').glob('round-*-experiment.json'))
-            require(len(reports) >= 2, 'historical real report files missing')
             ids = [upload(f'http://127.0.0.1:{http_port}', json.loads(p.read_text()), TOKEN) for p in reports[:2]]
             (evidence/'historical-report-provenance.json').write_text(json.dumps([
-                {'id': key, 'source': str(path.relative_to(ROOT))} for key, path in zip(ids, reports)]))
+                {'id': key, 'source': str(path.resolve())} for key, path in zip(ids, reports)]))
             wait_for(lambda: request(http_port)[1]['validity'] == 'complete')
             pid = children(tcp.pid)[0]
             paused = (pid, identity(pid))

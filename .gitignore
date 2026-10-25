@@ -1,7 +1,7 @@
 # Local reference clones have their own Git history.
 /sources/
 /artifacts/
-/.deps/
+/.deps
 .env
 .env.*
 !.env.example
@@ -12,7 +12,7 @@
 *.gch
 *.py[cod]
 __pycache__/
-.venv/
+.venv
 venv/
 build/
 CMakeFiles/

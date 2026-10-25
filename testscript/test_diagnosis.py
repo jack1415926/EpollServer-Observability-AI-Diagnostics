@@ -202,7 +202,8 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
         chunks = documents()
         self.assertTrue(chunks)
         self.assertTrue(all(c['start_line'] <= c['end_line'] and len(c['sha256']) == 64 for c in chunks))
-        self.assertTrue(any(c['scope'] == 'historical_reference' for c in chunks))
+        self.assertEqual({c['scope'] for c in chunks}, {'current_contract', 'verified_incident', 'technical_reference'})
+        self.assertTrue(any(c['scope'] == 'historical_reference' for c in documents(corpus='legacy')))
 
 
 class AgentTests(unittest.IsolatedAsyncioTestCase):

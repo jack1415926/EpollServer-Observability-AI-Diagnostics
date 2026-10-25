@@ -109,7 +109,13 @@ function renderLive(overview, workers) {
   $("worker-rows").replaceChildren(...rows.map(worker => {
     const row = document.createElement("tr"), name = text("span", `Worker ${worker.worker_index}`);
     name.append(text("small", `PID ${worker.pid} · ticks ${worker.process_start_ticks}`));
-    cells(row, [name, badge(worker.status), fmt(worker.metrics?.connections_current), fmt(worker.metrics?.receive_queue_messages), fmt(worker.metrics?.send_queue_messages), worker.age_ms == null ? "—" : `${fmt(worker.age_ms)} ms`]);
+    const resource = worker.process_resources, available = resource?.identity_verified === true;
+    const process = text("span", available ? `主线程 ${resource.leader_state}` : "资源未知");
+    process.append(text("small", available ? `${fmt(resource.threads)} 个线程 · ${resource.status}` : resource?.reason || "未采集"));
+    const rss = text("span", available && resource.rss_bytes != null ? `≈ ${fmt(resource.rss_bytes / 1048576, 2)} MiB` : "RSS —");
+    const cpu = available && Number.isSafeInteger(resource.cpu_user_ticks) && Number.isSafeInteger(resource.cpu_system_ticks) && resource.clock_ticks_per_second > 0 ? (resource.cpu_user_ticks + resource.cpu_system_ticks) / resource.clock_ticks_per_second : null;
+    rss.append(text("small", cpu == null ? "CPU 累计 —" : `CPU 累计 ${fmt(cpu, 2)} s`));
+    cells(row, [name, badge(worker.status), fmt(worker.metrics?.connections_current), fmt(worker.metrics?.receive_queue_messages), fmt(worker.metrics?.send_queue_messages), worker.age_ms == null ? "—" : `${fmt(worker.age_ms)} ms`, process, rss]);
     return row;
   }));
   if (overview.validity !== "complete") $("partial-note").textContent = `完整总量不可用。有效部分：连接 ${fmt(data.partial_sums?.connections_current)}，接收队列 ${fmt(data.partial_sums?.receive_queue_messages)}，发送队列 ${fmt(data.partial_sums?.send_queue_messages)}；仅代表已采集 Worker。`;

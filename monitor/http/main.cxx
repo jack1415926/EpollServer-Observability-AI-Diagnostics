@@ -41,7 +41,7 @@ MonitorJson Unavailable(const char *reason)
             {"workers", MonitorJson::array()}, {"expected_workers", nullptr}, {"valid_workers", 0},
             {"totals", empty}, {"partial_sums", empty}, {"tcp_health", "not_probed"},
             {"max_age_ms", MaxAgeMs}, {"collected_at_unix_ms", nullptr},
-            {"unsupported_metrics", {"cpu_memory", "cumulative_network", "business_counters", "mysql", "redis"}}};
+            {"unsupported_metrics", {"cpu_utilization", "cumulative_network", "business_counters", "mysql", "redis"}}};
 }
 
 class Sampler {

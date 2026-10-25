@@ -5,6 +5,7 @@ import hmac
 import json
 import logging
 import os
+from pathlib import Path
 import re
 import time
 import uuid
@@ -17,7 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from .agent import Tools, diagnose
 from .config import load_environment, redact
 from .providers import Providers, ProviderError
-from .retrieval import Retriever
+from .retrieval import INDEX, Retriever
 from .store import Store
 
 
@@ -112,7 +113,7 @@ def create_app(store=None, runner=None):
     async def lifespan(app):
         async with httpx.AsyncClient(trust_env=False, follow_redirects=False,
                 limits=httpx.Limits(max_connections=8, max_keepalive_connections=4)) as client:
-            retriever = Retriever(Providers(client)) if runner is None else None
+            retriever = Retriever(Providers(client), Path(os.getenv('EPOLL_DIAG_INDEX_PATH', str(INDEX)))) if runner is None else None
             tasks = [asyncio.create_task(initialize())]
             tasks += [asyncio.create_task(worker(client, retriever)) for _ in range(2)]
             try:

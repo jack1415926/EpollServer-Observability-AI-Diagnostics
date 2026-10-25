@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "revision": "batch2-knowledge-v1",
+  "entries": [
+    {
+      "path": "diagnosis/knowledge/runtime_contract.md",
+      "kind": "current_contract",
+      "authority": "repository_implementation",
+      "applies_to": [
+        "monitor/collector",
+        "monitor/http"
+      ],
+      "revision": "fbebd4f+batch2",
+      "sources": [
+        "monitor/collector/collector.cxx",
+        "monitor/http/main.cxx"
+      ]
+    },
+    {
+      "path": "diagnosis/knowledge/event_contract.md",
+      "kind": "current_contract",
+      "authority": "repository_implementation",
+      "applies_to": [
+        "monitor/events"
+      ],
+      "revision": "fbebd4f",
+      "sources": [
+        "monitor/collector/event_rules.cxx",
+        "monitor/http/events.cxx"
+      ]
+    },
+    {
+      "path": "diagnosis/knowledge/experiment_contract.md",
+      "kind": "current_contract",
+      "authority": "repository_implementation",
+      "applies_to": [
+        "monitor/experiments"
+      ],
+      "revision": "fbebd4f+batch2",
+      "sources": [
+        "monitor/http/experiments.cxx",
+        "testscript/import_experiment.py",
+        "diagnosis/agent.py"
+      ]
+    },
+    {
+      "path": "diagnosis/knowledge/linux_process.md",
+      "kind": "technical_reference",
+      "authority": "primary_source_paraphrase",
+      "applies_to": [
+        "Linux procfs"
+      ],
+      "revision": "online-2026-10-25",
+      "checked_on": "2026-10-25",
+      "sources": [
+        "https://man7.org/linux/man-pages/man5/proc_pid_stat.5.html",
+        "https://man7.org/linux/man-pages/man5/proc_pid_task.5.html",
+        "https://raw.githubusercontent.com/torvalds/linux/v6.17/fs/proc/array.c"
+      ]
+    },
+    {
+      "path": "diagnosis/knowledge/io_and_downstream.md",
+      "kind": "technical_reference",
+      "authority": "primary_source_paraphrase",
+      "applies_to": [
+        "Linux epoll",
+        "MySQL 8.4",
+        "Redis OSS latency monitoring"
+      ],
+      "revision": "online-2026-10-25",
+      "checked_on": "2026-10-25",
+      "sources": [
+        "https://man7.org/linux/man-pages/man7/epoll.7.html",
+        "https://dev.mysql.com/doc/refman/8.4/en/performance-schema-data-lock-waits-table.html",
+        "https://redis.io/docs/latest/operate/oss_and_stack/management/optimization/latency-monitor/"
+      ]
+    },
+    {
+      "path": "diagnosis/knowledge/confirmed_cases.md",
+      "kind": "verified_incident",
+      "authority": "repository_test_backed_history",
+      "applies_to": [
+        "historical repository incidents"
+      ],
+      "revision": "fbebd4f",
+      "sources": [
+        "docs/DEVELOPMENT_ISSUES.md",
+        "testscript/test_registration_logging.cxx",
+        "testscript/test_metrics_collector.py",
+        "testscript/test_stage3_lifecycle.py",
+        "server/app/ngx_log.cxx",
+        "server/misc/ngx_c_mysql_dao.cxx"
+      ]
+    }
+  ],
+  "legacy_policy": "README, decisions, stage progress and upstream notes remain accessible through the explicit legacy corpus; they are not mixed into the current corpus."
+}

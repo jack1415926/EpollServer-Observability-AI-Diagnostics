@@ -6,9 +6,9 @@
 
 阶段 4 已实现三类基础异常检测：采集缺失/过期、Worker 进程异常、收发队列持续积压；支持 MySQL 事件持久化、持续去重、自动恢复、查询 API 与网页列表。默认检测/恢复各 3 秒、队列阈值 1024 条，均可配置。规则、部署权限、验收及边界见 [阶段 4 事件](docs/STAGE_4_EVENTS.md)。
 
-阶段 1 的 Worker 快照、Master 名单与 C++ 汇总支持身份核验、过期、部分失败和旧实例隔离，采样默认关闭。阶段 2 提供本机绑定、Bearer 鉴权、限流、后台采集与缓存失效。基础指标完整不代表 TCP 业务健康，主动探测仍未实现；CPU/内存实时采集、累计计数和数据库内部指标尚未支持。原负载口径的正式监控开销验收留待后续。
+阶段 1 的 Worker 快照、Master 名单与 C++ 汇总支持身份核验、过期、部分失败和旧实例隔离，采样默认关闭。阶段 2 提供本机绑定、Bearer 鉴权、限流、后台采集与缓存失效。基础指标完整不代表 TCP 业务健康，主动探测仍未实现；Worker 主线程状态、近似 RSS 和累计 CPU 时间已补充；区间 CPU 利用率、累计业务计数和数据库内部指标仍未支持。原负载口径的正式监控开销验收留待后续。
 
-阶段 5 已接通独立 Python 诊断服务、DeepSeek Flash、Qwen 混合检索与重排、七种只读工具、异步任务、MySQL 报告持久化和网页。真实 Worker 暂停场景及 AI 故障隔离已通过；运行、权限、证据与验收边界见 [阶段 5 诊断](docs/STAGE_5_DIAGNOSIS.md)。
+阶段 5 已接通独立 Python 诊断服务、DeepSeek Flash、Qwen 混合检索与重排、八种只读工具、异步任务、MySQL 报告持久化和网页。真实 Worker 暂停场景及 AI 故障隔离已通过；运行、权限、证据与验收边界见 [阶段 5 诊断](docs/STAGE_5_DIAGNOSIS.md)。
 
 根据用户回传的 Ubuntu 验收输出，200 并发、6 个客户端进程、Redis Lua 开启的三轮 Ping 测试累计 600 万请求零失败，QPS 中位数为 32,203.656，抽样 P95 的三轮中位数为 9.411 ms。环境、完整口径和证据限制见 [本次 Linux 验收记录](docs/BASELINE_RESULTS_2026-10-23.md)。该结果是同机 Debug Ping 基线，不代表生产业务容量。
 
@@ -62,6 +62,7 @@ cd epoll-observability
 9. 网页入口、数据库初始化、实验生成/导入/对比与验收见 [阶段 3 Web 与性能实验](docs/STAGE_3_WEB_EXPERIMENTS.md)。
 10. 异常规则、事件表权限、配置及故障验收见 [阶段 4 事件](docs/STAGE_4_EVENTS.md)。
 11. 模型配置、知识索引、异步任务和诊断报告见 [阶段 5 诊断](docs/STAGE_5_DIAGNOSIS.md)。
+12. 诊断知识分层、独立进程资源与当前验收边界见 [第二批输入改进](docs/DIAGNOSIS_BATCH2_INPUTS.md)。
 
 原服务依赖 Linux、G++ C++17、Make、pthread、MySQL client、hiredis 和 redis-plus-plus。构建沿用 Make：
 

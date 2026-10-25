@@ -1,0 +1,21 @@
+# 当前运行观测契约
+
+适用：本仓库阶段5与第二批采集增量。依据为monitor/collector/collector.cxx、monitor/http/main.cxx及对应回归；这是实现契约，不是某次服务健康证明。
+
+## 采集完整、连接计数与业务健康
+
+complete只说明当前支持的基础快照完整。connections_current是被动采集的TCP连接数量，不是登录用户数量。tcp_health=not_probed表示没有主动业务探测；它不阻止连接计数本身被采集。监控健康接口200只表示监控自身存活。业务、MySQL或Redis是否健康需要各自证据。
+
+## 缺失、过期和部分和
+
+Worker身份与快照分别校验。采样年龄超过max_age_ms时为stale；metrics内缺失值保持null，不可补成0。partial_sums只来自有效Worker，不能冒充完整总量；另一个Worker的队列为0也不能说明缺失Worker的队列恢复。
+
+snapshot_identity_mismatch只说明文件身份字段与名单不符，不等于实际进程身份异常。process_unavailable表示读取实际进程失败，不能直接认定进程死亡。dead可确认该身份进程不再有效，但退出原因仍需要信号、退出码或其他对应证据。
+
+## 独立的进程观测
+
+process_resources由监控进程读取/proc，不来自Worker业务快照。identity_verified=true表示本轮核对PID、启动刻度及父进程通过。即使Worker业务样本stale，也可能取得有效的进程观测；两类有效性分别表示，不能把整个partial简单理解为所有字段都不可用。
+
+leader_state是进程组主线程的/proc状态；T表示观测到停止状态，S不能证明所有业务线程都空闲。cpu_user_ticks和cpu_system_ticks是累计CPU时间，必须结合clock_ticks_per_second及同一身份的跨时刻差值才能计算区间CPU利用率，单个累计值不能证明当前CPU繁忙。rss_bytes是近似RSS，不是精确内存或PSS；threads是进程线程数，不代表正在处理请求的线程数。
+
+进程资源本轮核验失败时identity_verified=false、数值为null并给出reason；不要使用之前生命周期的数值。当前尚无业务请求耗时、累计错误、锁等待及MySQL/Redis内部指标；这些缺口不能靠技术文档推算为已观测事实。

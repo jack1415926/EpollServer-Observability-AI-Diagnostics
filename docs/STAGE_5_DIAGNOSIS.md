@@ -1,5 +1,7 @@
 # 阶段 5：RAG 与只读 Agent 诊断
 
+后续第二批已增加知识分层、独立进程资源和第八种只读实验详情工具，当前差异见 [第二批输入改进](DIAGNOSIS_BATCH2_INPUTS.md)。本页验收结果保留阶段5原批次口径；完整验收现需显式传入 `--reports /path/to/existing-experiments`。
+
 2026-10-25。用户确认完整链路：网页 → Drogon 异步入口 → 本机独立 Python 服务 → 远端模型与检索 API → 独立 MySQL 任务/报告表。允许发送相关脱敏文档、指标和日志。工具只读，不执行 Shell、业务写入或自动恢复。
 
 ## 依赖与来源
@@ -93,9 +95,9 @@ set +a
 PYTHONPATH=testscript python3 -m unittest test_http_monitor test_event_rules test_import_experiment test_stage3_lifecycle -v
 .venv/bin/python testscript/test_stage3_live.py --database-only
 .venv/bin/python testscript/test_stage5_live.py --smoke
-.venv/bin/python testscript/test_stage5_live.py
+.venv/bin/python testscript/test_stage5_live.py --reports /path/to/existing-experiments
 # 在交互终端保留同一完整联调的服务供浏览器；回车后清理
-.venv/bin/python testscript/test_stage5_live.py --hold
+.venv/bin/python testscript/test_stage5_live.py --hold --reports /path/to/existing-experiments
 # 只复用已有诊断报告，独立重跑浏览器，无新模型调用或 TCP 故障
 .venv/bin/python testscript/test_stage5_live.py --smoke --hold --report /path/to/diagnosis.json
 ```

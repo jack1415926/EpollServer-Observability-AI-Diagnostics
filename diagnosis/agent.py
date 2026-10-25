@@ -90,6 +90,12 @@ class Tools:
                     r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}', v) for v in args.values() if isinstance(v, str)) or any(not isinstance(v, str) for v in args.values()):
                 raise ValueError('invalid_experiment_ids')
             return self.record('experiments/compare', await self.monitor('experiments/compare', args), 'historical_comparison')
+        if name == 'get_experiment':
+            key = args.get('experiment_id') if isinstance(args, dict) else None
+            if (not isinstance(args, dict) or set(args) != {'experiment_id'} or not isinstance(key, str) or
+                    not re.fullmatch(r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}', key)):
+                raise ValueError('invalid_experiment_id')
+            return self.record('experiments/'+key, await self.monitor('experiments/'+key), 'historical_experiment_detail')
         if name == 'read_server_logs':
             if args:
                 raise ValueError('unexpected_tool_arguments')
@@ -119,15 +125,17 @@ TOOL_DESCRIPTIONS = {
     'get_recent_events': 'Read stored current/historical instance events; active is not proof of current anomaly.',
     'read_server_logs': 'Read a bounded redacted tail of the operator-configured log; instance association is unverified.',
     'query_experiments': 'List stored historical experiments; never treat them as a new measurement.',
+    'get_experiment': 'Read one stored experiment by UUID, including recorded conditions and resource summary; not a new measurement.',
     'compare_experiments': 'Compare two stored UUID experiments and their run conditions; differences do not prove causation.',
-    'search_technical_docs': 'Hybrid search over project docs and explicitly historical upstream references.'}
+    'search_technical_docs': 'Search the configured corpus; labels distinguish current contracts, verified historical cases, technical references and legacy history.'}
 
 
 def schemas():
     result = []
     for name, description in TOOL_DESCRIPTIONS.items():
         fields = {'query': {'type': 'string'}} if name == 'search_technical_docs' else (
-            {k: {'type': 'string'} for k in ('baseline', 'candidate')} if name == 'compare_experiments' else {})
+            {k: {'type': 'string'} for k in ('baseline', 'candidate')} if name == 'compare_experiments' else (
+            {'experiment_id': {'type': 'string'}} if name == 'get_experiment' else {}))
         result.append({'type': 'function', 'function': {'name': name, 'description': description,
             'parameters': {'type': 'object', 'properties': fields, 'required': list(fields), 'additionalProperties': False}}})
     return result

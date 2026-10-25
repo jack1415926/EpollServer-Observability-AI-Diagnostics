@@ -39,12 +39,12 @@
       </div>
       <div class="two-columns">
         <article class="panel"><div class="panel-title"><h2>实例与采集</h2><span class="subtle">LIVE SNAPSHOT</span></div><dl id="instance"></dl></article>
-        <article class="panel"><div class="panel-title"><h2>数据边界</h2><span class="badge">基础指标</span></div><p class="boundary">TCP 业务健康：<strong>未主动探测</strong></p><p>快照完整表示基础指标可用，不表示业务线程、MySQL 或 Redis 健康。</p><p>CPU / 内存、累计网络与业务计数、数据库内部指标尚未接入实时采集。</p><p id="partial-note" class="subtle">缺失指标显示「—」，不会补零。部分数据不作为实例完整总量。</p></article>
+        <article class="panel"><div class="panel-title"><h2>数据边界</h2><span class="badge">基础指标</span></div><p class="boundary">TCP 业务健康：<strong>未主动探测</strong></p><p>快照完整表示基础指标可用，不表示业务线程、MySQL 或 Redis 健康。</p><p>Worker 页提供独立的进程状态、近似 RSS 和累计 CPU 时间；CPU 利用率、业务计数与数据库内部指标尚未支持。</p><p id="partial-note" class="subtle">缺失指标显示「—」，不会补零。部分数据不作为实例完整总量。</p></article>
       </div>
     </section>
     <section id="workers" class="page" hidden aria-labelledby="workers-heading">
       <article class="panel"><div class="panel-title"><div><h2 id="workers-heading">Worker 明细</h2><p>按 Master 名单展示；状态与数值均为最近一次采集结果。</p></div><span id="worker-count" class="badge">等待采集</span></div>
-        <div class="table-wrap"><table><thead><tr><th>Worker / PID</th><th>采集状态</th><th>连接数</th><th>接收队列</th><th>发送队列</th><th>样本年龄</th></tr></thead><tbody id="worker-rows"></tbody></table></div><p id="worker-empty" class="empty">连接监控服务后查看 Worker。</p>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Worker 状态表，可横向滚动"><table><thead><tr><th>Worker / PID</th><th>采集状态</th><th>连接数</th><th>接收队列</th><th>发送队列</th><th>样本年龄</th><th>进程观测</th><th>RSS / CPU 累计</th></tr></thead><tbody id="worker-rows"></tbody></table></div><p class="subtle">资源数据独立读取 /proc 并核验身份；RSS 为近似值，CPU 为累计时间，不是当前利用率。业务样本缺失保持未知。</p><p id="worker-empty" class="empty">连接监控服务后查看 Worker。</p>
       </article>
     </section>
     <section id="experiments" class="page" hidden aria-labelledby="experiments-heading">

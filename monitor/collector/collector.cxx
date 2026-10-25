@@ -6,6 +6,7 @@
 #include <climits>
 #include <fcntl.h>
 #include <fstream>
+#include <optional>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -107,7 +108,21 @@ std::string BootId(const std::filesystem::path &procRoot)
     return value;
 }
 
-struct Process { uint64_t ticks; int parent; char state; };
+struct Process {
+    uint64_t ticks;
+    int parent;
+    char state;
+    std::optional<uint64_t> user, system, threads, rssPages;
+};
+std::optional<uint64_t> OptionalNumber(const std::string &text)
+{
+    if (text.empty() || text.find_first_not_of("0123456789") != std::string::npos) return std::nullopt;
+    try {
+        size_t used = 0;
+        const auto value = std::stoull(text, &used);
+        return used == text.size() ? std::optional<uint64_t>(value) : std::nullopt;
+    } catch (const std::exception &) { return std::nullopt; }
+}
 Process ReadProcess(const std::filesystem::path &procRoot, int pid)
 {
     const auto file = procRoot / std::to_string(pid) / "stat";
@@ -125,9 +140,11 @@ Process ReadProcess(const std::filesystem::path &procRoot, int pid)
     std::istringstream fields(line.substr(end + 1));
     Process result{};
     std::string token;
-    for (int field = 3; field <= 22; ++field) {
-        if (!(fields >> token))
-            throw Error("process_unavailable");
+    for (int field = 3; field <= 24; ++field) {
+        if (!(fields >> token)) {
+            if (field <= 22) throw Error("process_unavailable");
+            break;
+        }
         try {
             if (field == 3) {
                 if (token.size() != 1)
@@ -142,20 +159,26 @@ Process ReadProcess(const std::filesystem::path &procRoot, int pid)
                     throw Error("process_unavailable");
                 if (field == 4) result.parent = static_cast<int>(value);
                 else result.ticks = value;
-            }
+            } else if (field == 14) result.user = OptionalNumber(token);
+            else if (field == 15) result.system = OptionalNumber(token);
+            else if (field == 20) {
+                result.threads = OptionalNumber(token);
+                if (result.threads == 0) result.threads.reset();
+            } else if (field == 24) result.rssPages = OptionalNumber(token);
         } catch (const std::invalid_argument &) { throw Error("process_unavailable"); }
         catch (const std::out_of_range &) { throw Error("process_unavailable"); }
     }
     return result;
 }
 
-void CheckProcess(const std::filesystem::path &procRoot, int pid, uint64_t ticks, int parent = -1)
+Process CheckProcess(const std::filesystem::path &procRoot, int pid, uint64_t ticks, int parent = -1)
 {
     const auto process = ReadProcess(procRoot, pid);
     if (process.state == 'Z' || process.state == 'X' || process.state == 'x')
         throw Error("dead");
     if (process.ticks != ticks || (parent != -1 && process.parent != parent))
         throw Error("identity_mismatch");
+    return process;
 }
 
 void ValidateMaster(const Json &master)
@@ -197,6 +220,32 @@ Json EmptyMetrics()
         result[key] = nullptr;
     return result;
 }
+Json EmptyResources(const std::string &reason)
+{
+    return {{"status", "unavailable"}, {"reason", reason}, {"identity_verified", false},
+            {"leader_state", nullptr}, {"cpu_user_ticks", nullptr}, {"cpu_system_ticks", nullptr},
+            {"clock_ticks_per_second", nullptr}, {"rss_bytes", nullptr}, {"threads", nullptr},
+            {"observed_at_boottime_ms", nullptr}, {"rss_is_approximate", true}};
+}
+Json Resources(const Process &process)
+{
+    Json value = EmptyResources("process_fields_unavailable");
+    const long frequency = sysconf(_SC_CLK_TCK), pageSize = sysconf(_SC_PAGESIZE);
+    value["identity_verified"] = true;
+    value["leader_state"] = std::string(1, process.state);
+    value["observed_at_boottime_ms"] = BootTimeMs();
+    if (frequency > 0) value["clock_ticks_per_second"] = frequency;
+    if (process.user) value["cpu_user_ticks"] = *process.user;
+    if (process.system) value["cpu_system_ticks"] = *process.system;
+    if (process.threads) value["threads"] = *process.threads;
+    if (process.rssPages && pageSize > 0 && *process.rssPages <= UINT64_MAX / static_cast<uint64_t>(pageSize))
+        value["rss_bytes"] = *process.rssPages * static_cast<uint64_t>(pageSize);
+    const bool complete = !value["cpu_user_ticks"].is_null() && !value["cpu_system_ticks"].is_null() &&
+        !value["threads"].is_null() && !value["rss_bytes"].is_null() && frequency > 0;
+    value["status"] = complete ? "complete" : "partial";
+    value["reason"] = complete ? "ok" : "process_fields_unavailable";
+    return value;
+}
 }
 
 Json Collect(const std::filesystem::path &manifest, uint64_t maxAgeMs,
@@ -208,7 +257,7 @@ Json Collect(const std::filesystem::path &manifest, uint64_t maxAgeMs,
                    {"max_age_ms", maxAgeMs}, {"tcp_health", "not_probed"},
                    {"collected_at_unix_ms", std::chrono::duration_cast<std::chrono::milliseconds>(
                        std::chrono::system_clock::now().time_since_epoch()).count()},
-                   {"unsupported_metrics", {"cpu_memory", "cumulative_network", "business_counters", "mysql", "redis"}}};
+                   {"unsupported_metrics", {"cpu_utilization", "cumulative_network", "business_counters", "mysql", "redis"}}};
     try {
         if (maxAgeMs == 0 || maxAgeMs > 60000)
             throw Error("invalid_max_age");
@@ -238,6 +287,7 @@ Json Collect(const std::filesystem::path &manifest, uint64_t maxAgeMs,
             row["status"] = "unavailable";
             row["metrics"] = EmptyMetrics();
             row["age_ms"] = nullptr;
+            row["process_resources"] = EmptyResources("not_observed");
             try {
                 const int pid = worker["pid"].get<int>();
                 const auto ticks = worker["process_start_ticks"].get<uint64_t>();
@@ -287,9 +337,16 @@ Json Collect(const std::filesystem::path &manifest, uint64_t maxAgeMs,
             CheckProcess(procRoot, masterPid, masterTicks);
             if (ReadFile(fd.value, manifest.filename().string(), 1024 * 1024) != original)
                 throw Error("changed");
-            for (const auto &row : result["workers"])
-                if (row["status"] == "fresh")
-                    CheckProcess(procRoot, row["pid"].get<int>(), row["process_start_ticks"].get<uint64_t>(), masterPid);
+            for (auto &row : result["workers"]) {
+                try {
+                    const auto process = CheckProcess(procRoot, row["pid"].get<int>(),
+                        row["process_start_ticks"].get<uint64_t>(), masterPid);
+                    row["process_resources"] = Resources(process);
+                } catch (const Error &error) {
+                    if (row["status"] == "fresh") throw;
+                    row["process_resources"] = EmptyResources(error.what());
+                }
+            }
             const uint64_t finished = BootTimeMs();
             result["collected_at_boottime_ms"] = finished;
             for (auto &row : result["workers"])
