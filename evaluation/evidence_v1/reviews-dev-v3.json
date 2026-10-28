@@ -1,0 +1,201 @@
+{
+  "scope": "T11/T12 source-based development/holdout review; no formal accuracy claim",
+  "reviewer": "project_assistant_source_and_fixture_review; not external human expert or blind review",
+  "reviewed_on": "2026-10-28",
+  "results_sha256": "7eac4f15a19513610412279cb52cedb9c36b951560642bd04238356dbbbac90a",
+  "interpretation": "supported hypotheses are unverified compatible directions, not proven causes; failures are counted separately",
+  "reviews": [
+    {
+      "id": "D1",
+      "strategy": "targeted",
+      "report_sha256": "1cad3b294473986b672e574e57012b5e581a6e41d06644fa5f5737162b9c493a",
+      "outcome": "partial",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [
+          "partial",
+          "partial",
+          "supported"
+        ],
+        "excluded_causes": [
+          "supported",
+          "supported"
+        ]
+      },
+      "summary_support": "supported",
+      "notes": "核心边界已修正：文件采样、stale/null不确认暂停或退出；假设把SIGSTOP与T/t并称不够精确，且“被回收”须限定取证之后的时点。不是已确认根因。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    },
+    {
+      "id": "D1",
+      "strategy": "fixed",
+      "report_sha256": "e06976138390271c58d79ced5373331107092d4d48fd3d8d41ee562cf750a3f5",
+      "outcome": "pass",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "excluded_causes": [
+          "supported"
+        ]
+      },
+      "summary_support": "supported",
+      "notes": "过期、null及未取退出证据边界正确，无共享内存机制；多读来源未转化为已确认根因。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    },
+    {
+      "id": "D2",
+      "strategy": "targeted",
+      "report_sha256": "2e11ac38d6b98b5fb7b187d30a2fd1354849c6f1ad570a2aed6f94e48a373f4e",
+      "outcome": "partial",
+      "claim_support": {
+        "facts": [
+          "partial",
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [
+          "supported",
+          "supported"
+        ],
+        "excluded_causes": [
+          "supported"
+        ]
+      },
+      "summary_support": "partial",
+      "notes": "正确区分dead与单纯SIGSTOP、不确认SIGKILL；“服务状态unavailable”应明确为采集/接口状态，不能暗示TCP业务已被探测。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    },
+    {
+      "id": "D2",
+      "strategy": "fixed",
+      "report_sha256": "26fe159bd9ebca66eb03bdc5b0891d5619a41b1423f3640bf4b8a89e251c7922",
+      "outcome": "fail",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "partial",
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [
+          "partial",
+          "unsupported"
+        ],
+        "excluded_causes": []
+      },
+      "summary_support": "supported",
+      "notes": "摘要承认单纯T不会dead，却仍把“可能只是暂停”列为候选，自相矛盾。Master启动字段名也应为master_start_ticks。形式校验不证明此语义正确。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    },
+    {
+      "id": "D3",
+      "strategy": "targeted",
+      "report_sha256": "0f53d77c7f49adce79716a75beb45ed8df086dd2923db4c3319b0e40b4f52bbd",
+      "outcome": "pass",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [
+          "supported"
+        ],
+        "excluded_causes": [
+          "supported",
+          "supported"
+        ]
+      },
+      "summary_support": "supported",
+      "notes": "不可读不证明退出，不自动补起，单纯T/t不导致process_unavailable；明确缺少当前进程与退出证据。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    },
+    {
+      "id": "C1",
+      "strategy": "targeted",
+      "report_sha256": "e5010a0da96eedc82f73640ce4866226b08614f016c81c7290d1257a945e0ce6",
+      "outcome": "pass",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [],
+        "excluded_causes": []
+      },
+      "summary_support": "supported",
+      "notes": "只读取Worker；observations模式正确给出完整名单覆盖和连接数7，无虚构其他Worker。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    },
+    {
+      "id": "C1",
+      "strategy": "fixed",
+      "report_sha256": "e60bc982e92544e462a665d6e3a88822a76c7995f018380052e93a2bc38f1299",
+      "outcome": "pass",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [],
+        "excluded_causes": []
+      },
+      "summary_support": "supported",
+      "notes": "计数、完整覆盖与未探测业务健康均正确；读取了不必要来源，按实际成本计入。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    },
+    {
+      "id": "C3",
+      "strategy": "targeted",
+      "report_sha256": "39a3a331a626fedd4c08c6bf939d14b3e8906cc81de39a13d6be22b086868cdc",
+      "outcome": "pass",
+      "claim_support": {
+        "facts": [],
+        "possible_causes": [],
+        "excluded_causes": []
+      },
+      "summary_support": "supported",
+      "notes": "正确范围提示，无证据读取；这是分类控制题而不是故障诊断准确率样本。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    }
+  ]
+}

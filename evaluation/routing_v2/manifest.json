@@ -1,0 +1,12 @@
+{
+  "cases_sha256": "9d9fe1d26cfcaac0e71a9993e3204dfcaaea78c4bba8e93ebbef185177d316d8",
+  "index_sha256": "fff6280faeb5c1d3472d508198294f3f9e2441be27c8e73f66e56cdb19933aa3",
+  "files": {
+    "diagnosis/routing.py": "bf30e382fcd2137fd31513fd5814b7ab1f896884607ff3f896d4c68a697f66bc",
+    "diagnosis/agent.py": "e1a108ebf88f1c675ee0bd086d839dd1599f0f093a37e2719bd52eba9360b451",
+    "diagnosis/providers.py": "0f51f3542c29853ea532fb4031115c5ed1a2ce428e1d692f69f326f1ad419c27",
+    "diagnosis/evaluate_routing.py": "eb18fa3be9f33030646ed55044c42c75e1582468542a5f1484286d5b5c03f0df"
+  },
+  "model": "deepseek-flash",
+  "scope": "routing acceptance; synthetic fixed-tool replay, not fault diagnosis accuracy"
+}

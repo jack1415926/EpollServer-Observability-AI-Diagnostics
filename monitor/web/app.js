@@ -8,13 +8,17 @@ function renderDiagnosis(task) {
   if (!task.report) return;
   const report = task.report, analysis = report.analysis;
   if (report.target?.instance) target.append(text("p", `诊断时的实例：${report.target.instance}`, "subtle"));
-  target.append(text("p", analysis.conclusion === "insufficient_evidence" ? "证据不足，无法确定根因。" : "以下原因属于待验证推测。"), text("p", analysis.summary));
-  for (const [label, values] of [["已确认事实", analysis.facts], ["可能原因", analysis.possible_causes], ["尚未确认", analysis.unknowns], ["后续验证建议", analysis.next_steps]]) {
+  const notices = {knowledge: "技术资料回答", experiments: "历史实验分析", clarify: "需要补充信息", out_of_scope: "支持范围提示", failure: "诊断未完成"};
+  target.append(text("p", report.answer_mode === "observation" ? "取证时的观测" : notices[report.kind] || (analysis.conclusion === "insufficient_evidence" ? "证据不足，无法确定根因。" : "以下原因属于待验证推测。")), text("p", analysis.summary));
+  if (Number.isFinite(report.generated_at_unix_ms)) target.append(text("p", `报告生成：${new Date(report.generated_at_unix_ms).toLocaleString("zh-CN")}；数据与事件时间以来源为准，事实不会随轮询自动更新。`, "subtle"));
+  const basisLabels = {observation: "观测", document: "资料", historical: "历史", user_statement: "用户陈述", unverified_log: "未核验日志"};
+  for (const [label, values] of [["事实与来源", analysis.facts], ["可排除的解释", analysis.excluded_causes], ["待验证的可能原因", analysis.possible_causes], ["尚未确认", analysis.unknowns], ["后续验证建议", analysis.next_steps]]) {
+    if (!values?.length) continue;
     target.append(text("h3", label)); const list = document.createElement("ul");
-    for (const value of values) list.append(text("li", typeof value === "string" ? value : `${value.text} [${value.evidence_ids.join(", ")}]`));
+    for (const value of values) list.append(text("li", typeof value === "string" ? value : `${basisLabels[value.basis] ? `${basisLabels[value.basis]}：` : ""}${value.text} [${value.evidence_ids.join(", ")}]`));
     target.append(list);
   }
-  target.append(text("h3", "证据与来源"));
+  if (report.evidence.length) target.append(text("h3", "证据与来源"));
   for (const evidence of report.evidence) {
     const detail = document.createElement("details");
     detail.append(text("summary", `${evidence.id} · ${evidence.source} · ${evidence.scope} · ${new Date(evidence.retrieved_at_unix_ms).toLocaleString("zh-CN")}`));
@@ -75,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 const $ = id => document.getElementById(id);
 let token = "", generation = 0, timer = null, refreshing = false, experiments = [], eventsRefreshing = false, diagnosesRefreshing = false, selectedDiagnosis = null;
-const descriptions = {diagnoses: ["AI 诊断", "用当前观测与技术资料分析故障，核对证据与待验证假设。"], overview: ["运行总览", "观察当前实例的连接、队列与采集状态。"], workers: ["Worker 状态", "查看当前实例的进程身份、指标与数据有效性。"], experiments: ["性能实验", "保存运行证据，在明确条件下比较实验结果。"], events: ["异常事件", "查询确定性检测证据、触发时间与自动恢复记录。"]};
+const descriptions = {diagnoses: ["AI 诊断", "按问题查询技术资料、当前观测或历史实验，核对依据与未知。"], overview: ["运行总览", "观察当前实例的连接、队列与采集状态。"], workers: ["Worker 状态", "查看当前实例的进程身份、指标与数据有效性。"], experiments: ["性能实验", "保存运行证据，在明确条件下比较实验结果。"], events: ["异常事件", "查询确定性检测证据、触发时间与自动恢复记录。"]};
 const labels = {complete: "采集完整", partial: "部分数据", stopping: "实例停止中", unavailable: "指标不可用", instance_changed: "实例变化", fresh: "有效", stale: "已过期", dead: "进程已退出", missing: "快照缺失", invalid_json: "快照损坏", collection_failed: "采集失败", identity_mismatch: "进程身份不符", snapshot_identity_mismatch: "快照身份不符"};
 const fmt = (value, digits = 0) => value == null || !Number.isFinite(Number(value)) ? "—" : Number(value).toLocaleString("zh-CN", {maximumFractionDigits: digits});
 function text(tag, value, className) { const el = document.createElement(tag); el.textContent = value; if (className) el.className = className; return el; }

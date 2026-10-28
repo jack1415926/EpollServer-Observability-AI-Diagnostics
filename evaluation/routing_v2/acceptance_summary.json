@@ -1,0 +1,100 @@
+{
+  "scope": "small authored routing acceptance, not general classification accuracy or diagnosis quality",
+  "manifest_sha256": "590a41bffe4ac9f0972c7ce05edf180d2cfcec5c7799fae34433c9c2d974cca4",
+  "cases": 13,
+  "intent_matches": 13,
+  "full_replays": [
+    {
+      "id": "K1",
+      "kind": "knowledge",
+      "tools": [
+        {
+          "name": "search_technical_docs",
+          "args": {
+            "query": "epoll 就绪通知原理"
+          }
+        }
+      ],
+      "evidence_sources": [
+        "technical_docs",
+        "technical_docs",
+        "technical_docs",
+        "technical_docs",
+        "technical_docs"
+      ],
+      "policy_passed": true,
+      "report_sha256": "406403459d70b645748b2b044dcdbbcd0472f6b882b323d1cecd245b52d46970"
+    },
+    {
+      "id": "R2",
+      "kind": "runtime",
+      "tools": [
+        {
+          "name": "read_server_logs",
+          "args": {}
+        }
+      ],
+      "evidence_sources": [
+        "configured_server_log"
+      ],
+      "policy_passed": true,
+      "report_sha256": "714e86f9f33a8392a7dea2a0806f73c392b8e0bc85b605e1530a395a33ed88cf"
+    },
+    {
+      "id": "E1",
+      "kind": "experiments",
+      "tools": [
+        {
+          "name": "compare_experiments",
+          "args": {
+            "baseline": "00000000-0000-0000-0000-000000000021",
+            "candidate": "00000000-0000-0000-0000-000000000022"
+          }
+        }
+      ],
+      "evidence_sources": [
+        "experiments/compare"
+      ],
+      "policy_passed": true,
+      "report_sha256": "915dd6125137ad81a9ab015dc9ee59d485a9c1148c8616d9999ddf4293f117ed"
+    },
+    {
+      "id": "O1",
+      "kind": "out_of_scope",
+      "tools": [],
+      "evidence_sources": [],
+      "policy_passed": true,
+      "report_sha256": "053fb3c241ade338035974dca6fb773621daf3c83bc0243222a0c95a13c38a3e"
+    },
+    {
+      "id": "C1",
+      "kind": "clarify",
+      "tools": [],
+      "evidence_sources": [],
+      "policy_passed": true,
+      "report_sha256": "ec317f080264fda7e08cf3820f21297c28806c0c35959c54aeca7851a89168cc"
+    },
+    {
+      "id": "E3",
+      "kind": "experiments",
+      "tools": [
+        {
+          "name": "compare_experiments",
+          "args": {
+            "baseline": "00000000-0000-0000-0000-000000000021",
+            "candidate": "00000000-0000-0000-0000-000000000022"
+          }
+        }
+      ],
+      "evidence_sources": [
+        "experiments/compare"
+      ],
+      "policy_passed": true,
+      "report_sha256": "f9f4197a624c9443809da47fe585950f4bee2318274522d6299ce914157276ab"
+    }
+  ],
+  "after_measurement_index": {
+    "sha256": "56a6b434b4017e6d4f8821b33ef3a5a3b7371ff52e6f1cec11383db58eb406fc",
+    "chunks": 300
+  }
+}

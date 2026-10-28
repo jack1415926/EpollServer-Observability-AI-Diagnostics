@@ -50,7 +50,7 @@ set +a
 
 ## 知识与引用
 
-离线语料包含 README、实施决策、问题记录、阶段说明和 `docs/upstream/*.md`。按标题及重叠行窗口切分，保留相对文件、行号范围、标题、整份文件 SHA-256 和来源范围。向量与元数据通过单个 `.npz` 原子替换发布，不加载 pickle；索引位于忽略的 `artifacts/diagnosis/index.npz`。修改文档、模型或分段逻辑后重建，替换索引后重启 Python。
+离线语料包含 README、实施决策、问题记录、阶段说明、`docs/upstream/*.md` 和受审阅的 `docs/knowledge/*.md` 资料摘要。按标题及重叠行窗口切分，保留相对文件、行号范围、标题、整份文件 SHA-256 和来源范围。向量与元数据通过单个 `.npz` 原子替换发布，不加载 pickle；索引位于忽略的 `artifacts/diagnosis/index.npz`。修改文档、模型或分段逻辑后重建，替换索引后重启 Python。
 
 检索为 BM25/Dense 各前 20 → RRF(k=60) → 合并前 20 → 远端 Rerank 前 5。查询时复核文件哈希，`source_changed` 标记旧版本；早期阶段说明不代表当前完成范围，上游文档显式标为历史参考。实时快照和诊断报告不自动进入索引。
 
@@ -88,6 +88,8 @@ set +a
 
 ## 分层验收
 
+2026-10-26当前修改的补测见[验证核对](DIAGNOSIS_VERIFICATION_AUDIT.md)：37项合并回归、五类真实任务及重启读回、浏览器提交与窄屏检查通过；本次为smoke，未复测真实TCP故障。文档更新后索引待重建。
+
 ```bash
 .venv/bin/python -m unittest testscript.test_diagnosis -v
 PYTHONPATH=testscript python3 -m unittest test_http_monitor test_event_rules test_import_experiment test_stage3_lifecycle -v
@@ -113,3 +115,47 @@ PYTHONPATH=testscript python3 -m unittest test_http_monitor test_event_rules tes
 私有测试 MySQL 均通过管理员 SHUTDOWN 并 wait 后删除数据目录；HTTP、Python 和 TCP 测试实例及独立浏览器已退出，临时 TCP 配置已删。保留忽略的知识索引、参考克隆、0600 本机环境配置与验收证据。原业务数据、授权和本机 nginx.conf 未改。
 
 正式数据库初始化、生产部署、正式监控性能开销和大规模诊断效果评测未执行；本批不提交或推送。
+
+## 2026-10-26：最终报告输出协议更新
+
+原阶段验收属于当时实现。当前七种取证工具请求strict=true，DeepSeek工具请求自动走beta端点；最终报告通过唯一的submit_diagnosis_report及named tool_choice返回参数，而非只依赖JSON Mode和提示词。服务端schema从Analysis派生，并以本次真实E编号限制引用；后端Pydantic保留完整约束，最多一次只修正最终报告的重生成，不重跑取证、不重试HTTP，失败仍拒绝。
+
+API的strict支持经实测存在额外字段/非法JSON反例，不能视为强保证；output_validation记录请求模式、后端校验和修正原因。长度截断明确失败。`diagnosis.probe`的DeepSeek最小检查改为strict函数，新增独立 `--strict-contract` 验证额外字段；单次通过不代表普遍保证。细节、6次真实回放及边界见 [Strict输出记录](DIAGNOSIS_STRUCTURED_OUTPUT.md)。原3次失败保留在v1基线，未做新的全面质量评测或性能验收。
+
+## 2026-10-26：json_schema原生端点修正
+
+进一步核验后确认：Chat Completions的response_format=json_schema返回400，不等于DeepSeek的Responses协议不支持该格式。当前最终报告已改用 `/responses` 的 `text.format={type:json_schema,name,schema}`，完整保留Analysis长度/条数和引用enum；七种取证工具仍用原Chat循环，历史调用/结果按Responses配对格式传递。后端校验与一次最终修正保留，output_validation协议标记为deepseek_responses_json_schema。
+
+默认diagnosis.probe同步验证Responses，新增独立 `--json-schema-contract`；原 `--strict-contract` 仅检查beta工具。4次真实诊断回放首次通过、25项相关测试通过；额外字段反例说明服务端保证仍不能过度承诺。上一节beta最终函数方案属于前一批历史状态。当前接口、400错误和验证范围见 [Responses修复](DIAGNOSIS_RESPONSES_JSON_SCHEMA.md)。
+
+## 2026-10-26：按问题路由取代固定全量初始读取
+
+当前先分类，再按问题取证。知识问题只检索文档并用独立知识回答schema，不访问当前指标；故障问题只选所需health/workers/events/logs和可选文档；实验问题只读指定对比或最近列表；范围外和需澄清问题不取证。分类JSON由后端校验，工具列表过滤加实际派发白名单双重约束，错误分类不触发全量读取。任务内相同工具参数不重复读，比较UUID核对原文并保留基准/候选角色。
+
+报告保留schema_version=1，新增kind/routing；网页不再给知识回答强加根因结论。分类增加一次模型调用，仍计入已有任务期限；不能因本批声称成本或广泛诊断效果已优化。13题路由开发验收与6条固定证据回放通过；完整行为及旧报告兼容范围见 [路由说明](DIAGNOSIS_ROUTING.md)。前面固定采集描述保留为历史阶段行为。
+
+## 2026-10-26：T4语料分层
+
+建库保留原22份来源，使用 `diagnosis/corpus_policy.json` 审阅章节和少量混合段落的行范围。片段增加corpus元数据：当前契约/历史案例/技术原理/规划进度、发布日期（未知为null）、适用版本、组件、来源性质、替代关系及审阅版本。上游绑定导入提交；本项目标为工作树文档快照，具体版本由文件哈希识别，不冒充已发布运行版本。来源正文变化需先复核标注，检查在Embedding调用之前执行。
+
+默认查询在BM25和Dense各取前20之前排除规划进度及已替代片段，其余参数不变。含历史、上游、旧版、路线图等明确词项的查询保留全池访问；返回retrieval_purpose及原有历史scope。历史案例和技术原理仍可参与默认查询，但不能证明当前实例事实。用途识别为本地词项规则，隐含的历史意图可能未被识别，不宣称已解决所有路由与语义问题。取证模型可看到元数据；引用支持检查仍属T12。
+
+索引保存策略哈希；旧索引或策略不匹配需显式重建，生产路径不默默退回未分层检索。评测可用 `--legacy-corpus` 明确选择旧的全池行为，清单记录该设置；不覆盖v1冻结索引与分数。建库 `--offline` 仅复用已有向量，有新正文时在API调用前失败且保留原索引。
+
+分类清单、完整实现与小规模检索对照的实际结果见 [T4记录](DIAGNOSIS_CORPUS_LAYERS.md)。这批验证语料分层与检索行为，不作为新版诊断准确率或正式性能验收，不改TCP、数据库、工具权限或网页。
+
+## 2026-10-27：T5进程与信号资料主题
+
+建库增加三份Linux man-pages摘要，涉及SIGSTOP/SIGCONT、proc状态/启动身份和waitpid停止/退出/回收语义；来源版本、日期、原始快照哈希和助手整理身份随corpus元数据返回。通用机制标为primary_reference，项目适用推导另标project_document，不将助手摘要冒充官方原文。当前受审阅来源共25份，原有参数、工具和运行指标不变。
+
+资料与6题小规模评测已完成，具体结果、索引版本和未解决问题见 [T5记录](DIAGNOSIS_KNOWLEDGE_T5.md)。3道知识题人工核对通过；3道运行态题未检索资料，仍有机制错误或策略遗漏，不能据资料入库声称诊断质量达标。该批使用合成接口回放和真实模型，不是新的TCP故障注入；旧Worker暂停案例仅复核历史证据。
+
+## 2026-10-28：T11/T12证据计划与支持校验
+
+当前先分类、按题读取运行/历史证据，再按问题和已取数据补充采样、Worker状态、整体退出策略、事件、实验可比性及能力边界中的必要契约。契约来自固定的 `diagnosis/observation_contracts.json`，核对其引用源码/文档哈希，失败时仅报告观测与未知，不拿模型记忆填补；它是内部只读资料查表，不是新开放的运行工具。普通有效计数/监控存活查询直接回答观测，不运行额外Agent选工具循环、不强填未知或根因。
+
+新报告analysis_schema_version=2。facts/possible_causes/excluded_causes每项声明basis和support，使用该E编号原始JSON的RFC6901指针与原值、显式length数量，或原样短摘录。检查类型、引用集合、可见值/数量/摘录、部分数字/完整标识、Worker实体混用、来源范围及少量已知项目矛盾；历史记录正文和未核验用户/日志不能冒充当前观测。本次查询可用性、记录数量和detection控制面摘要与历史事件内容分别处理。程序并不理解所有自然语言，semantic_status保持requires_review。
+
+生成错误共享一次最终修正，不重取证、不执行建议。支持/格式或远端失败任务可保存kind=failure、delivery_status=rejected的元数据与有界证据，状态仍为失败或超时，不展示成功事实。成功与失败均记录提示词/代码/知识索引哈希、检索过程、实际模型标识/缺失、用量/缺失及结束/未完成状态；检索上下文与缓存按任务隔离，取证时间不因复用刷新。嵌套JSON脱敏保持结构与幂等，原值定位不会因落库前再次脱敏被破坏。
+
+外层schema_version=1及数据库JSON存储保持，旧记录仍可读；网页标明来源类别、可排除解释、失败记录和报告生成时间，数据/事件时点仍以来源为准。工作树契约不等于对运行二进制版本的独立验证。完整实现、人工可复查的源审阅流程、代价对照、拒绝结果与实际验收范围见 [T11/T12交付](DIAGNOSIS_EVIDENCE_POLICY.md)，不宣称全语义自动证明或新真实TCP故障复测。

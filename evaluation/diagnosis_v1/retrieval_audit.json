@@ -1,0 +1,1174 @@
+{
+  "scope": "original labeled anchors only; not semantic relevance adjudication",
+  "manifest_sha256": "380f2d30de824a484d8bb3525fd10d966d64ec5aec7f60d68d4c609a81558538",
+  "index_sha256": "f3130e610111d384158307cef21abc4dcbfff2ed88798527b1d729eb188658c7",
+  "case_count": 24,
+  "evidence_group_count": 38,
+  "stages": {
+    "returned": 18,
+    "rerank_dropped": 7,
+    "fusion_dropped": 3,
+    "not_in_union40": 10
+  },
+  "macro_recall_at_5": 0.4791666666666667,
+  "cases": [
+    {
+      "case_id": "C1",
+      "split": "dev",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_1_COMPLETION.md",
+              "line": 22
+            }
+          ],
+          "stage": "returned"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_1_COMPLETION.md",
+              "line": 25
+            }
+          ],
+          "stage": "returned"
+        }
+      ],
+      "recall_at_5": 1.0,
+      "returned": [
+        {
+          "path": "docs/STAGE_1_WORKER_SNAPSHOT.md",
+          "start_line": 20,
+          "end_line": 39
+        },
+        {
+          "path": "docs/upstream/SHUTDOWN_VALIDATION.md",
+          "start_line": 5,
+          "end_line": 13
+        },
+        {
+          "path": "docs/STAGE_1_COMPLETION.md",
+          "start_line": 18,
+          "end_line": 40
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 57,
+          "end_line": 59
+        },
+        {
+          "path": "docs/STAGE_1_COMPLETION.md",
+          "start_line": 67,
+          "end_line": 90
+        }
+      ]
+    },
+    {
+      "case_id": "C2",
+      "split": "dev",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_2_HTTP_MONITOR.md",
+              "line": 78
+            }
+          ],
+          "stage": "returned"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_1_COMPLETION.md",
+              "line": 27
+            }
+          ],
+          "stage": "rerank_dropped"
+        }
+      ],
+      "recall_at_5": 0.5,
+      "returned": [
+        {
+          "path": "docs/STAGE_2_HTTP_MONITOR.md",
+          "start_line": 61,
+          "end_line": 84
+        },
+        {
+          "path": "docs/STAGE_2_HTTP_MONITOR.md",
+          "start_line": 107,
+          "end_line": 120
+        },
+        {
+          "path": "docs/STAGE_2_HTTP_MONITOR.md",
+          "start_line": 89,
+          "end_line": 112
+        },
+        {
+          "path": "docs/DECISIONS.md",
+          "start_line": 74,
+          "end_line": 81
+        },
+        {
+          "path": "docs/STAGE_2_HTTP_MONITOR.md",
+          "start_line": 1,
+          "end_line": 4
+        }
+      ]
+    },
+    {
+      "case_id": "C3",
+      "split": "dev",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_4_EVENTS.md",
+              "line": 48
+            }
+          ],
+          "stage": "returned"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_5_DIAGNOSIS.md",
+              "line": 55
+            }
+          ],
+          "stage": "fusion_dropped"
+        }
+      ],
+      "recall_at_5": 0.5,
+      "returned": [
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 46,
+          "end_line": 53
+        },
+        {
+          "path": "docs/STAGE_5_DIAGNOSIS.md",
+          "start_line": 75,
+          "end_line": 88
+        },
+        {
+          "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+          "start_line": 92,
+          "end_line": 108
+        },
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 41,
+          "end_line": 45
+        },
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 1,
+          "end_line": 4
+        }
+      ]
+    },
+    {
+      "case_id": "W1",
+      "split": "dev",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_4_EVENTS.md",
+              "line": 17
+            }
+          ],
+          "stage": "returned"
+        }
+      ],
+      "recall_at_5": 1.0,
+      "returned": [
+        {
+          "path": "docs/STAGE_1_COMPLETION.md",
+          "start_line": 36,
+          "end_line": 40
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 135,
+          "end_line": 154
+        },
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 5,
+          "end_line": 22
+        },
+        {
+          "path": "docs/STAGE_1_WORKER_SNAPSHOT.md",
+          "start_line": 38,
+          "end_line": 39
+        },
+        {
+          "path": "docs/STAGE_1_COMPLETION.md",
+          "start_line": 18,
+          "end_line": 40
+        }
+      ]
+    },
+    {
+      "case_id": "W2",
+      "split": "dev",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_1_COMPLETION.md",
+              "line": 39
+            }
+          ],
+          "stage": "returned"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_4_EVENTS.md",
+              "line": 17
+            }
+          ],
+          "stage": "returned"
+        }
+      ],
+      "recall_at_5": 1.0,
+      "returned": [
+        {
+          "path": "docs/STAGE_1_COMPLETION.md",
+          "start_line": 36,
+          "end_line": 40
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 135,
+          "end_line": 154
+        },
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 5,
+          "end_line": 22
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 159,
+          "end_line": 169
+        },
+        {
+          "path": "docs/STAGE_1_WORKER_SNAPSHOT.md",
+          "start_line": 38,
+          "end_line": 39
+        }
+      ]
+    },
+    {
+      "case_id": "W3",
+      "split": "dev",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_4_EVENTS.md",
+              "line": 17
+            }
+          ],
+          "stage": "rerank_dropped"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_1_COMPLETION.md",
+              "line": 27
+            }
+          ],
+          "stage": "returned"
+        }
+      ],
+      "recall_at_5": 0.5,
+      "returned": [
+        {
+          "path": "docs/STAGE_1_WORKER_SNAPSHOT.md",
+          "start_line": 40,
+          "end_line": 52
+        },
+        {
+          "path": "docs/upstream/EPOLL_SERVER_LearningNotes.md",
+          "start_line": 170,
+          "end_line": 187
+        },
+        {
+          "path": "docs/STAGE_1_COMPLETION.md",
+          "start_line": 18,
+          "end_line": 40
+        },
+        {
+          "path": "docs/STAGE_1_MASTER_MEMBERSHIP.md",
+          "start_line": 28,
+          "end_line": 38
+        },
+        {
+          "path": "docs/DECISIONS.md",
+          "start_line": 11,
+          "end_line": 20
+        }
+      ]
+    },
+    {
+      "case_id": "Q1",
+      "split": "dev",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_4_EVENTS.md",
+              "line": 13
+            }
+          ],
+          "stage": "returned"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_2_HTTP_MONITOR.md",
+              "line": 72
+            }
+          ],
+          "stage": "rerank_dropped"
+        }
+      ],
+      "recall_at_5": 0.5,
+      "returned": [
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 24,
+          "end_line": 38
+        },
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 5,
+          "end_line": 22
+        },
+        {
+          "path": "docs/DECISIONS.md",
+          "start_line": 100,
+          "end_line": 104
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 39,
+          "end_line": 59
+        },
+        {
+          "path": "docs/upstream/code-review-2026-07-06.md",
+          "start_line": 136,
+          "end_line": 148
+        }
+      ]
+    },
+    {
+      "case_id": "Q2",
+      "split": "dev",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_4_EVENTS.md",
+              "line": 15
+            }
+          ],
+          "stage": "returned"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_4_EVENTS.md",
+              "line": 19
+            }
+          ],
+          "stage": "returned"
+        }
+      ],
+      "recall_at_5": 1.0,
+      "returned": [
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 5,
+          "end_line": 22
+        },
+        {
+          "path": "docs/DECISIONS.md",
+          "start_line": 100,
+          "end_line": 104
+        },
+        {
+          "path": "README.md",
+          "start_line": 1,
+          "end_line": 14
+        },
+        {
+          "path": "docs/STAGE_2_HTTP_MONITOR.md",
+          "start_line": 5,
+          "end_line": 16
+        },
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 73,
+          "end_line": 92
+        }
+      ]
+    },
+    {
+      "case_id": "Q3",
+      "split": "dev",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_4_EVENTS.md",
+              "line": 15
+            }
+          ],
+          "stage": "returned"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_4_EVENTS.md",
+              "line": 40
+            }
+          ],
+          "stage": "rerank_dropped"
+        }
+      ],
+      "recall_at_5": 0.5,
+      "returned": [
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 5,
+          "end_line": 22
+        },
+        {
+          "path": "README.md",
+          "start_line": 1,
+          "end_line": 14
+        },
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 65,
+          "end_line": 72
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 39,
+          "end_line": 59
+        },
+        {
+          "path": "docs/DECISIONS.md",
+          "start_line": 100,
+          "end_line": 104
+        }
+      ]
+    },
+    {
+      "case_id": "E1",
+      "split": "dev",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+              "line": 103
+            }
+          ],
+          "stage": "returned"
+        }
+      ],
+      "recall_at_5": 1.0,
+      "returned": [
+        {
+          "path": "docs/STAGE_1_COMPLETION.md",
+          "start_line": 114,
+          "end_line": 120
+        },
+        {
+          "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+          "start_line": 92,
+          "end_line": 108
+        },
+        {
+          "path": "docs/upstream/PERFORMANCE_TROUBLESHOOTING.md",
+          "start_line": 130,
+          "end_line": 139
+        },
+        {
+          "path": "docs/upstream/PERFORMANCE_TROUBLESHOOTING.md",
+          "start_line": 7,
+          "end_line": 15
+        },
+        {
+          "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+          "start_line": 127,
+          "end_line": 147
+        }
+      ]
+    },
+    {
+      "case_id": "E2",
+      "split": "dev",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+              "line": 90
+            }
+          ],
+          "stage": "returned"
+        }
+      ],
+      "recall_at_5": 1.0,
+      "returned": [
+        {
+          "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+          "start_line": 83,
+          "end_line": 91
+        },
+        {
+          "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+          "start_line": 127,
+          "end_line": 147
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 113,
+          "end_line": 124
+        },
+        {
+          "path": "docs/upstream/CURRENT_STATUS_AND_NEXT_STEPS.md",
+          "start_line": 21,
+          "end_line": 36
+        },
+        {
+          "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+          "start_line": 168,
+          "end_line": 183
+        }
+      ]
+    },
+    {
+      "case_id": "E3",
+      "split": "dev",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+              "line": 94
+            }
+          ],
+          "stage": "returned"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_5_DIAGNOSIS.md",
+              "line": 59
+            }
+          ],
+          "stage": "rerank_dropped"
+        }
+      ],
+      "recall_at_5": 0.5,
+      "returned": [
+        {
+          "path": "docs/STAGE_5_DIAGNOSIS.md",
+          "start_line": 75,
+          "end_line": 88
+        },
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 46,
+          "end_line": 53
+        },
+        {
+          "path": "docs/STAGE_2_HTTP_MONITOR.md",
+          "start_line": 61,
+          "end_line": 84
+        },
+        {
+          "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+          "start_line": 92,
+          "end_line": 108
+        },
+        {
+          "path": "docs/STAGE_0_BASELINE.md",
+          "start_line": 7,
+          "end_line": 23
+        }
+      ]
+    },
+    {
+      "case_id": "N1",
+      "split": "holdout",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_1_COMPLETION.md",
+              "line": 27
+            }
+          ],
+          "stage": "not_in_union40"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_2_HTTP_MONITOR.md",
+              "line": 72
+            }
+          ],
+          "stage": "returned"
+        }
+      ],
+      "recall_at_5": 0.5,
+      "returned": [
+        {
+          "path": "docs/STAGE_2_HTTP_MONITOR.md",
+          "start_line": 61,
+          "end_line": 84
+        },
+        {
+          "path": "docs/upstream/Redis-fork-fd-share-vs-epoll-thundering-herd.md",
+          "start_line": 5,
+          "end_line": 19
+        },
+        {
+          "path": "docs/upstream/SHUTDOWN_VALIDATION.md",
+          "start_line": 5,
+          "end_line": 13
+        },
+        {
+          "path": "docs/STAGE_0_BASELINE.md",
+          "start_line": 7,
+          "end_line": 23
+        },
+        {
+          "path": "docs/upstream/PERFORMANCE_TROUBLESHOOTING.md",
+          "start_line": 65,
+          "end_line": 77
+        }
+      ]
+    },
+    {
+      "case_id": "N2",
+      "split": "holdout",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_4_EVENTS.md",
+              "line": 19
+            }
+          ],
+          "stage": "returned"
+        }
+      ],
+      "recall_at_5": 1.0,
+      "returned": [
+        {
+          "path": "docs/upstream/PERFORMANCE_TROUBLESHOOTING.md",
+          "start_line": 114,
+          "end_line": 129
+        },
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 73,
+          "end_line": 92
+        },
+        {
+          "path": "docs/upstream/PERFORMANCE_TROUBLESHOOTING.md",
+          "start_line": 7,
+          "end_line": 15
+        },
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 5,
+          "end_line": 22
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 113,
+          "end_line": 124
+        }
+      ]
+    },
+    {
+      "case_id": "N3",
+      "split": "holdout",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_5_DIAGNOSIS.md",
+              "line": 57
+            }
+          ],
+          "stage": "not_in_union40"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_1_COMPLETION.md",
+              "line": 20
+            }
+          ],
+          "stage": "not_in_union40"
+        }
+      ],
+      "recall_at_5": 0.0,
+      "returned": [
+        {
+          "path": "docs/upstream/CURRENT_STATUS_AND_NEXT_STEPS.md",
+          "start_line": 12,
+          "end_line": 20
+        },
+        {
+          "path": "docs/STAGE_2_HTTP_MONITOR.md",
+          "start_line": 107,
+          "end_line": 120
+        },
+        {
+          "path": "docs/upstream/Redis-fork-fd-share-vs-epoll-thundering-herd.md",
+          "start_line": 39,
+          "end_line": 60
+        },
+        {
+          "path": "docs/upstream/Redis-fork-fd-share-vs-epoll-thundering-herd.md",
+          "start_line": 5,
+          "end_line": 19
+        },
+        {
+          "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+          "start_line": 5,
+          "end_line": 18
+        }
+      ]
+    },
+    {
+      "case_id": "P1",
+      "split": "holdout",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_2_HTTP_MONITOR.md",
+              "line": 72
+            }
+          ],
+          "stage": "returned"
+        }
+      ],
+      "recall_at_5": 1.0,
+      "returned": [
+        {
+          "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+          "start_line": 145,
+          "end_line": 147
+        },
+        {
+          "path": "docs/upstream/PERFORMANCE_VALIDATION.md",
+          "start_line": 5,
+          "end_line": 18
+        },
+        {
+          "path": "docs/STAGE_2_HTTP_MONITOR.md",
+          "start_line": 61,
+          "end_line": 84
+        },
+        {
+          "path": "docs/upstream/EPOLL_SERVER_LearningNotes.md",
+          "start_line": 116,
+          "end_line": 139
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 24,
+          "end_line": 38
+        }
+      ]
+    },
+    {
+      "case_id": "P2",
+      "split": "holdout",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_2_HTTP_MONITOR.md",
+              "line": 72
+            }
+          ],
+          "stage": "not_in_union40"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_1_COMPLETION.md",
+              "line": 27
+            }
+          ],
+          "stage": "not_in_union40"
+        }
+      ],
+      "recall_at_5": 0.0,
+      "returned": [
+        {
+          "path": "docs/upstream/EPOLL_SERVER_LearningNotes.md",
+          "start_line": 402,
+          "end_line": 405
+        },
+        {
+          "path": "docs/STAGE_1_WORKER_SNAPSHOT.md",
+          "start_line": 20,
+          "end_line": 39
+        },
+        {
+          "path": "docs/upstream/Redis-fork-fd-share-vs-epoll-thundering-herd.md",
+          "start_line": 5,
+          "end_line": 19
+        },
+        {
+          "path": "docs/upstream/EPOLL_SERVER_LearningNotes.md",
+          "start_line": 134,
+          "end_line": 157
+        },
+        {
+          "path": "docs/upstream/code-review-2026-07-06.md",
+          "start_line": 136,
+          "end_line": 148
+        }
+      ]
+    },
+    {
+      "case_id": "P3",
+      "split": "holdout",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_5_DIAGNOSIS.md",
+              "line": 59
+            }
+          ],
+          "stage": "not_in_union40"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_2_HTTP_MONITOR.md",
+              "line": 72
+            }
+          ],
+          "stage": "not_in_union40"
+        }
+      ],
+      "recall_at_5": 0.0,
+      "returned": [
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 24,
+          "end_line": 38
+        },
+        {
+          "path": "docs/upstream/PERFORMANCE_TROUBLESHOOTING.md",
+          "start_line": 7,
+          "end_line": 15
+        },
+        {
+          "path": "docs/upstream/EPOLL_SERVER_LearningNotes.md",
+          "start_line": 546,
+          "end_line": 569
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 57,
+          "end_line": 59
+        },
+        {
+          "path": "docs/upstream/code-review-2026-07-06.md",
+          "start_line": 136,
+          "end_line": 148
+        }
+      ]
+    },
+    {
+      "case_id": "D1",
+      "split": "holdout",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_2_HTTP_MONITOR.md",
+              "line": 72
+            }
+          ],
+          "stage": "rerank_dropped"
+        }
+      ],
+      "recall_at_5": 0.0,
+      "returned": [
+        {
+          "path": "docs/upstream/code-review-2026-07-06.md",
+          "start_line": 136,
+          "end_line": 148
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 24,
+          "end_line": 38
+        },
+        {
+          "path": "docs/upstream/SHUTDOWN_VALIDATION.md",
+          "start_line": 5,
+          "end_line": 13
+        },
+        {
+          "path": "docs/upstream/PERFORMANCE_TROUBLESHOOTING.md",
+          "start_line": 16,
+          "end_line": 28
+        },
+        {
+          "path": "docs/upstream/Redis-Cache-Aside-issues-and-solutions.md",
+          "start_line": 9,
+          "end_line": 32
+        }
+      ]
+    },
+    {
+      "case_id": "D2",
+      "split": "holdout",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_5_DIAGNOSIS.md",
+              "line": 59
+            }
+          ],
+          "stage": "fusion_dropped"
+        }
+      ],
+      "recall_at_5": 0.0,
+      "returned": [
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 24,
+          "end_line": 38
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 135,
+          "end_line": 154
+        },
+        {
+          "path": "docs/STAGE_5_DIAGNOSIS.md",
+          "start_line": 99,
+          "end_line": 104
+        },
+        {
+          "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+          "start_line": 109,
+          "end_line": 132
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 69,
+          "end_line": 81
+        }
+      ]
+    },
+    {
+      "case_id": "D3",
+      "split": "holdout",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_2_HTTP_MONITOR.md",
+              "line": 72
+            }
+          ],
+          "stage": "fusion_dropped"
+        }
+      ],
+      "recall_at_5": 0.0,
+      "returned": [
+        {
+          "path": "docs/upstream/EPOLL_SERVER_LearningNotes.md",
+          "start_line": 618,
+          "end_line": 626
+        },
+        {
+          "path": "docs/upstream/PERFORMANCE_TROUBLESHOOTING.md",
+          "start_line": 1,
+          "end_line": 4
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 24,
+          "end_line": 38
+        },
+        {
+          "path": "docs/DECISIONS.md",
+          "start_line": 64,
+          "end_line": 73
+        },
+        {
+          "path": "docs/upstream/EPOLL_SERVER_LearningNotes.md",
+          "start_line": 600,
+          "end_line": 623
+        }
+      ]
+    },
+    {
+      "case_id": "R1",
+      "split": "holdout",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_2_HTTP_MONITOR.md",
+              "line": 72
+            }
+          ],
+          "stage": "not_in_union40"
+        }
+      ],
+      "recall_at_5": 0.0,
+      "returned": [
+        {
+          "path": "docs/upstream/Redis-Cache-Aside-issues-and-solutions.md",
+          "start_line": 293,
+          "end_line": 308
+        },
+        {
+          "path": "docs/upstream/Redis-Cache-Aside-issues-and-solutions.md",
+          "start_line": 9,
+          "end_line": 32
+        },
+        {
+          "path": "docs/upstream/Redis-Cache-Aside-issues-and-solutions.md",
+          "start_line": 165,
+          "end_line": 172
+        },
+        {
+          "path": "docs/upstream/Redis-Cache-Aside-issues-and-solutions.md",
+          "start_line": 75,
+          "end_line": 98
+        },
+        {
+          "path": "docs/upstream/Redis-Cache-Aside-issues-and-solutions.md",
+          "start_line": 309,
+          "end_line": 320
+        }
+      ]
+    },
+    {
+      "case_id": "R2",
+      "split": "holdout",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_5_DIAGNOSIS.md",
+              "line": 61
+            }
+          ],
+          "stage": "rerank_dropped"
+        }
+      ],
+      "recall_at_5": 0.0,
+      "returned": [
+        {
+          "path": "docs/upstream/code-review-2026-07-06.md",
+          "start_line": 182,
+          "end_line": 190
+        },
+        {
+          "path": "docs/upstream/CURRENT_STATUS_AND_NEXT_STEPS.md",
+          "start_line": 62,
+          "end_line": 69
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 24,
+          "end_line": 38
+        },
+        {
+          "path": "docs/DEVELOPMENT_ISSUES.md",
+          "start_line": 135,
+          "end_line": 154
+        },
+        {
+          "path": "docs/upstream/code-review-2026-07-06.md",
+          "start_line": 15,
+          "end_line": 31
+        }
+      ]
+    },
+    {
+      "case_id": "R3",
+      "split": "holdout",
+      "groups": [
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+              "line": 103
+            }
+          ],
+          "stage": "not_in_union40"
+        },
+        {
+          "anchors": [
+            {
+              "path": "docs/STAGE_2_HTTP_MONITOR.md",
+              "line": 72
+            }
+          ],
+          "stage": "not_in_union40"
+        }
+      ],
+      "recall_at_5": 0.0,
+      "returned": [
+        {
+          "path": "docs/upstream/PERFORMANCE_TROUBLESHOOTING.md",
+          "start_line": 103,
+          "end_line": 113
+        },
+        {
+          "path": "docs/upstream/code-review-2026-07-06.md",
+          "start_line": 84,
+          "end_line": 104
+        },
+        {
+          "path": "docs/upstream/PERFORMANCE_VALIDATION.md",
+          "start_line": 34,
+          "end_line": 50
+        },
+        {
+          "path": "docs/upstream/CURRENT_STATUS_AND_NEXT_STEPS.md",
+          "start_line": 21,
+          "end_line": 36
+        },
+        {
+          "path": "docs/upstream/OPTIMIZATION_AND_AGENT_ROADMAP.md",
+          "start_line": 54,
+          "end_line": 61
+        }
+      ]
+    }
+  ]
+}

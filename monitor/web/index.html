@@ -65,7 +65,7 @@
       </article>
     </section>
     <section id="diagnoses" class="page" hidden aria-labelledby="diagnoses-heading">
-      <article class="panel"><div class="panel-title"><div><h2 id="diagnoses-heading">有证据的 AI 诊断</h2><p>结合当前观测、历史实验与技术文档分析，建议步骤需人工验证。</p></div><span class="subtle">READ ONLY</span></div>
+      <article class="panel"><div class="panel-title"><div><h2 id="diagnoses-heading">有证据的 AI 诊断</h2><p>按问题需要查询技术资料、当前观测或历史实验，展示依据与未知。</p></div><span class="subtle">READ ONLY</span></div>
         <form id="diagnosis-form"><label for="diagnosis-question">故障或问题描述</label><textarea id="diagnosis-question" rows="3" maxlength="1000" required placeholder="例如：Worker 指标过期，应该检查哪些证据？"></textarea><button id="diagnosis-submit" class="primary" type="submit">提交诊断</button></form>
         <p id="diagnosis-notice" role="status" aria-live="polite">连接后可提交诊断。任务异步执行，结果保留 7 天。</p>
         <div class="table-wrap" tabindex="0" role="region" aria-label="诊断任务表，可横向滚动"><table><thead><tr><th>问题 / 提交时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="diagnosis-rows"></tbody></table></div>

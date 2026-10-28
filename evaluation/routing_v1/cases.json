@@ -1,0 +1,86 @@
+[
+  {
+    "id": "K1",
+    "question": "请解释epoll的就绪通知原理，不检查当前实例。",
+    "expected_intent": "knowledge",
+    "fixture": "complete",
+    "full_replay": true
+  },
+  {
+    "id": "K2",
+    "question": "本项目的null指标与0有什么区别？",
+    "expected_intent": "knowledge",
+    "fixture": "complete",
+    "full_replay": false
+  },
+  {
+    "id": "K3",
+    "question": "旧压测结果缺少均值时应该怎样导入？",
+    "expected_intent": "knowledge",
+    "fixture": "experiments",
+    "full_replay": false
+  },
+  {
+    "id": "R1",
+    "question": "当前Worker指标过期了，请核对它的采样状态。",
+    "expected_intent": "runtime",
+    "fixture": "stale",
+    "full_replay": false
+  },
+  {
+    "id": "R2",
+    "question": "请读取配置的服务日志，判断mysql error=2006能否证明当前数据库已断开。",
+    "expected_intent": "runtime",
+    "fixture": "old_log",
+    "full_replay": true
+  },
+  {
+    "id": "E1",
+    "question": "比较基准00000000-0000-0000-0000-000000000021与候选00000000-0000-0000-0000-000000000022，能证明优化有效吗？",
+    "expected_intent": "experiments",
+    "fixture": "experiments",
+    "full_replay": true
+  },
+  {
+    "id": "E2",
+    "question": "请列出最近保存的历史实验。",
+    "expected_intent": "experiments",
+    "fixture": "experiments",
+    "full_replay": false
+  },
+  {
+    "id": "O1",
+    "question": "我的订单想退款，怎么联系商家客服？",
+    "expected_intent": "out_of_scope",
+    "fixture": "complete",
+    "full_replay": true
+  },
+  {
+    "id": "O2",
+    "question": "你好！",
+    "expected_intent": "out_of_scope",
+    "fixture": "complete",
+    "full_replay": false
+  },
+  {
+    "id": "C1",
+    "question": "帮我看看这个。",
+    "expected_intent": "clarify",
+    "fixture": "complete",
+    "full_replay": true
+  },
+  {
+    "id": "C2",
+    "question": "帮我比较一下这两次实验，暂时没有实验标识。",
+    "expected_intent": "clarify",
+    "fixture": "experiments",
+    "full_replay": false
+  },
+  {
+    "id": "K4",
+    "question": "背景里曾提到Worker超时。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。这里重复背景说明。最后强调：仅解释采集过期与缺失值null的概念，不读取本机当前状态。",
+    "expected_intent": "knowledge",
+    "fixture": "complete",
+    "full_replay": false
+  }
+]

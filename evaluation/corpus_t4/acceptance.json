@@ -1,0 +1,413 @@
+{
+  "scope": "T4 development acceptance; not independent diagnosis quality evaluation",
+  "local": {
+    "scope": "T4 development retrieval check; not diagnosis accuracy or independent holdout",
+    "cases": 8,
+    "mode": "bm25",
+    "by_selection": {
+      "unfiltered": {
+        "hit_at_5": 7,
+        "ineligible_returned": 8
+      },
+      "layered": {
+        "hit_at_5": 8,
+        "ineligible_returned": 0
+      }
+    },
+    "regressed_cases": [],
+    "api_calls": 0
+  },
+  "remote": {
+    "scope": "T4 development retrieval check; not diagnosis accuracy or independent holdout",
+    "cases": 8,
+    "mode": "hybrid_rerank",
+    "by_selection": {
+      "unfiltered": {
+        "hit_at_5": 8,
+        "ineligible_returned": 7
+      },
+      "layered": {
+        "hit_at_5": 8,
+        "ineligible_returned": 0
+      }
+    },
+    "regressed_cases": [],
+    "api_calls": 22
+  },
+  "index": {
+    "sha256": "807d33989e9775851d6b7f760c7039a6bbb1b0cf827d5120c511aee4f1fa2fef",
+    "chunks": 294,
+    "reused_vectors": 272,
+    "new_vectors": 22
+  },
+  "frozen_v1_sha256": "f3130e610111d384158307cef21abc4dcbfff2ed88798527b1d729eb188658c7",
+  "manifests": {
+    "local": {
+      "started_at": "2026-10-26T17:18:38.610799+00:00",
+      "scope": "T4 development retrieval check; not diagnosis accuracy or independent holdout",
+      "mode": "bm25",
+      "index_sha256": "807d33989e9775851d6b7f760c7039a6bbb1b0cf827d5120c511aee4f1fa2fef",
+      "policy_sha256": "f24a8a61ca5cf2780f16baa75f6468b6adef963db8faca4922dc3c2af989c704",
+      "cases_sha256": "7fb0cddd7bf0c657454597b2161730dd9d3ebc9ca5bd6ecc71234834b8a35a39",
+      "files": {
+        "diagnosis/audit_corpus.py": "491f2d093c8f006b9aff7fe424efece221183239473dc09c48ea4ed52f1f9673",
+        "diagnosis/corpus.py": "915492aed14c47dcb80d0295c9571f823174e32910b70b95143da55f2dbb5ddd",
+        "diagnosis/retrieval.py": "d1b8e249cab2d7d7efbdacf76bc1974690c63d11664f9fc428334a46b640dbab",
+        "diagnosis/evaluate.py": "70d0cebfc20530a029c03f073916ca95f56a81766c642ff0be59cca0315dec43",
+        "diagnosis/providers.py": "0f51f3542c29853ea532fb4031115c5ed1a2ce428e1d692f69f326f1ad419c27"
+      },
+      "models": {
+        "EMBEDDING_MODEL": "Qwen/Qwen3-Embedding-8B",
+        "RERANK_MODEL": "Qwen/Qwen3-Reranker-8B"
+      },
+      "comparison": "same corpus/vectors/query; only eligibility differs; query API cache shared"
+    },
+    "remote": {
+      "started_at": "2026-10-26T17:19:35.289318+00:00",
+      "scope": "T4 development retrieval check; not diagnosis accuracy or independent holdout",
+      "mode": "hybrid_rerank",
+      "index_sha256": "807d33989e9775851d6b7f760c7039a6bbb1b0cf827d5120c511aee4f1fa2fef",
+      "policy_sha256": "f24a8a61ca5cf2780f16baa75f6468b6adef963db8faca4922dc3c2af989c704",
+      "cases_sha256": "7fb0cddd7bf0c657454597b2161730dd9d3ebc9ca5bd6ecc71234834b8a35a39",
+      "files": {
+        "diagnosis/audit_corpus.py": "491f2d093c8f006b9aff7fe424efece221183239473dc09c48ea4ed52f1f9673",
+        "diagnosis/corpus.py": "915492aed14c47dcb80d0295c9571f823174e32910b70b95143da55f2dbb5ddd",
+        "diagnosis/retrieval.py": "d1b8e249cab2d7d7efbdacf76bc1974690c63d11664f9fc428334a46b640dbab",
+        "diagnosis/evaluate.py": "70d0cebfc20530a029c03f073916ca95f56a81766c642ff0be59cca0315dec43",
+        "diagnosis/providers.py": "0f51f3542c29853ea532fb4031115c5ed1a2ce428e1d692f69f326f1ad419c27"
+      },
+      "models": {
+        "EMBEDDING_MODEL": "Qwen/Qwen3-Embedding-8B",
+        "RERANK_MODEL": "Qwen/Qwen3-Reranker-8B"
+      },
+      "comparison": "same corpus/vectors/query; only eligibility differs; query API cache shared"
+    }
+  },
+  "case_results": [
+    {
+      "id": "C1",
+      "selection": "unfiltered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": false,
+      "ineligible_returned": 3,
+      "eligible_chunks": 294,
+      "mode": "local"
+    },
+    {
+      "id": "C1",
+      "selection": "layered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 233,
+      "mode": "local"
+    },
+    {
+      "id": "C2",
+      "selection": "unfiltered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 2,
+      "eligible_chunks": 294,
+      "mode": "local"
+    },
+    {
+      "id": "C2",
+      "selection": "layered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 233,
+      "mode": "local"
+    },
+    {
+      "id": "C3",
+      "selection": "unfiltered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 1,
+      "eligible_chunks": 294,
+      "mode": "local"
+    },
+    {
+      "id": "C3",
+      "selection": "layered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 233,
+      "mode": "local"
+    },
+    {
+      "id": "C4",
+      "selection": "unfiltered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 1,
+      "eligible_chunks": 294,
+      "mode": "local"
+    },
+    {
+      "id": "C4",
+      "selection": "layered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 233,
+      "mode": "local"
+    },
+    {
+      "id": "H1",
+      "selection": "unfiltered",
+      "purpose": "history",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 294,
+      "mode": "local"
+    },
+    {
+      "id": "H1",
+      "selection": "layered",
+      "purpose": "history",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 294,
+      "mode": "local"
+    },
+    {
+      "id": "H2",
+      "selection": "unfiltered",
+      "purpose": "history",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 294,
+      "mode": "local"
+    },
+    {
+      "id": "H2",
+      "selection": "layered",
+      "purpose": "history",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 294,
+      "mode": "local"
+    },
+    {
+      "id": "T1",
+      "selection": "unfiltered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 1,
+      "eligible_chunks": 294,
+      "mode": "local"
+    },
+    {
+      "id": "T1",
+      "selection": "layered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 233,
+      "mode": "local"
+    },
+    {
+      "id": "T2",
+      "selection": "unfiltered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 294,
+      "mode": "local"
+    },
+    {
+      "id": "T2",
+      "selection": "layered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 233,
+      "mode": "local"
+    },
+    {
+      "id": "C1",
+      "selection": "unfiltered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 3,
+      "eligible_chunks": 294,
+      "mode": "remote"
+    },
+    {
+      "id": "C1",
+      "selection": "layered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 233,
+      "mode": "remote"
+    },
+    {
+      "id": "C2",
+      "selection": "unfiltered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 1,
+      "eligible_chunks": 294,
+      "mode": "remote"
+    },
+    {
+      "id": "C2",
+      "selection": "layered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 233,
+      "mode": "remote"
+    },
+    {
+      "id": "C3",
+      "selection": "unfiltered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 2,
+      "eligible_chunks": 294,
+      "mode": "remote"
+    },
+    {
+      "id": "C3",
+      "selection": "layered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 233,
+      "mode": "remote"
+    },
+    {
+      "id": "C4",
+      "selection": "unfiltered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 1,
+      "eligible_chunks": 294,
+      "mode": "remote"
+    },
+    {
+      "id": "C4",
+      "selection": "layered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 233,
+      "mode": "remote"
+    },
+    {
+      "id": "H1",
+      "selection": "unfiltered",
+      "purpose": "history",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 294,
+      "mode": "remote"
+    },
+    {
+      "id": "H1",
+      "selection": "layered",
+      "purpose": "history",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 294,
+      "mode": "remote"
+    },
+    {
+      "id": "H2",
+      "selection": "unfiltered",
+      "purpose": "history",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 294,
+      "mode": "remote"
+    },
+    {
+      "id": "H2",
+      "selection": "layered",
+      "purpose": "history",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 294,
+      "mode": "remote"
+    },
+    {
+      "id": "T1",
+      "selection": "unfiltered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 294,
+      "mode": "remote"
+    },
+    {
+      "id": "T1",
+      "selection": "layered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 233,
+      "mode": "remote"
+    },
+    {
+      "id": "T2",
+      "selection": "unfiltered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 294,
+      "mode": "remote"
+    },
+    {
+      "id": "T2",
+      "selection": "layered",
+      "purpose": "default",
+      "status": "ok",
+      "hit_at_5": true,
+      "ineligible_returned": 0,
+      "eligible_chunks": 233,
+      "mode": "remote"
+    }
+  ],
+  "evidence_files": {
+    "unit-tests-final.log": "b7a324f659ff091d7f3db3e48cc4801fca18aea02d8649877740feef885f4638",
+    "local/results.jsonl": "f91a14a177294b89a05e4c263186ee5240209f9fd1bff81920f29a103ceb2051",
+    "remote/results.jsonl": "544ebb417ee28c14c6cde290efb8696cfb675a829f490bb7ac0d219a8dd63742"
+  }
+}

@@ -1,0 +1,468 @@
+{
+  "scope": "T11/T12 engineering delivery and bounded validation; not broad diagnosis accuracy or deployment acceptance",
+  "completed_on": "2026-10-28",
+  "reviewer": "project assistant source/fixture-based review; no external human expert or blind review",
+  "iteration_ledger": [
+    {
+      "run": "smoke",
+      "manifest_sha256": "c8c8a475a45a477cc07239411c12d10898029477ad11593dcd2417ab37d37750",
+      "results_sha256": "2a18b6e03d3aa6ad933ae7f3c0a51eb6c818bf76d6b9a87801b3d415e4a43f20",
+      "summary": {
+        "attempts": 1,
+        "ok": 1,
+        "errors": 0,
+        "route_matches": 1,
+        "semantic_review": "pending_manual_review",
+        "actual_api_calls": 5
+      }
+    },
+    {
+      "run": "dev",
+      "manifest_sha256": "a2685b2051eed55583504ff5b1eee8b3691d4e60144158cd31509cfd3f5271c3",
+      "results_sha256": "bb483c587ecb7f70fa81eba492b6d60ea7a9fce4d8f3dd4c8d792baeff3c02bf",
+      "summary": {
+        "attempts": 10,
+        "ok": 4,
+        "errors": 6,
+        "route_matches": 3,
+        "semantic_review": "pending_manual_review",
+        "actual_api_calls": 55
+      }
+    },
+    {
+      "run": "dev-v2",
+      "manifest_sha256": "f021778c8df401ae7a1641c272a4ddb78451c8e3dd5e0d6018188e4db9e78294",
+      "results_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "interrupted_before_first_complete_record",
+      "actual_call_count": null
+    },
+    {
+      "run": "dev-v2-resumed",
+      "manifest_sha256": "19c32884c3a944aba3d09647276dc78943aefdd8ac830e0ceb6580962047b58f",
+      "results_sha256": "a55f2c975584bbf4b28f1ea45b671444fc42b759dec93f9cd4497f621f4fdd3f",
+      "summary": {
+        "attempts": 10,
+        "ok": 7,
+        "errors": 3,
+        "route_matches": 7,
+        "semantic_review": "pending_manual_review",
+        "actual_api_calls": 50
+      }
+    },
+    {
+      "run": "dev-v3",
+      "manifest_sha256": "fdf2c81a23d0b5203cd1bbacb1ff4cf5cf5735ba135deae4ffe121f811c5756c",
+      "results_sha256": "7eac4f15a19513610412279cb52cedb9c36b951560642bd04238356dbbbac90a",
+      "summary": {
+        "attempts": 10,
+        "ok": 8,
+        "errors": 2,
+        "route_matches": 8,
+        "semantic_review": "pending_manual_review",
+        "actual_api_calls": 51
+      }
+    },
+    {
+      "run": "holdout",
+      "manifest_sha256": "a653290c4b2ccb1eb778e8a654f53b6e77cacd20338f8dc69190bec2c8de126f",
+      "results_sha256": "68ca85ab8575f85ad8cc1fbbfbad90c14f0902e2b444a49c0c2152a05990d741",
+      "summary": {
+        "attempts": 8,
+        "ok": 6,
+        "errors": 2,
+        "route_matches": 6,
+        "semantic_review": "pending_manual_review",
+        "actual_api_calls": 38
+      }
+    },
+    {
+      "run": "knowledge-control",
+      "manifest_sha256": "6ceee5febb4db3dc34892a09ab5c0e6526d5caf0d2095dc8de71cf4959260c67",
+      "results_sha256": "fe6116e42dabb2133d750062d7fd56cdce5fabe4a4951ca1534e114e2589f4bb",
+      "summary": {
+        "attempts": 1,
+        "ok": 1,
+        "errors": 0,
+        "route_matches": 1,
+        "semantic_review": "pending_manual_review",
+        "actual_api_calls": 5
+      }
+    }
+  ],
+  "semantic_reviews": {
+    "dev-v3": {
+      "review_sha256": "1c6f7376e278847ab9d6dd42d896a37e46debeba354f0e276d0f0d719377b3a1",
+      "summary": {
+        "scope": "T11/T12 source-based development/holdout review; no formal accuracy claim",
+        "reviewer": "project_assistant_source_and_fixture_review; not external human expert or blind review",
+        "by_strategy": {
+          "fixed": {
+            "attempts": 4,
+            "delivered": 3,
+            "rejected": 1,
+            "semantic_outcomes": {
+              "pass": 2,
+              "fail": 1
+            },
+            "all_attempt_seconds_median": 35.897949999999994,
+            "executed_tool_calls": 27,
+            "services": {
+              "DEEPSEEK": {
+                "calls": 18,
+                "missing_usage": 0,
+                "available_usage_sums": {
+                  "prompt_tokens": 76489,
+                  "completion_tokens": 6838,
+                  "input_tokens": 118547,
+                  "output_tokens": 14057,
+                  "total_tokens": 215931
+                }
+              },
+              "EMBEDDING": {
+                "calls": 6,
+                "missing_usage": 0,
+                "available_usage_sums": {
+                  "prompt_tokens": 156,
+                  "completion_tokens": 0,
+                  "total_tokens": 156
+                }
+              },
+              "RERANK": {
+                "calls": 6,
+                "missing_usage": 6,
+                "available_usage_sums": {}
+              }
+            }
+          },
+          "targeted": {
+            "attempts": 6,
+            "delivered": 5,
+            "rejected": 1,
+            "semantic_outcomes": {
+              "partial": 2,
+              "pass": 3
+            },
+            "all_attempt_seconds_median": 18.081699999999998,
+            "executed_tool_calls": 7,
+            "services": {
+              "DEEPSEEK": {
+                "calls": 19,
+                "missing_usage": 0,
+                "available_usage_sums": {
+                  "prompt_tokens": 27493,
+                  "completion_tokens": 6107,
+                  "input_tokens": 56819,
+                  "output_tokens": 12306,
+                  "total_tokens": 102725
+                }
+              },
+              "EMBEDDING": {
+                "calls": 1,
+                "missing_usage": 0,
+                "available_usage_sums": {
+                  "prompt_tokens": 19,
+                  "completion_tokens": 0,
+                  "total_tokens": 19
+                }
+              },
+              "RERANK": {
+                "calls": 1,
+                "missing_usage": 1,
+                "available_usage_sums": {}
+              }
+            }
+          }
+        },
+        "paired_cases": [
+          "C1",
+          "D1",
+          "D2",
+          "D3"
+        ],
+        "paired": {
+          "targeted": {
+            "cases": 4,
+            "delivered": 4,
+            "executed_tool_calls": 6,
+            "actual_api_calls": 15,
+            "available_deepseek_total_tokens": 86983,
+            "all_attempt_seconds_median": 22.83905
+          },
+          "fixed": {
+            "cases": 4,
+            "delivered": 3,
+            "executed_tool_calls": 27,
+            "actual_api_calls": 30,
+            "available_deepseek_total_tokens": 215931,
+            "all_attempt_seconds_median": 35.897949999999994
+          }
+        },
+        "failed_attempts": [
+          {
+            "id": "D3",
+            "strategy": "fixed",
+            "error": "report_support_invalid"
+          },
+          {
+            "id": "C2",
+            "strategy": "targeted",
+            "error": "report_support_invalid"
+          }
+        ],
+        "warning": "semantic labels are source-based reviewer judgments, not automatic truth; failed attempts stay outside semantic denominators"
+      }
+    },
+    "holdout": {
+      "review_sha256": "0b0b6d495dc16f144164fa711ea803f0e1406c350c7856fbaf3d2b0d0267f3f3",
+      "summary": {
+        "scope": "T11/T12 source-based development/holdout review; no formal accuracy claim",
+        "reviewer": "project_assistant_source_and_fixture_review; not external human expert or blind review",
+        "by_strategy": {
+          "fixed": {
+            "attempts": 2,
+            "delivered": 2,
+            "rejected": 0,
+            "semantic_outcomes": {
+              "partial": 2
+            },
+            "all_attempt_seconds_median": 24.881500000000003,
+            "executed_tool_calls": 12,
+            "services": {
+              "DEEPSEEK": {
+                "calls": 8,
+                "missing_usage": 0,
+                "available_usage_sums": {
+                  "prompt_tokens": 35645,
+                  "completion_tokens": 3996,
+                  "input_tokens": 43346,
+                  "output_tokens": 5940,
+                  "total_tokens": 88927
+                }
+              },
+              "EMBEDDING": {
+                "calls": 2,
+                "missing_usage": 0,
+                "available_usage_sums": {
+                  "prompt_tokens": 52,
+                  "completion_tokens": 0,
+                  "total_tokens": 52
+                }
+              },
+              "RERANK": {
+                "calls": 2,
+                "missing_usage": 2,
+                "available_usage_sums": {}
+              }
+            }
+          },
+          "targeted": {
+            "attempts": 6,
+            "delivered": 4,
+            "rejected": 2,
+            "semantic_outcomes": {
+              "partial": 2,
+              "pass": 2
+            },
+            "all_attempt_seconds_median": 19.35945,
+            "executed_tool_calls": 10,
+            "services": {
+              "DEEPSEEK": {
+                "calls": 24,
+                "missing_usage": 0,
+                "available_usage_sums": {
+                  "prompt_tokens": 43832,
+                  "completion_tokens": 8479,
+                  "input_tokens": 78819,
+                  "output_tokens": 16517,
+                  "total_tokens": 147647
+                }
+              },
+              "EMBEDDING": {
+                "calls": 1,
+                "missing_usage": 0,
+                "available_usage_sums": {
+                  "prompt_tokens": 22,
+                  "completion_tokens": 0,
+                  "total_tokens": 22
+                }
+              },
+              "RERANK": {
+                "calls": 1,
+                "missing_usage": 1,
+                "available_usage_sums": {}
+              }
+            }
+          }
+        },
+        "paired_cases": [
+          "H1",
+          "H5"
+        ],
+        "paired": {
+          "targeted": {
+            "cases": 2,
+            "delivered": 2,
+            "executed_tool_calls": 5,
+            "actual_api_calls": 9,
+            "available_deepseek_total_tokens": 59752,
+            "all_attempt_seconds_median": 23.32945
+          },
+          "fixed": {
+            "cases": 2,
+            "delivered": 2,
+            "executed_tool_calls": 12,
+            "actual_api_calls": 12,
+            "available_deepseek_total_tokens": 88927,
+            "all_attempt_seconds_median": 24.881500000000003
+          }
+        },
+        "failed_attempts": [
+          {
+            "id": "H4",
+            "strategy": "targeted",
+            "error": "report_support_invalid"
+          },
+          {
+            "id": "H6",
+            "strategy": "targeted",
+            "error": "ValidationError"
+          }
+        ],
+        "warning": "semantic labels are source-based reviewer judgments, not automatic truth; failed attempts stay outside semantic denominators"
+      }
+    },
+    "knowledge-control": {
+      "review_sha256": "42742b20c4c997aae9b3c8aa17ded5de291ca628427264242ba7a7f154d20cc8",
+      "summary": {
+        "scope": "T11/T12 source-based development/holdout review; no formal accuracy claim",
+        "reviewer": "project_assistant_source_and_fixture_review; not external human expert or blind review",
+        "by_strategy": {
+          "targeted": {
+            "attempts": 1,
+            "delivered": 1,
+            "rejected": 0,
+            "semantic_outcomes": {
+              "pass": 1
+            },
+            "all_attempt_seconds_median": 14.9423,
+            "executed_tool_calls": 1,
+            "services": {
+              "DEEPSEEK": {
+                "calls": 3,
+                "missing_usage": 0,
+                "available_usage_sums": {
+                  "input_tokens": 13055,
+                  "output_tokens": 2050,
+                  "total_tokens": 15105
+                }
+              },
+              "EMBEDDING": {
+                "calls": 1,
+                "missing_usage": 0,
+                "available_usage_sums": {
+                  "prompt_tokens": 19,
+                  "completion_tokens": 0,
+                  "total_tokens": 19
+                }
+              },
+              "RERANK": {
+                "calls": 1,
+                "missing_usage": 1,
+                "available_usage_sums": {}
+              }
+            }
+          }
+        },
+        "paired_cases": [],
+        "paired": {},
+        "failed_attempts": [],
+        "warning": "semantic labels are source-based reviewer judgments, not automatic truth; failed attempts stay outside semantic denominators"
+      }
+    }
+  },
+  "delivered_review_outcomes": {
+    "partial": 6,
+    "pass": 8,
+    "fail": 1
+  },
+  "current_index": {
+    "path": "artifacts/diagnosis/index.npz",
+    "sha256": "7ec14185a71955a72f809169cdcb5d86f1d4a93c65fb42f1c021c28ffc25b030",
+    "sources": 25,
+    "chunks": 308,
+    "new_vectors": 9,
+    "reused_vectors": 299
+  },
+  "measured_index": {
+    "path": "artifacts/evidence-t11-t12/before-index.npz",
+    "sha256": "91af1bd8050d2f330894b1152caa33e639df551ded3e7d53103c642156cd4fb8",
+    "chunks": 305
+  },
+  "release_code_sha256": {
+    "diagnosis/agent.py": "15a1765c5303388b8bd1fb0ad0c57c65770bb1a399ecbab2e53b65f7276ed98f",
+    "diagnosis/config.py": "e055d21e6b5a92d428f4b5c8bde92d3a6a591a4382974ab429392660aaeb9bd5",
+    "diagnosis/routing.py": "00e99f2f3750478d76b7505cee7bada7622e0eae62f67e6989dde2fb9367e68d",
+    "diagnosis/providers.py": "97b8f6208a89be8eabd45b5b98d65687d21ca96fd4fcdc339a16c1985e37347b",
+    "diagnosis/retrieval.py": "32cbe4e957ad5f3221c6fa6b4f3d0437f870900bdd0a4b133afd285d6ecc61db",
+    "diagnosis/selection.py": "bcb7dcc525b48085b8fe2e3e64a9eea9a4e947ae88268f588d89695a913a6c4c",
+    "diagnosis/observation_contracts.json": "ba961f46bade33d2544cd441cfdf55c1427a2948f2b55f2a40538aa5adfabc26",
+    "diagnosis/evidence.py": "e71488a2dbfc4e31dc48843038f841f95a95936e2eab406451dde9225ee02bc3",
+    "diagnosis/review_evidence.py": "9254c94a70261c2602f78ba3cb6fc1aa46e3b1d92fafd69a08a38c74edd3b700",
+    "diagnosis/evaluate_evidence.py": "3d4229fdef7fe0202c300fbb46b457dc39b51fd426fdf7e6e555526336bc6ef8",
+    "diagnosis/service.py": "8cae05730bb7737bed5f6e127e88eaf1b8147c26d4ae509d5b87e4cdb4841bc7",
+    "diagnosis/corpus_policy.json": "2e69ed39f5c87848cc543f0bc2cb15d67c90842c336b34ff13449d21ca46eef6",
+    "monitor/web/app.js": "ae1bd548d5d7df37695a010d3c934511e74144d6bede993f63f779a982ec79e4",
+    "monitor/build/epoll-monitor": "6cce986e9ec19f2645ae0455a5825ce75a451854223b3e086babf13b8fcebcec",
+    "testscript/test_stage5_live.py": "b298b117acf253dec53ffc03e827260d463564ef985e328666de1875ec71f544"
+  },
+  "integration": {
+    "database_lifecycle": {
+      "path": "artifacts/stage3-live-lpktdfoz",
+      "evidence_hashes": {},
+      "new_model_generation": false
+    },
+    "real_routing_and_401": {
+      "path": "artifacts/stage5-live-uia7bqxg",
+      "evidence_hashes": {
+        "routing-reports.json": "1bf5653906d4031ea831d9a918b2c3974a9c6a435968bd7e7721f9ba35f6b6bd",
+        "rejected-report.json": "020a8976595e4f4d6a2e9fc5dda00df23ad3d17eabc9b278cc49fa61b1dac414",
+        "manifest.json": "f60142b1f5bc6ad27eea6f89278443de91262fa4d421251431f8d250d6860b20",
+        "diagnosis.json": "13d8fcf403e39971371b0c86e483f32e0ead09c876106f77b8bbecdc2446830b"
+      },
+      "new_model_generation": true
+    },
+    "redaction_sql_and_report_reuse": {
+      "path": "artifacts/stage5-live-ng4nkhka",
+      "evidence_hashes": {
+        "manifest.json": "c4e743a794ac1ddffdf8b2e1194367086843789c55e9f46f64aa8a5c4b3f63e9",
+        "diagnosis.json": "57d092ba430ee5c07c14d24a3f8d736265280d4606f32e233bf8b3e5cce94bd1"
+      },
+      "new_model_generation": false
+    }
+  },
+  "checks": {
+    "combined_unit_cases": 63,
+    "combined_unit_log_sha256": "06983d652765994ee1e35a9aa03aca1c59b72f0b41f1494c897978af0fda94ae",
+    "node_production_render": "passed",
+    "python_js_syntax": "passed",
+    "make_http": "passed",
+    "current_validator_and_idempotent_redaction_recheck": "all delivered dev-v3/holdout and real routing/rejected records stable",
+    "browser_full_qa": "not_rerun",
+    "new_tcp_fault": "not_run",
+    "formal_monitor_overhead": "not_run",
+    "production_database_initialization": "not_done",
+    "deployment_or_push": "not_done"
+  },
+  "protected": {
+    "server/nginx.conf": "47824137d3869b5bd495d8cf8df4d0864e86c03c993731a95dbfb23186e39b2f",
+    "artifacts/corpus-t4/index.npz": "807d33989e9775851d6b7f760c7039a6bbb1b0cf827d5120c511aee4f1fa2fef",
+    "artifacts/knowledge-t5/index.npz": "18a40f1f85db57c90a4b82d90878342afd94aad9ceab61f5858dab313a2cfeb5",
+    "artifacts/diagnosis-eval-v1/index.npz": "f3130e610111d384158307cef21abc4dcbfff2ed88798527b1d729eb188658c7"
+  },
+  "interpretation": [
+    "Original rejected or partial results are preserved; a later single control call does not backfill the original run.",
+    "Use paired same-case summaries only; other strategy groups have different case counts.",
+    "Reused SQL report contains old provider telemetry; it generated no new remote model calls.",
+    "Local support checks do not prove arbitrary natural-language semantics; every production report remains requires_review."
+  ]
+}

@@ -1,0 +1,492 @@
+{
+  "dataset": "diagnosis_v1",
+  "started_at": "2026-10-25T16:21:33.580237+00:00",
+  "scope": "fixed synthetic tool replay; not live diagnosis accuracy",
+  "rows": 144,
+  "errors": 3,
+  "groups": [
+    {
+      "kind": "retrieval",
+      "mode": "bm25",
+      "split": "dev",
+      "attempted": 12,
+      "ok": 12,
+      "seconds_mean": 0.0014,
+      "seconds_median": 0.00145,
+      "recall_at_5": 0.5417,
+      "mrr_at_5": 0.4194
+    },
+    {
+      "kind": "retrieval",
+      "mode": "bm25",
+      "split": "holdout",
+      "attempted": 12,
+      "ok": 12,
+      "seconds_mean": 0.0021,
+      "seconds_median": 0.00135,
+      "recall_at_5": 0.3333,
+      "mrr_at_5": 0.2292
+    },
+    {
+      "kind": "retrieval",
+      "mode": "bm25",
+      "split": "all",
+      "attempted": 24,
+      "ok": 24,
+      "seconds_mean": 0.0018,
+      "seconds_median": 0.0014,
+      "recall_at_5": 0.4375,
+      "mrr_at_5": 0.3243
+    },
+    {
+      "kind": "retrieval",
+      "mode": "dense",
+      "split": "dev",
+      "attempted": 12,
+      "ok": 12,
+      "seconds_mean": 1.7761,
+      "seconds_median": 1.34975,
+      "recall_at_5": 0.5,
+      "mrr_at_5": 0.4333
+    },
+    {
+      "kind": "retrieval",
+      "mode": "dense",
+      "split": "holdout",
+      "attempted": 12,
+      "ok": 12,
+      "seconds_mean": 1.7291,
+      "seconds_median": 1.2013500000000001,
+      "recall_at_5": 0.0833,
+      "mrr_at_5": 0.0278
+    },
+    {
+      "kind": "retrieval",
+      "mode": "dense",
+      "split": "all",
+      "attempted": 24,
+      "ok": 24,
+      "seconds_mean": 1.7526,
+      "seconds_median": 1.3393000000000002,
+      "recall_at_5": 0.2917,
+      "mrr_at_5": 0.2306
+    },
+    {
+      "kind": "retrieval",
+      "mode": "hybrid",
+      "split": "dev",
+      "attempted": 12,
+      "ok": 12,
+      "seconds_mean": 0.0016,
+      "seconds_median": 0.0017,
+      "recall_at_5": 0.75,
+      "mrr_at_5": 0.6736
+    },
+    {
+      "kind": "retrieval",
+      "mode": "hybrid",
+      "split": "holdout",
+      "attempted": 12,
+      "ok": 12,
+      "seconds_mean": 0.003,
+      "seconds_median": 0.0017499999999999998,
+      "recall_at_5": 0.2083,
+      "mrr_at_5": 0.1875
+    },
+    {
+      "kind": "retrieval",
+      "mode": "hybrid",
+      "split": "all",
+      "attempted": 24,
+      "ok": 24,
+      "seconds_mean": 0.0023,
+      "seconds_median": 0.0017,
+      "recall_at_5": 0.4792,
+      "mrr_at_5": 0.4306
+    },
+    {
+      "kind": "retrieval",
+      "mode": "hybrid_rerank",
+      "split": "dev",
+      "attempted": 12,
+      "ok": 12,
+      "seconds_mean": 1.2924,
+      "seconds_median": 1.28065,
+      "recall_at_5": 0.75,
+      "mrr_at_5": 0.6875
+    },
+    {
+      "kind": "retrieval",
+      "mode": "hybrid_rerank",
+      "split": "holdout",
+      "attempted": 12,
+      "ok": 12,
+      "seconds_mean": 1.3007,
+      "seconds_median": 1.29355,
+      "recall_at_5": 0.2083,
+      "mrr_at_5": 0.1319
+    },
+    {
+      "kind": "retrieval",
+      "mode": "hybrid_rerank",
+      "split": "all",
+      "attempted": 24,
+      "ok": 24,
+      "seconds_mean": 1.2966,
+      "seconds_median": 1.28065,
+      "recall_at_5": 0.4792,
+      "mrr_at_5": 0.4097
+    },
+    {
+      "kind": "diagnosis",
+      "mode": "hybrid_rerank",
+      "split": "dev",
+      "attempted": 12,
+      "ok": 12,
+      "seconds_mean": 12.9374,
+      "seconds_median": 13.27435,
+      "citation_ids_exist": {
+        "passed": 12,
+        "denominator": 12
+      },
+      "required_evidence_present": {
+        "passed": 12,
+        "denominator": 12
+      },
+      "expected_conclusion_matches": {
+        "passed": 6,
+        "denominator": 6
+      },
+      "reviewed": 12,
+      "fact_support": {
+        "supported": 104,
+        "partial": 2
+      },
+      "cause_support": {
+        "supported": 22,
+        "partial": 10,
+        "unsupported": 1
+      },
+      "required_points_met": {
+        "true": 12,
+        "denominator": 12
+      },
+      "factual_error": {
+        "true": 6,
+        "denominator": 12
+      },
+      "time_instance_confusion": {
+        "true": 0,
+        "denominator": 12
+      },
+      "appropriate_uncertainty": {
+        "true": 10,
+        "denominator": 12
+      },
+      "summary_supported": {
+        "true": 11,
+        "denominator": 12
+      }
+    },
+    {
+      "kind": "diagnosis",
+      "mode": "hybrid_rerank",
+      "split": "holdout",
+      "attempted": 12,
+      "ok": 11,
+      "seconds_mean": 13.5254,
+      "seconds_median": 13.3016,
+      "citation_ids_exist": {
+        "passed": 11,
+        "denominator": 11
+      },
+      "required_evidence_present": {
+        "passed": 9,
+        "denominator": 11
+      },
+      "expected_conclusion_matches": {
+        "passed": 11,
+        "denominator": 11
+      },
+      "reviewed": 11,
+      "fact_support": {
+        "supported": 86,
+        "unsupported": 2,
+        "partial": 3
+      },
+      "cause_support": {
+        "supported": 24,
+        "partial": 1
+      },
+      "required_points_met": {
+        "true": 11,
+        "denominator": 11
+      },
+      "factual_error": {
+        "true": 2,
+        "denominator": 11
+      },
+      "time_instance_confusion": {
+        "true": 0,
+        "denominator": 11
+      },
+      "appropriate_uncertainty": {
+        "true": 11,
+        "denominator": 11
+      },
+      "summary_supported": {
+        "true": 11,
+        "denominator": 11
+      }
+    },
+    {
+      "kind": "diagnosis",
+      "mode": "hybrid_rerank",
+      "split": "all",
+      "attempted": 24,
+      "ok": 23,
+      "seconds_mean": 13.2186,
+      "seconds_median": 13.3016,
+      "citation_ids_exist": {
+        "passed": 23,
+        "denominator": 23
+      },
+      "required_evidence_present": {
+        "passed": 21,
+        "denominator": 23
+      },
+      "expected_conclusion_matches": {
+        "passed": 17,
+        "denominator": 17
+      },
+      "reviewed": 23,
+      "fact_support": {
+        "supported": 190,
+        "partial": 5,
+        "unsupported": 2
+      },
+      "cause_support": {
+        "supported": 46,
+        "partial": 11,
+        "unsupported": 1
+      },
+      "required_points_met": {
+        "true": 23,
+        "denominator": 23
+      },
+      "factual_error": {
+        "true": 8,
+        "denominator": 23
+      },
+      "time_instance_confusion": {
+        "true": 0,
+        "denominator": 23
+      },
+      "appropriate_uncertainty": {
+        "true": 21,
+        "denominator": 23
+      },
+      "summary_supported": {
+        "true": 22,
+        "denominator": 23
+      }
+    },
+    {
+      "kind": "diagnosis",
+      "mode": "live_only",
+      "split": "dev",
+      "attempted": 12,
+      "ok": 10,
+      "seconds_mean": 10.1078,
+      "seconds_median": 10.14835,
+      "citation_ids_exist": {
+        "passed": 10,
+        "denominator": 10
+      },
+      "required_evidence_present": {
+        "passed": 10,
+        "denominator": 10
+      },
+      "expected_conclusion_matches": {
+        "passed": 5,
+        "denominator": 5
+      },
+      "reviewed": 10,
+      "fact_support": {
+        "supported": 53,
+        "partial": 5
+      },
+      "cause_support": {
+        "supported": 18,
+        "partial": 2
+      },
+      "required_points_met": {
+        "true": 8,
+        "denominator": 10
+      },
+      "factual_error": {
+        "true": 4,
+        "denominator": 10
+      },
+      "time_instance_confusion": {
+        "true": 1,
+        "denominator": 10
+      },
+      "appropriate_uncertainty": {
+        "true": 10,
+        "denominator": 10
+      },
+      "summary_supported": {
+        "true": 9,
+        "denominator": 10
+      }
+    },
+    {
+      "kind": "diagnosis",
+      "mode": "live_only",
+      "split": "holdout",
+      "attempted": 12,
+      "ok": 12,
+      "seconds_mean": 10.0507,
+      "seconds_median": 9.6661,
+      "citation_ids_exist": {
+        "passed": 12,
+        "denominator": 12
+      },
+      "required_evidence_present": {
+        "passed": 9,
+        "denominator": 12
+      },
+      "expected_conclusion_matches": {
+        "passed": 12,
+        "denominator": 12
+      },
+      "reviewed": 12,
+      "fact_support": {
+        "supported": 67,
+        "partial": 1,
+        "unsupported": 1
+      },
+      "cause_support": {
+        "supported": 18,
+        "partial": 3
+      },
+      "required_points_met": {
+        "true": 11,
+        "denominator": 12
+      },
+      "factual_error": {
+        "true": 1,
+        "denominator": 12
+      },
+      "time_instance_confusion": {
+        "true": 0,
+        "denominator": 12
+      },
+      "appropriate_uncertainty": {
+        "true": 12,
+        "denominator": 12
+      },
+      "summary_supported": {
+        "true": 12,
+        "denominator": 12
+      }
+    },
+    {
+      "kind": "diagnosis",
+      "mode": "live_only",
+      "split": "all",
+      "attempted": 24,
+      "ok": 22,
+      "seconds_mean": 10.0766,
+      "seconds_median": 9.780899999999999,
+      "citation_ids_exist": {
+        "passed": 22,
+        "denominator": 22
+      },
+      "required_evidence_present": {
+        "passed": 19,
+        "denominator": 22
+      },
+      "expected_conclusion_matches": {
+        "passed": 17,
+        "denominator": 17
+      },
+      "reviewed": 22,
+      "fact_support": {
+        "supported": 120,
+        "partial": 6,
+        "unsupported": 1
+      },
+      "cause_support": {
+        "supported": 36,
+        "partial": 5
+      },
+      "required_points_met": {
+        "true": 19,
+        "denominator": 22
+      },
+      "factual_error": {
+        "true": 5,
+        "denominator": 22
+      },
+      "time_instance_confusion": {
+        "true": 1,
+        "denominator": 22
+      },
+      "appropriate_uncertainty": {
+        "true": 22,
+        "denominator": 22
+      },
+      "summary_supported": {
+        "true": 21,
+        "denominator": 22
+      }
+    }
+  ],
+  "services": {
+    "DEEPSEEK": {
+      "requests": 103,
+      "errors": 0,
+      "usage_missing": 0,
+      "usage_sums": {
+        "prompt_cache_miss_tokens": 319224,
+        "total_tokens": 485921,
+        "completion_tokens": 91945,
+        "prompt_tokens": 393976,
+        "prompt_cache_hit_tokens": 74752
+      },
+      "returned_models": [
+        "deepseek-flash"
+      ],
+      "finish_reasons": {
+        "stop": 96,
+        "tool_calls": 7
+      }
+    },
+    "EMBEDDING": {
+      "requests": 27,
+      "errors": 0,
+      "usage_missing": 0,
+      "usage_sums": {
+        "total_tokens": 1284,
+        "completion_tokens": 0,
+        "prompt_tokens": 1284
+      },
+      "returned_models": [
+        "Qwen/Qwen3-Embedding-8B"
+      ],
+      "finish_reasons": {}
+    },
+    "RERANK": {
+      "requests": 27,
+      "errors": 0,
+      "usage_missing": 27,
+      "usage_sums": {},
+      "returned_models": [],
+      "finish_reasons": {}
+    }
+  },
+  "semantic_review": "assistant rubric review, not independent expert truth",
+  "cache_note": "per-case query/rerank reuse; latency and usage are execution-order dependent"
+}

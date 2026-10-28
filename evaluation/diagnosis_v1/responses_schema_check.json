@@ -1,0 +1,201 @@
+{
+  "scope": "json_schema endpoint compatibility fix; not a full diagnosis quality benchmark",
+  "capability": [
+    {
+      "probe": "chat_minimal",
+      "path": "/chat/completions",
+      "request_sha256": "091116f5108a87aeb8cb80d3c02c36e753424363ac6a5ef984caf3c378e4992d",
+      "http_status": 400,
+      "error": {
+        "message": "This response_format type is unavailable now (request_id: 07047442-3345-4441-8cf4-433fb21cb355)",
+        "type": "invalid_request_error",
+        "param": null,
+        "code": "invalid_request_error"
+      }
+    },
+    {
+      "probe": "responses_minimal",
+      "path": "/responses",
+      "request_sha256": "7bd1d904f5998fdd1ae4cfc91e85f515a71835abf5e575f8b32c939adc63901f",
+      "http_status": 200,
+      "status": "completed",
+      "model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 58,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 5,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 63
+      },
+      "minimal_valid": true
+    },
+    {
+      "probe": "responses_report",
+      "path": "/responses",
+      "request_sha256": "fa6815aefeb4e5d3f154164874407a65ed33296f9113ce92b85e2a19e1a2dce4",
+      "http_status": 200,
+      "status": "completed",
+      "model": "deepseek-flash",
+      "usage": {
+        "input_tokens": 428,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 361,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 789
+      },
+      "pydantic_valid": true
+    }
+  ],
+  "enforcement": [
+    {
+      "strict": null,
+      "status": "completed",
+      "output": {
+        "ok": true,
+        "extra_probe": null
+      },
+      "conforms": false,
+      "usage": {
+        "input_tokens": 77,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 11,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 88
+      }
+    },
+    {
+      "strict": true,
+      "status": "completed",
+      "output": {
+        "ok": true,
+        "extra_probe": null
+      },
+      "conforms": false,
+      "usage": {
+        "input_tokens": 77,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 11,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 88
+      }
+    }
+  ],
+  "native_history": {
+    "status": "ok",
+    "value": {
+      "ok": true
+    },
+    "scope": "synthetic paired function call/output history; no tool execution"
+  },
+  "replays": [
+    {
+      "case_id": "D1",
+      "mode": "hybrid_rerank",
+      "status": "ok",
+      "seconds": 38.8456,
+      "output_validation": {
+        "requested_protocol": "deepseek_responses_json_schema",
+        "validated_by": "pydantic",
+        "repair_errors": []
+      },
+      "checks": {
+        "citation_ids_exist": true,
+        "required_evidence_present": true,
+        "expected_conclusion_matches": true,
+        "semantic_support": "requires_review",
+        "claim_count": 14
+      },
+      "manifest_sha256": "c7691c1189f04ea8f492b7bd7faf1ba42bff042f21e464cb5fe3c913d031fe2d",
+      "report_sha256": "8480d205400eb741cc18d89e86d0db00735499a009b80e5be27b2c89165f1bb4",
+      "responses_requests": 1
+    },
+    {
+      "case_id": "D1",
+      "mode": "live_only",
+      "status": "ok",
+      "seconds": 10.3457,
+      "output_validation": {
+        "requested_protocol": "deepseek_responses_json_schema",
+        "validated_by": "pydantic",
+        "repair_errors": []
+      },
+      "checks": {
+        "citation_ids_exist": true,
+        "required_evidence_present": true,
+        "expected_conclusion_matches": true,
+        "semantic_support": "requires_review",
+        "claim_count": 8
+      },
+      "manifest_sha256": "c7691c1189f04ea8f492b7bd7faf1ba42bff042f21e464cb5fe3c913d031fe2d",
+      "report_sha256": "5040c209bc1befa5f3c0ccde29dd26ca658ff0cda12f7ff01a669aaffa0f1e72",
+      "responses_requests": 1
+    },
+    {
+      "case_id": "R2",
+      "mode": "hybrid_rerank",
+      "status": "ok",
+      "seconds": 18.5596,
+      "output_validation": {
+        "requested_protocol": "deepseek_responses_json_schema",
+        "validated_by": "pydantic",
+        "repair_errors": []
+      },
+      "checks": {
+        "citation_ids_exist": true,
+        "required_evidence_present": false,
+        "expected_conclusion_matches": true,
+        "semantic_support": "requires_review",
+        "claim_count": 11
+      },
+      "manifest_sha256": "ebf1a35bc98d4240e45025cafbce0d463cf1eefe5153f8827a66950a9b781f0f",
+      "report_sha256": "1be2271919784c3bc29d194c35147529ccd795d940cdd60ae9d1cddd3a8e54f8",
+      "responses_requests": 1
+    },
+    {
+      "case_id": "R2",
+      "mode": "live_only",
+      "status": "ok",
+      "seconds": 10.3777,
+      "output_validation": {
+        "requested_protocol": "deepseek_responses_json_schema",
+        "validated_by": "pydantic",
+        "repair_errors": []
+      },
+      "checks": {
+        "citation_ids_exist": true,
+        "required_evidence_present": false,
+        "expected_conclusion_matches": true,
+        "semantic_support": "requires_review",
+        "claim_count": 7
+      },
+      "manifest_sha256": "ebf1a35bc98d4240e45025cafbce0d463cf1eefe5153f8827a66950a9b781f0f",
+      "report_sha256": "955a2fdf8fd2b8c54bcd6753895712941ec397bb174260f1dccfb68e8b0a35db",
+      "responses_requests": 1
+    }
+  ],
+  "successful": 4,
+  "first_pass": 4,
+  "documentation_index_update": {
+    "sha256": "fff6280faeb5c1d3472d508198294f3f9e2441be27c8e73f66e56cdb19933aa3",
+    "chunks": 297,
+    "new_embeddings": 6,
+    "reused_vectors": 291,
+    "note": "Updated after the four replay measurements; their manifests retain the previous index hash."
+  }
+}

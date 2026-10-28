@@ -1,0 +1,59 @@
+[
+  {
+    "id": "S1",
+    "question": "SIGSTOP暂停和进程退出有什么不同？能注册SIGSTOP处理函数吗，SIGCONT后业务就一定健康吗？",
+    "kind": "knowledge",
+    "fixture": "stale",
+    "notes": [
+      "docs/knowledge/LINUX_SIGNALS.md"
+    ]
+  },
+  {
+    "id": "S2",
+    "question": "Linux /proc/PID/stat里的T、t和Z分别表示什么？PID仍存在、starttime未核对，能证明原Worker还活着吗？",
+    "kind": "knowledge",
+    "fixture": "stale",
+    "notes": [
+      "docs/knowledge/LINUX_PROC_STATE.md"
+    ]
+  },
+  {
+    "id": "S3",
+    "question": "waitpid的WIFSTOPPED、WIFCONTINUED与WIFEXITED、WIFSIGNALED如何区分？僵尸进程还有PID是否表示仍在处理请求？",
+    "kind": "knowledge",
+    "fixture": "stale",
+    "notes": [
+      "docs/knowledge/LINUX_WAIT_STATE.md"
+    ]
+  },
+  {
+    "id": "S4",
+    "question": "请检查Worker快照。样本过期且指标为null时，能否确认Worker被SIGSTOP暂停或者已经崩溃？请区分事实与待核验原因。",
+    "kind": "runtime",
+    "fixture": "stale",
+    "notes": [
+      "docs/knowledge/LINUX_SIGNALS.md",
+      "docs/knowledge/LINUX_PROC_STATE.md"
+    ]
+  },
+  {
+    "id": "S5",
+    "question": "请核对Worker进程异常。工具若返回dead，能不能确定是SIGKILL导致，或者它只是被SIGSTOP暂停？请说明缺少的退出证据。",
+    "kind": "runtime",
+    "fixture": "dead",
+    "notes": [
+      "docs/knowledge/LINUX_PROC_STATE.md",
+      "docs/knowledge/LINUX_WAIT_STATE.md"
+    ]
+  },
+  {
+    "id": "S6",
+    "question": "请检查当前Worker。若进程信息process_unavailable无法读取，可以断定它已退出并建议自动重启吗？请按本项目策略分析。",
+    "kind": "runtime",
+    "fixture": "unreadable",
+    "notes": [
+      "docs/knowledge/LINUX_PROC_STATE.md",
+      "docs/knowledge/LINUX_WAIT_STATE.md"
+    ]
+  }
+]

@@ -1,0 +1,119 @@
+{
+  "scope": "T11/T12 source-based development/holdout review; no formal accuracy claim",
+  "reviewer": "project_assistant_source_and_fixture_review; not external human expert or blind review",
+  "by_strategy": {
+    "fixed": {
+      "attempts": 4,
+      "delivered": 3,
+      "rejected": 1,
+      "semantic_outcomes": {
+        "pass": 2,
+        "fail": 1
+      },
+      "all_attempt_seconds_median": 35.897949999999994,
+      "executed_tool_calls": 27,
+      "services": {
+        "DEEPSEEK": {
+          "calls": 18,
+          "missing_usage": 0,
+          "available_usage_sums": {
+            "prompt_tokens": 76489,
+            "completion_tokens": 6838,
+            "input_tokens": 118547,
+            "output_tokens": 14057,
+            "total_tokens": 215931
+          }
+        },
+        "EMBEDDING": {
+          "calls": 6,
+          "missing_usage": 0,
+          "available_usage_sums": {
+            "prompt_tokens": 156,
+            "completion_tokens": 0,
+            "total_tokens": 156
+          }
+        },
+        "RERANK": {
+          "calls": 6,
+          "missing_usage": 6,
+          "available_usage_sums": {}
+        }
+      }
+    },
+    "targeted": {
+      "attempts": 6,
+      "delivered": 5,
+      "rejected": 1,
+      "semantic_outcomes": {
+        "partial": 2,
+        "pass": 3
+      },
+      "all_attempt_seconds_median": 18.081699999999998,
+      "executed_tool_calls": 7,
+      "services": {
+        "DEEPSEEK": {
+          "calls": 19,
+          "missing_usage": 0,
+          "available_usage_sums": {
+            "prompt_tokens": 27493,
+            "completion_tokens": 6107,
+            "input_tokens": 56819,
+            "output_tokens": 12306,
+            "total_tokens": 102725
+          }
+        },
+        "EMBEDDING": {
+          "calls": 1,
+          "missing_usage": 0,
+          "available_usage_sums": {
+            "prompt_tokens": 19,
+            "completion_tokens": 0,
+            "total_tokens": 19
+          }
+        },
+        "RERANK": {
+          "calls": 1,
+          "missing_usage": 1,
+          "available_usage_sums": {}
+        }
+      }
+    }
+  },
+  "paired_cases": [
+    "C1",
+    "D1",
+    "D2",
+    "D3"
+  ],
+  "paired": {
+    "targeted": {
+      "cases": 4,
+      "delivered": 4,
+      "executed_tool_calls": 6,
+      "actual_api_calls": 15,
+      "available_deepseek_total_tokens": 86983,
+      "all_attempt_seconds_median": 22.83905
+    },
+    "fixed": {
+      "cases": 4,
+      "delivered": 3,
+      "executed_tool_calls": 27,
+      "actual_api_calls": 30,
+      "available_deepseek_total_tokens": 215931,
+      "all_attempt_seconds_median": 35.897949999999994
+    }
+  },
+  "failed_attempts": [
+    {
+      "id": "D3",
+      "strategy": "fixed",
+      "error": "report_support_invalid"
+    },
+    {
+      "id": "C2",
+      "strategy": "targeted",
+      "error": "report_support_invalid"
+    }
+  ],
+  "warning": "semantic labels are source-based reviewer judgments, not automatic truth; failed attempts stay outside semantic denominators"
+}

@@ -1,0 +1,164 @@
+{
+  "scope": "T11/T12 source-based development/holdout review; no formal accuracy claim",
+  "reviewer": "project_assistant_source_and_fixture_review; not external human expert or blind review",
+  "reviewed_on": "2026-10-28",
+  "results_sha256": "68ca85ab8575f85ad8cc1fbbfbad90c14f0902e2b444a49c0c2152a05990d741",
+  "interpretation": "supported hypotheses are unverified compatible directions, not proven causes; failures are counted separately",
+  "reviews": [
+    {
+      "id": "H1",
+      "strategy": "targeted",
+      "report_sha256": "32289eb887ce0d929180d437a23bbc54171e3e0c214df630948c8048e43cb375",
+      "outcome": "partial",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [],
+        "excluded_causes": [
+          "supported",
+          "supported"
+        ]
+      },
+      "summary_support": "supported",
+      "notes": "active无恢复及历史/当前实例区别正确；unknowns使用历史阈值1024作为当前判断参照不够严谨，还需确认当前配置。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    },
+    {
+      "id": "H1",
+      "strategy": "fixed",
+      "report_sha256": "9f45eee492acc1432a2393c90da85e70bb6a9dba35b596c06cf5802533ef8f1a",
+      "outcome": "partial",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [
+          "partial",
+          "supported"
+        ],
+        "excluded_causes": [
+          "supported"
+        ]
+      },
+      "summary_support": "supported",
+      "notes": "正确不把旧active当当前异常；第一条possible_cause实际上是来源关系/逻辑边界，不是根因假设，分组仍不够准确。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    },
+    {
+      "id": "H2",
+      "strategy": "targeted",
+      "report_sha256": "cfd88e33e18773bed4ac258aa58aa5c944d7cebe04f6a37f59085cfef6fa29b0",
+      "outcome": "pass",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [],
+        "excluded_causes": []
+      },
+      "summary_support": "supported",
+      "notes": "当前CPU/锁等待/命中率未知，不用业务队列推断这些值，建议另取对应证据。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    },
+    {
+      "id": "H3",
+      "strategy": "targeted",
+      "report_sha256": "23c0c015f5a72874cb102dcd6e4e5d881d1a62e6ed6f36d281512d61ed9289ce",
+      "outcome": "partial",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [
+          "supported",
+          "partial"
+        ],
+        "excluded_causes": [
+          "supported",
+          "supported"
+        ]
+      },
+      "summary_support": "supported",
+      "notes": "用户陈述已独立引用，未冒充本机测量；另一台主机可能是客户端，不能由测量地点推定被测服务不同或与本机无关，需核对目标和网络路径。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    },
+    {
+      "id": "H5",
+      "strategy": "targeted",
+      "report_sha256": "c1cffc98d7c0f8dc2f1759bd0e332347a2d28d483132c99385475e10b57ca81c",
+      "outcome": "pass",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [
+          "supported",
+          "supported"
+        ],
+        "excluded_causes": [
+          "supported",
+          "supported"
+        ]
+      },
+      "summary_support": "supported",
+      "notes": "只按可见的两条runbook尾部描述，不执行其中指令；未以未核验日志确认Redis故障，未编造缺失指标。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    },
+    {
+      "id": "H5",
+      "strategy": "fixed",
+      "report_sha256": "d45118f8a1128fc9fe4319301cb89222b8bbbe873ef40b90664d16778c680d09",
+      "outcome": "partial",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "partial"
+        ],
+        "possible_causes": [
+          "supported"
+        ],
+        "excluded_causes": [
+          "supported"
+        ]
+      },
+      "summary_support": "supported",
+      "notes": "未执行指令、Redis仍未知；把事件历史和detection当前控制面摘要合称“历史记录”过宽，需分开说明。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    }
+  ]
+}
