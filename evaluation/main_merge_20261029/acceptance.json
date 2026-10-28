@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-28T18:01:31.724294+00:00",
+  "merge_parents": [
+    "2177e70bb791201b0625b7a317172dbdfe6e747e",
+    "eb833ae5124f92893099817d629ea30abdef2774"
+  ],
+  "scope": "main/T7 conflict integration, existing raw process fields and experiment detail preserved; no performance or diagnosis-quality claim",
+  "checks": {
+    "monitor_cases": 35,
+    "monitor_seconds": 30.975,
+    "diagnosis_cases": 87,
+    "diagnosis_seconds": 3.922,
+    "node_production_render": "passed including raw state/threads/cumulative CPU alongside interval CPU/RSS",
+    "real_proc_http": "old main stopped/resumed process observation probe passed; new resource loop covered in HTTP regressions",
+    "browser": {
+      "desktop_dimensions": [
+        1280,
+        633
+      ],
+      "mobile_width": 390,
+      "document_width": 390,
+      "table_content_width": 950,
+      "table_viewport_width": 316,
+      "violations": 0,
+      "incomplete": 1
+    },
+    "immutable_main_inputs": "cases/reviews/fixtures/report bytes unchanged; new wrapper test filename avoids add/add loss",
+    "secret_scan": "passed",
+    "local_config_and_frozen_baselines": "unchanged"
+  },
+  "code_sha256": {
+    "monitor/collector/collector.cxx": "1d1caca2387214837b30e92e3f07d5374554c24176abd6ac82b0d910298f0b20",
+    "monitor/collector/collector.h": "d27b1f5e5a251066234cf20d73238ea3b8de893b634cd10fb9d17817cc6ad856",
+    "monitor/http/main.cxx": "d89ffde32b024fc073bd83dfc30f43c46b3801c5bb191922702ee4b419da09a7",
+    "monitor/web/app.js": "b088b58a8da4aee9e7f0f66c5f29211aef2ba2fd10405188d8be02d301b20bf3",
+    "monitor/web/index.html": "c3272e38a4624ca50dffa9856b5cdb196c80cf2aaaf88c886245d3878f22b89b",
+    "diagnosis/agent.py": "4ba10a7643235a1bd1a504e31ef3ef118b046feb4e242f28c209d8f9bf7ea04d",
+    "diagnosis/catalog.py": "903454eaba55b11bb27b796d0c9b954f6113544a9a237a9b9ddaee273cdadb11",
+    "diagnosis/retrieval.py": "d66191339af08a05df9ae7d61e79e03dc97d8dd041d303c3e8c8e51d22e6867c",
+    "diagnosis/service.py": "e3717d7034a971633503561f2a0fd126dc4a9f69c3d9ce36346b25c61b07e284",
+    "diagnosis/routing.py": "baf18b56ee42ae1f86eabb5088d4f452a3e0f1f4224df9087f944f78f5024b71",
+    "diagnosis/evidence.py": "878a700d31d5caf1fe64b88c61bb0780beef0093be14780376152c0725f0cd12",
+    "diagnosis/observation_contracts.json": "0797f4dc44b61997e052cd65d002be431f797262b8224b7865fb84a44680d05a",
+    "diagnosis/corpus_policy.json": "16c4f51e348a13c9b75bccca7b88059fbd6d66c936bda357f5659d875b59d202",
+    "testscript/test_legacy_diagnosis_evaluation.py": "68dc6bc61a97a600212b4d291f68cfaf68bf2bda5ebe33ed6acc4902d33a579e",
+    "testscript/test_process_resources_compat.py": "e01d579f4e24acc0252456b8e8da2867ffd9eb7ba1906c94c982e4841d33d08a"
+  },
+  "evidence_sha256": {
+    "monitor-tests.log": "9af96d1f5be4e9e20743e1362abdc72646cdd7534841cb062a613534d8e2fb82",
+    "diagnosis-tests.log": "9de9072f8c1c879372a777af99861864c60c499cf3a62841045cac736b8bb3cc",
+    "proc-http-probe.log": "ae3a2e1e3edbd804e0b120e111ffcc9c0ef8be45e153507e7ace58a6af67d746",
+    "browser-console.log": "c997f77df7f410774cb56773f1f59d938fce2793bc9a20a94be9c0efcb8144af",
+    "browser-qa.json": "703fbc2e1c9e302361fd2dc80613e217226d0d592894c14184943e2a2a493ae0",
+    "a11y.json": "5d6b9cee15c8fabd0c992524d3746d7cf6f0b88a6db7ef1d9a5f04694f11fbc7",
+    "tool-evidence.json": "11a614a21c30297168e2409ae52b0dd8af9a0cc5aa13fbdd8ea219eb121b2569",
+    "desktop.png": "ebbdfc3b981bf75c42f7ac3b2d285e3a5ffde9935b6b111bd92fff5174bdccad",
+    "mobile.png": "ec94e088c85e10082e1a8372f516a86a7f3a9cc572a71146dae665a87fd3e3e2",
+    "mobile-resources.png": "3b36d3e8b34b495b540c0477a41671f9152967f809268044e77fb1a188a88250"
+  },
+  "index": {
+    "sources": 26,
+    "chunks": 326,
+    "sha256": "3c0c0988fbd35db50ad760e9f61f5f0f2079e069d8e31912bab7a1e690820f8a",
+    "new_vectors": 19,
+    "reused_vectors": 307,
+    "default": "reviewed current; catalog and legacy explicitly selected"
+  },
+  "limits": [
+    "No paid generation, quality rescoring, performance load, DB migration or production deployment.",
+    "One environment-only browser attempt failed because a temporary CLI was absent; fixture cleanup confirmed, cached CLI restored, final run passed.",
+    "Original T7 and historical quality outputs are retained; this record does not backfill their scores."
+  ]
+}

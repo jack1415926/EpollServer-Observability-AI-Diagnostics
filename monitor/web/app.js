@@ -8,13 +8,17 @@ function renderDiagnosis(task) {
   if (!task.report) return;
   const report = task.report, analysis = report.analysis;
   if (report.target?.instance) target.append(text("p", `诊断时的实例：${report.target.instance}`, "subtle"));
-  target.append(text("p", analysis.conclusion === "insufficient_evidence" ? "证据不足，无法确定根因。" : "以下原因属于待验证推测。"), text("p", analysis.summary));
-  for (const [label, values] of [["已确认事实", analysis.facts], ["可能原因", analysis.possible_causes], ["尚未确认", analysis.unknowns], ["后续验证建议", analysis.next_steps]]) {
+  const notices = {knowledge: "技术资料回答", experiments: "历史实验分析", clarify: "需要补充信息", out_of_scope: "支持范围提示", failure: "诊断未完成"};
+  target.append(text("p", report.answer_mode === "observation" ? "取证时的观测" : notices[report.kind] || (analysis.conclusion === "insufficient_evidence" ? "证据不足，无法确定根因。" : "以下原因属于待验证推测。")), text("p", analysis.summary));
+  if (Number.isFinite(report.generated_at_unix_ms)) target.append(text("p", `报告生成：${new Date(report.generated_at_unix_ms).toLocaleString("zh-CN")}；数据与事件时间以来源为准，事实不会随轮询自动更新。`, "subtle"));
+  const basisLabels = {observation: "观测", document: "资料", historical: "历史", user_statement: "用户陈述", unverified_log: "未核验日志"};
+  for (const [label, values] of [["事实与来源", analysis.facts], ["可排除的解释", analysis.excluded_causes], ["待验证的可能原因", analysis.possible_causes], ["尚未确认", analysis.unknowns], ["后续验证建议", analysis.next_steps]]) {
+    if (!values?.length) continue;
     target.append(text("h3", label)); const list = document.createElement("ul");
-    for (const value of values) list.append(text("li", typeof value === "string" ? value : `${value.text} [${value.evidence_ids.join(", ")}]`));
+    for (const value of values) list.append(text("li", typeof value === "string" ? value : `${basisLabels[value.basis] ? `${basisLabels[value.basis]}：` : ""}${value.text} [${value.evidence_ids.join(", ")}]`));
     target.append(list);
   }
-  target.append(text("h3", "证据与来源"));
+  if (report.evidence.length) target.append(text("h3", "证据与来源"));
   for (const evidence of report.evidence) {
     const detail = document.createElement("details");
     detail.append(text("summary", `${evidence.id} · ${evidence.source} · ${evidence.scope} · ${new Date(evidence.retrieved_at_unix_ms).toLocaleString("zh-CN")}`));
@@ -75,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 const $ = id => document.getElementById(id);
 let token = "", generation = 0, timer = null, refreshing = false, experiments = [], eventsRefreshing = false, diagnosesRefreshing = false, selectedDiagnosis = null;
-const descriptions = {diagnoses: ["AI 诊断", "用当前观测与技术资料分析故障，核对证据与待验证假设。"], overview: ["运行总览", "观察当前实例的连接、队列与采集状态。"], workers: ["Worker 状态", "查看当前实例的进程身份、指标与数据有效性。"], experiments: ["性能实验", "保存运行证据，在明确条件下比较实验结果。"], events: ["异常事件", "查询确定性检测证据、触发时间与自动恢复记录。"]};
+const descriptions = {diagnoses: ["AI 诊断", "按问题查询技术资料、当前观测或历史实验，核对依据与未知。"], overview: ["运行总览", "观察当前实例的连接、队列与采集状态。"], workers: ["Worker 状态", "查看当前实例的进程身份、指标与数据有效性。"], experiments: ["性能实验", "保存运行证据，在明确条件下比较实验结果。"], events: ["异常事件", "查询确定性检测证据、触发时间与自动恢复记录。"]};
 const labels = {complete: "采集完整", partial: "部分数据", stopping: "实例停止中", unavailable: "指标不可用", instance_changed: "实例变化", fresh: "有效", stale: "已过期", dead: "进程已退出", missing: "快照缺失", invalid_json: "快照损坏", collection_failed: "采集失败", identity_mismatch: "进程身份不符", snapshot_identity_mismatch: "快照身份不符"};
 const fmt = (value, digits = 0) => value == null || !Number.isFinite(Number(value)) ? "—" : Number(value).toLocaleString("zh-CN", {maximumFractionDigits: digits});
 function text(tag, value, className) { const el = document.createElement(tag); el.textContent = value; if (className) el.className = className; return el; }
@@ -109,17 +113,16 @@ function renderLive(overview, workers) {
   $("worker-rows").replaceChildren(...rows.map(worker => {
     const row = document.createElement("tr"), name = text("span", `Worker ${worker.worker_index}`);
     name.append(text("small", `PID ${worker.pid} · ticks ${worker.process_start_ticks}`));
-    const resource = worker.process_resources, available = resource?.identity_verified === true;
-    const process = text("span", available ? `主线程 ${resource.leader_state}` : "资源未知");
-    process.append(text("small", available ? `${fmt(resource.threads)} 个线程 · ${resource.status}` : resource?.reason || "未采集"));
-    const rss = text("span", available && resource.rss_bytes != null ? `≈ ${fmt(resource.rss_bytes / 1048576, 2)} MiB` : "RSS —");
-    const cpu = available && Number.isSafeInteger(resource.cpu_user_ticks) && Number.isSafeInteger(resource.cpu_system_ticks) && resource.clock_ticks_per_second > 0 ? (resource.cpu_user_ticks + resource.cpu_system_ticks) / resource.clock_ticks_per_second : null;
-    rss.append(text("small", cpu == null ? "CPU 累计 —" : `CPU 累计 ${fmt(cpu, 2)} s`));
-    cells(row, [name, badge(worker.status), fmt(worker.metrics?.connections_current), fmt(worker.metrics?.receive_queue_messages), fmt(worker.metrics?.send_queue_messages), worker.age_ms == null ? "—" : `${fmt(worker.age_ms)} ms`, process, rss]);
+    const resource = worker.resources || {}, process = worker.process_resources || {}, resourceState = text("span", {available: "可用", partial: "部分可用", unavailable: "不可用"}[resource.status] || "未采集");
+    if (resource.reason === "cpu_warming_up") resourceState.append(text("small", "CPU 等待第二次采样"));
+    if (resource.sampled_at_unix_ms != null) resourceState.append(text("small", `${new Date(resource.sampled_at_unix_ms).toLocaleTimeString("zh-CN")} · CPU 窗口 ${fmt(resource.interval_ms)} ms`));
+    const cpu = text("span", resource.cpu_percent == null ? "—" : `${fmt(resource.cpu_percent, 1)}%`);
+    if (process.identity_verified) cpu.append(text("small", `累计 user/system ${fmt(process.cpu_user_ticks)}/${fmt(process.cpu_system_ticks)} tick · HZ ${fmt(process.clock_ticks_per_second)}`));
+    cells(row, [name, badge(worker.status), fmt(worker.metrics?.connections_current), fmt(worker.metrics?.receive_queue_messages), fmt(worker.metrics?.send_queue_messages), worker.age_ms == null ? "—" : `${fmt(worker.age_ms)} ms`, cpu, resource.rss_bytes == null ? "—" : `${fmt(resource.rss_bytes / 1048576, 1)} MiB`, resourceState, process.leader_state || "—", fmt(process.threads)]);
     return row;
   }));
   if (overview.validity !== "complete") $("partial-note").textContent = `完整总量不可用。有效部分：连接 ${fmt(data.partial_sums?.connections_current)}，接收队列 ${fmt(data.partial_sums?.receive_queue_messages)}，发送队列 ${fmt(data.partial_sums?.send_queue_messages)}；仅代表已采集 Worker。`;
-  else $("partial-note").textContent = "当前基础指标完整。逐字段采样，不是所有进程同一瞬间的事务快照。";
+  else $("partial-note").textContent = "当前连接与队列快照完整；CPU/RSS 按各 Worker 的资源采集状态判断。逐字段采样，不是同一瞬间的事务快照。";
   $("updated").textContent = data.collected_at_unix_ms ? `采集于 ${new Date(data.collected_at_unix_ms).toLocaleTimeString("zh-CN")} · 每 2 秒刷新` : "当前无有效采集时间";
   notice(overview.validity === "complete" ? "已连接 · 实时指标每 2 秒刷新。TCP 业务健康未主动探测。" : `监控服务可达，采集状态：${labels[overview.validity] || overview.validity} · ${data.reason}`, overview.validity !== "complete");
 }

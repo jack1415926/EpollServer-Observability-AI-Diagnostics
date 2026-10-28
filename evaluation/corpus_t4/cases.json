@@ -1,0 +1,10 @@
+[
+  {"id":"C1","question":"现在是否已实现独立Python诊断服务，还是只有stdio MCP？","expected_purpose":"default","relevant":[{"path":"README.md","text":"独立 Python 诊断服务"},{"path":"docs/STAGE_5_DIAGNOSIS.md","heading":"任务与故障语义"},{"path":"docs/DECISIONS.md","heading":"阶段 5 确认范围（2026-10-25）"}]},
+  {"id":"C2","question":"最终诊断报告当前使用哪个json_schema端点，Chat Completions还是Responses？","expected_purpose":"default","relevant":[{"path":"docs/STAGE_5_DIAGNOSIS.md","heading":"2026-10-26：json_schema原生端点修正"},{"path":"docs/DECISIONS.md","heading":"原生json_schema接口修正（2026-10-26）"}]},
+  {"id":"C3","question":"当前/api/v1/events接口是否已经实现，支持什么查询与状态？","expected_purpose":"default","relevant":[{"path":"docs/STAGE_4_EVENTS.md","heading":"API 与页面"}]},
+  {"id":"C4","question":"当前基础指标完整能否证明TCP业务健康，缺失指标可以填0吗？","expected_purpose":"default","relevant":[{"path":"docs/STAGE_1_COMPLETION.md","heading":"读取和汇总语义"},{"path":"docs/STAGE_2_HTTP_MONITOR.md","heading":"结构与采样语义"},{"path":"README.md","text":"基础指标完整不代表 TCP 业务健康"}]},
+  {"id":"H1","question":"上游历史路线图中推荐的Agent方向是什么，stdio MCP和独立诊断Agent当时如何安排？","expected_purpose":"history","relevant":[{"path":"docs/upstream/OPTIMIZATION_AND_AGENT_ROADMAP.md","heading":"3. 推荐的 Agent 方向"}]},
+  {"id":"H2","question":"历史Redis连接在fork后共享的问题如何修复和验证？","expected_purpose":"history","relevant":[{"path":"docs/upstream/Redis-fork-fd-share-vs-epoll-thundering-herd.md","text":"Redis"},{"path":"docs/upstream/code-review-2026-07-06.md","text":"fork"}]},
+  {"id":"T1","question":"epoll LT与ET的原理有什么区别，ET如何处理粘包和半包？","expected_purpose":"default","relevant":[{"path":"docs/upstream/EPOLL_SERVER_LearningNotes.md","text":"ET"}]},
+  {"id":"T2","question":"Cache Aside缓存击穿中，互斥锁与逻辑过期分别如何工作？","expected_purpose":"default","relevant":[{"path":"docs/upstream/Redis-Cache-Aside-issues-and-solutions.md","text":"逻辑过期"},{"path":"docs/upstream/Redis-Cache-Aside-issues-and-solutions.md","text":"互斥锁"}]}
+]

@@ -11,6 +11,7 @@ import tempfile
 import time
 import unittest
 import copy
+import sys
 from process_group import start_process_group, stop_process_group, remove_process_directory
 try:
     from .experiment_fixture import valid_report
@@ -153,10 +154,60 @@ int openat(int fd, const char *path, int flags, ...) {
             self.assertEqual(result["data"]["tcp_health"], "not_probed")
             if endpoint in ("overview", "metrics"):
                 self.assertEqual(result["data"]["totals"]["connections_current"], 3)
-                self.assertIn("cpu_utilization", result["data"]["unsupported_metrics"])
+                self.assertNotIn("cpu_memory", result["data"]["unsupported_metrics"])
             if endpoint == "workers":
                 self.assertEqual(len(result["data"]["workers"]), 2)
+                self.assertGreater(result['data']['workers'][0]['resources']['rss_bytes'], 0)
+                self.assertIn(result['data']['workers'][0]['resources']['status'], ('partial', 'available'))
         self.assertNotIn(str(self.root), json.dumps(result))
+
+    def test_worker_resources_cpu_load_pause_resume_and_exit(self):
+        cpu = start_process_group([sys.executable, '-c',
+            'memory=bytearray(16*1024*1024)\nwhile True:\n sum(i*i for i in range(10000))'])
+        self.processes.append(cpu)
+        self.addCleanup(stop_process_group, cpu, timeout=1)
+        member = {'worker_index':0, 'pid':cpu.pid, 'process_start_ticks':identity(cpu.pid)}
+        self.master['workers'][0] = member
+        sample = {**self.samples[0], **member}
+        file = self.root / f"worker-{self.master['boot_id']}-{cpu.pid}-{member['process_start_ticks']}.json"
+        def publish():
+            self.write(file, {**sample, 'sampled_at_boottime_ms':int(time.clock_gettime(time.CLOCK_BOOTTIME)*1000)})
+        publish(); self.write(self.manifest, self.master)
+        def row():
+            rows = request(self.port, 'workers')[1]['data']['workers']
+            return next((w for w in rows if w['pid']==cpu.pid), None)
+        def loaded():
+            value = row()
+            return value if value and (value['resources']['cpu_percent'] or 0)>10 else None
+        busy = wait_for(loaded)
+        self.assertGreater(busy['resources']['rss_bytes'], 16*1024*1024)
+        self.assertIsInstance(busy['resources']['sampled_at_unix_ms'], int)
+        self.assertGreater(busy['resources']['interval_ms'], 0)
+        self.assertEqual(identity(cpu.pid), member['process_start_ticks'])
+        os.kill(cpu.pid, signal.SIGSTOP)
+        try:
+            def paused():
+                value = row()
+                return value if value and value['status']=='stale' and value['resources']['cpu_percent']==0 else None
+            stopped = wait_for(paused, timeout=8)
+            self.assertIsNone(stopped['metrics']['connections_current'])
+            self.assertGreater(stopped['resources']['rss_bytes'], 0)
+        finally:
+            if cpu.poll() is None and identity(cpu.pid)==member['process_start_ticks']:
+                os.kill(cpu.pid, signal.SIGCONT)
+        publish()
+        resumed = wait_for(loaded)
+        stop_process_group(cpu, timeout=1)
+        def exited():
+            value = row()
+            return value if value and value['resources']['reason']=='dead' else None
+        dead = wait_for(exited)
+        self.assertIsNone(dead['resources']['cpu_percent'])
+        self.assertIsNone(dead['resources']['rss_bytes'])
+        if os.getenv('EPOLL_T7_EVIDENCE'):
+            evidence = Path(os.environ['EPOLL_T7_EVIDENCE']); evidence.mkdir(parents=True, exist_ok=True)
+            (evidence/'controlled-worker.json').write_text(json.dumps(
+                {'busy':busy,'paused':stopped,'resumed':resumed,'exited':dead},indent=2)+'\n')
 
     def test_auth_input_and_no_static_files(self):
         (self.root / "secret.txt").write_text("DO-NOT-EXPOSE")

@@ -7,6 +7,7 @@ for separate browser QA until stdin newline, then performs the same cleanup.
 """
 import argparse
 from contextlib import ExitStack
+import hashlib
 import http.client
 import json
 import os
@@ -54,9 +55,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--smoke', action='store_true')
     parser.add_argument('--hold', action='store_true')
+    parser.add_argument('--routing', action='store_true', help='five current route kinds through real HTTP/Python/MySQL; requires --smoke')
     parser.add_argument('--report', type=Path, help='reuse a saved diagnosis.json for browser QA; requires --smoke')
     parser.add_argument('--reports', type=Path, help='existing experiment report directory; required for full TCP acceptance')
     args = parser.parse_args()
+    if args.routing and (not args.smoke or args.report):
+        parser.error('--routing requires --smoke and cannot reuse --report')
     if args.report and not args.smoke:
         parser.error('--report requires --smoke; no TCP fault or new model call is performed')
     if args.hold and not sys.stdin.isatty():
@@ -71,6 +75,22 @@ def main():
     evidence.chmod(0o700)
     print(f'Evidence: {evidence}', flush=True)
     processes = []
+    protected = {}
+    for entry in Path('/proc').iterdir():
+        if entry.name.isdigit():
+            try:
+                name = (entry/'comm').read_text().strip()
+                if name in ('mysqld','nginx','epoll-monitor'):
+                    protected[entry.name] = {'name':name,'start_ticks':identity(int(entry.name))}
+            except (OSError, ValueError):
+                pass
+    paths = ['diagnosis/agent.py','diagnosis/routing.py','diagnosis/providers.py','diagnosis/service.py',
+             'diagnosis/evidence.py','diagnosis/selection.py','diagnosis/observation_contracts.json','diagnosis/config.py',
+             'diagnosis/retrieval.py','diagnosis/corpus.py','diagnosis/corpus_policy.json',
+             'diagnosis/store.py','monitor/web/app.js','monitor/web/index.html','monitor/build/epoll-monitor',
+             'artifacts/diagnosis/index.npz','testscript/test_stage5_live.py']
+    (evidence/'manifest.json').write_text(json.dumps({'files':{p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest()
+        for p in paths},'routing':args.routing,'smoke':args.smoke,'protected_services':protected},indent=2)+'\n')
     with ExitStack() as cleanup:
         database = TestDatabase(evidence/'database')
         environment = database.__enter__()
@@ -91,7 +111,17 @@ def main():
             store.initialize()
             sample_id = '00000000-0000-0000-0000-000000000001'
             store.create(sample_id, 'SQL preflight')
-            sample = {'schema_version': 1, 'facts': [], 'unknowns': ['preflight only']}
+            from diagnosis.agent import Tools
+            from diagnosis.config import redact
+            sample_tools=Tools(None,None)
+            sample_tools.record('technical_docs',{'text':'password=synthetic-value'},'project_document')
+            sample = json.loads(redact({'schema_version': 1, 'facts': [], 'unknowns': ['preflight only'],
+                'evidence':sample_tools.evidence,'arguments':json.dumps({'password':'synthetic value'})}))
+            require(json.loads(sample['evidence'][0]['excerpt'])['text']=='password=[REDACTED]',
+                    'nested evidence redaction corrupted JSON')
+            require(hashlib.sha256(sample['evidence'][0]['excerpt'].encode()).hexdigest()==sample['evidence'][0]['sha256'],
+                    'redaction changed evidence hash')
+            require(json.loads(sample['arguments'])['password']=='[REDACTED]','nested arguments not redacted')
             store.update(sample_id, 'succeeded', report=sample)
             # Idempotent completion retry must not create another report.
             store.update(sample_id, 'succeeded', report=sample)
@@ -180,8 +210,53 @@ def main():
             row = value['data']
             return row if row['status'] not in ('queued', 'running') else None
 
+        def verify_report(record, expected_kind=None):
+            require(record['status'] == 'succeeded', f'diagnosis failed: {record.get("error_code")}')
+            report = record['report']
+            refs = {e['id'] for e in report['evidence']}
+            claims=report['analysis']['facts']+report['analysis']['possible_causes']+report['analysis'].get('excluded_causes',[])
+            require(all(ref in refs for item in claims for ref in item['evidence_ids']), 'fabricated citation')
+            if report.get('analysis_schema_version')==2:
+                support=report.get('support_validation')
+                if report.get('kind') in ('runtime','knowledge','experiments'):
+                    require(support and support['checked_claims']==len(claims),'support validation not recorded')
+                require('model_calls' in report.get('reproducibility',{}),'provider metadata missing')
+            if expected_kind:
+                require(report.get('kind') == expected_kind, f'wrong route: {report.get("kind")}')
+            sources = {e['source'] for e in report['evidence']}
+            if report.get('kind') == 'knowledge':
+                require(sources == {'technical_docs'} and any(e['scope'] != 'unavailable' for e in report['evidence']), 'knowledge retrieval unavailable or read runtime data')
+            elif report.get('kind') in ('out_of_scope','clarify'):
+                require(not sources and not report['analysis']['facts'], 'scope/clarification read evidence')
+            elif report.get('kind') == 'experiments':
+                require(sources <= {'experiments','experiments/compare','technical_docs'} and 'experiments' in sources, 'experiment route read runtime or failed to read history')
+            elif report.get('kind') == 'runtime':
+                require('experiments' not in sources and 'experiments/compare' not in sources, 'runtime route read unrequested history')
+                if report.get('answer_mode')!='observation':
+                    require(report['analysis']['unknowns'], 'missing uncertainty disclosure')
+            actual = json.loads(sql(f"SELECT report FROM epoll_monitor_test.diagnosis_report WHERE id='{record['id']}'"))
+            require(actual == report, 'persisted actual diagnostic report differs')
+            return report
+
         start = time.monotonic()
-        if args.report:
+        routing_records = []
+        if args.routing:
+            cases = [('knowledge','请解释本项目epoll的就绪通知原理，不检查当前实例。'),
+                     ('runtime','请核对当前Worker采样状态，不读取历史实验，并说明缺少的证据。'),
+                     ('experiments','请列出最近已保存的历史实验，不检查当前运行状态。'),
+                     ('out_of_scope','我的订单想退款，怎么联系商家客服？'),
+                     ('clarify','帮我看看这个。')]
+            for kind, question in cases:
+                task_id = submit(question)
+                item = wait_for(lambda: finished(task_id), timeout=120)
+                verify_report(item, kind)
+                routing_records.append(item)
+                print(f'PASS: real {kind} route, evidence policy and exact SQL readback', flush=True)
+            (evidence/'routing-reports.json').write_text(json.dumps(routing_records,ensure_ascii=False,indent=2))
+            record = routing_records[0]
+            key = record['id']
+            report = record['report']
+        elif args.report:
             original = json.loads(args.report.read_text())
             key = original['id']
             with patch.dict(os.environ, environment):
@@ -189,25 +264,40 @@ def main():
                 store.update(key, 'succeeded', report=original['report'])
             record = finished(key)
             (evidence/'replayed-report-source.txt').write_text(str(args.report.resolve())+'\n')
+            report = verify_report(record)
         else:
-            key = submit('请分析当前 Worker 采集异常，区分当前观测、历史实验和技术文档。说明哪些原因只是推测、哪些信息不足，并建议验证步骤。不要将采集异常等同于业务故障。')
+            key = submit('请分析当前 Worker 采集异常，区分当前观测、历史资料和技术文档。说明哪些原因只是推测、哪些信息不足，并建议验证步骤。不要将采集异常等同于业务故障。')
             record = wait_for(lambda: finished(key), timeout=120)
-        require(record['status'] == 'succeeded', f'diagnosis failed: {record.get("error_code")}')
-        report = record['report']
-        refs = {e['id'] for e in report['evidence']}
-        require(all(ref in refs for item in report['analysis']['facts']+report['analysis']['possible_causes'] for ref in item['evidence_ids']), 'fabricated citation')
-        require(any(e['source'] == 'technical_docs' and e['scope'] != 'unavailable' for e in report['evidence']), 'real hybrid retrieval missing')
-        require(report['analysis']['unknowns'], 'missing uncertainty disclosure')
+            report = verify_report(record)
         (evidence/'diagnosis.json').write_text(json.dumps(record, ensure_ascii=False, indent=2))
-        actual = json.loads(sql(f"SELECT report FROM epoll_monitor_test.diagnosis_report WHERE id='{key}'"))
-        require(actual == report, 'persisted actual diagnostic report differs')
-        print(f'PASS: {"replayed report" if args.report else "actual remote diagnosis"}, citations and SQL readback ({time.monotonic()-start:.1f}s)', flush=True)
+        print(f'PASS: actual task/report chain, citations and SQL readback ({time.monotonic()-start:.1f}s)', flush=True)
         if paused is not None:
             resume(); paused = None
             wait_for(lambda: request(http_port)[1]['validity'] == 'complete')
 
         stop(diag); diag = start_diag()
         require(request(http_port, 'diagnoses/'+key)[1]['data']['report'] == report, 'diagnostic report lost on restart')
+        for item in routing_records:
+            require(request(http_port, 'diagnoses/'+item['id'])[1]['data']['report'] == item['report'], 'routed report lost on restart')
+        if args.smoke and args.routing:
+            # Exercise rejected-report persistence without a TCP fault or a valid model generation.
+            stop(diag)
+            broken={**environment,'DEEPSEEK_API_KEY':'invalid-test-key'}
+            diag=start_diag(broken)
+            failed_key=submit('请核对当前Worker状态。')
+            failed=wait_for(lambda: finished(failed_key),timeout=120)
+            require(failed['status']=='failed' and failed['error_code']=='deepseek_http_401','provider auth failure not rejected')
+            rejected=failed['report']
+            require(rejected and rejected.get('delivery_status')=='rejected' and not rejected['analysis']['facts'],
+                    'rejected report exposed success claims')
+            require(rejected['reproducibility']['model_calls'][-1]['error']=='deepseek_http_401','failed call metadata missing')
+            actual=json.loads(sql(f"SELECT report FROM epoll_monitor_test.diagnosis_report WHERE id='{failed_key}'"))
+            require(actual==rejected,'rejected report SQL mismatch')
+            (evidence/'rejected-report.json').write_text(json.dumps(failed,ensure_ascii=False,indent=2))
+            stop(diag);diag=start_diag()
+            require(request(http_port,'diagnoses/'+failed_key)[1]['data']['report']==rejected,'rejected report lost on restart')
+            require(request(http_port,'health')[0]==200,'provider failure affected monitor')
+            print('PASS: real 401 rejection metadata, exact SQL readback, restart persistence and monitor liveness',flush=True)
         if not args.smoke:
             # Seed interrupted work as if the process had died before committing completion.
             sql("INSERT INTO epoll_monitor_test.diagnosis_task (id,question,status,created_at_unix_ms,updated_at_unix_ms,expires_at_unix_ms) "
@@ -227,14 +317,15 @@ def main():
             require(failed['status'] == 'failed' and failed['error_code'] == 'deepseek_http_401', 'AI auth failure falsely succeeded')
             require(request(http_port, 'health')[0] == 200, 'AI provider failure affected monitor')
             stop(diag); diag = start_diag()
-        print('PASS: restart persistence and fault isolation', flush=True)
+        print('PASS: restart persistence' + (' and full fault isolation' if not args.smoke else ' (smoke; no TCP fault injected)'), flush=True)
         if args.hold:
             print(f'Browser QA: http://127.0.0.1:{http_port}/#diagnoses ; token is test_http_monitor.TOKEN', flush=True)
-            (evidence/'browser.json').write_text(json.dumps({'port': http_port, 'task_id': key}))
+            (evidence/'browser.json').write_text(json.dumps({'port': http_port, 'task_id': key, 'task_ids': {item['report']['kind']:item['id'] for item in routing_records}}))
             input('Press Enter to clean up: ')
     require(all(p.poll() is not None for p in processes) and not database.root.exists(), 'resource cleanup incomplete')
     if tcp is not None:
         require(tcp.poll() is not None and not config.exists(), 'TCP cleanup incomplete')
+    require(all(identity(int(pid)) == info['start_ticks'] for pid,info in protected.items()), 'pre-existing service identity changed; inspect evidence')
     print('PASS: test processes exited; private MySQL SHUTDOWN; test config and data removed', flush=True)
 
 

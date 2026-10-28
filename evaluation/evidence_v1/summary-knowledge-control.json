@@ -1,0 +1,45 @@
+{
+  "scope": "T11/T12 source-based development/holdout review; no formal accuracy claim",
+  "reviewer": "project_assistant_source_and_fixture_review; not external human expert or blind review",
+  "by_strategy": {
+    "targeted": {
+      "attempts": 1,
+      "delivered": 1,
+      "rejected": 0,
+      "semantic_outcomes": {
+        "pass": 1
+      },
+      "all_attempt_seconds_median": 14.9423,
+      "executed_tool_calls": 1,
+      "services": {
+        "DEEPSEEK": {
+          "calls": 3,
+          "missing_usage": 0,
+          "available_usage_sums": {
+            "input_tokens": 13055,
+            "output_tokens": 2050,
+            "total_tokens": 15105
+          }
+        },
+        "EMBEDDING": {
+          "calls": 1,
+          "missing_usage": 0,
+          "available_usage_sums": {
+            "prompt_tokens": 19,
+            "completion_tokens": 0,
+            "total_tokens": 19
+          }
+        },
+        "RERANK": {
+          "calls": 1,
+          "missing_usage": 1,
+          "available_usage_sums": {}
+        }
+      }
+    }
+  },
+  "paired_cases": [],
+  "paired": {},
+  "failed_attempts": [],
+  "warning": "semantic labels are source-based reviewer judgments, not automatic truth; failed attempts stay outside semantic denominators"
+}

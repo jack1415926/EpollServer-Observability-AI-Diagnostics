@@ -8,6 +8,8 @@ from pathlib import Path
 import signal
 import subprocess
 import tempfile
+import select
+import sys
 
 from process_group import start_process_group, stop_process_group
 from protocol import recv_pkg, require, send_pkg
@@ -19,16 +21,29 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--binary", type=Path, default=Path("server/nginx"))
     parser.add_argument("--monitor", type=Path, default=Path("monitor/build/epoll-monitor"))
+    parser.add_argument("--resources", action="store_true", help="verify independent CPU/RSS; Ping-only profile disables Redis rate limiting in the private config")
+    parser.add_argument("--output", type=Path, help="new evidence directory; existing paths are rejected")
+    parser.add_argument("--hold", action="store_true", help="hold resumed services for browser QA, at most 300 seconds")
     args = parser.parse_args()
     binary, monitor_binary = args.binary.resolve(), args.monitor.resolve()
-    root = Path(tempfile.mkdtemp(prefix="epoll-http-live-"))
+    if args.output:
+        root = args.output.resolve(); root.mkdir(mode=0o700, parents=True, exist_ok=False)
+    else:
+        root = Path(tempfile.mkdtemp(prefix="epoll-http-live-"))
     tcp_port, http_port = free_port(), free_port()
     config = root / "nginx.conf"
     metrics = root / "metrics"
     source = (binary.parent / "nginx.conf").read_text()
     source = "\n".join(line for line in configure(source, tcp_port).splitlines()
                        if not line.strip().startswith(("WorkerSnapshotEnable", "WorkerSnapshotDirectory")))
+    if args.resources:
+        source = '\n'.join(line for line in source.splitlines() if not line.strip().startswith('RedisRateLimitEnable'))
+        source += '\nRedisRateLimitEnable = 0\n'
     config.write_text(source + f"\nWorkerSnapshotEnable = 1\nWorkerSnapshotDirectory = {metrics}\n")
+    config.chmod(0o600)
+    (root/'parameters.json').write_text(json.dumps({'tcp_port':tcp_port,'http_port':http_port,
+        'resources':args.resources,'redis_rate_limit_enabled':False if args.resources else 'from_local_config',
+        'scope':'functional Ping and resource observation, not a performance measurement'})+'\n')
     tcp = monitor = None
     workers = []
     try:
@@ -64,6 +79,10 @@ def main():
             monitor = start_monitor()
             wait_for(complete)
             require(save("complete")["data"]["totals"]["connections_current"] == 0, "unexpected initial connections")
+            if args.resources:
+                wait_for(lambda: all(w['resources']['cpu_percent'] is not None for w in request(http_port,'workers')[1]['data']['workers']))
+                resource = save('resources-idle', 'workers')
+                require(all(w['resources']['rss_bytes'] > 0 for w in resource['data']['workers']), 'missing Worker RSS')
             with connect(tcp_port, "127.0.10.1") as client:
                 send_pkg(client, 0, b"")
                 require(recv_pkg(client) == (0, b""), "initial Ping failed")
@@ -78,10 +97,19 @@ def main():
                 partial = save("partial")
                 require(partial["data"]["valid_workers"] == 1 and
                         partial["data"]["totals"]["connections_current"] is None, "partial became fake total")
+                if args.resources:
+                    resource = save('resources-paused', 'workers')
+                    paused = next(w for w in resource['data']['workers'] if w['pid']==workers[0])
+                    require(paused['status']=='stale' and paused['resources']['rss_bytes'] > 0 and
+                            paused['resources']['cpu_percent']==0, 'paused resources confused with stale business snapshot')
             finally:
                 os.kill(workers[0], signal.SIGCONT)
             wait_for(complete)
+            if args.resources: save('resources-resumed', 'workers')
             print("PASS: stopped Worker expires; resume recovers complete", flush=True)
+            if args.hold:
+                print(f'HOLD: HTTP port {http_port}; press Enter to finish, automatic continuation after 300s',flush=True)
+                if select.select([sys.stdin], [], [], 300)[0]: sys.stdin.readline()
 
             manifest.chmod(0o666)
             try:
@@ -102,6 +130,7 @@ def main():
             require(tcp.wait(timeout=30) == 1, "TCP fail-stop behavior changed")
             wait_for(lambda: request(http_port)[0] == 503)
             save("tcp-exited")
+            if args.resources: save('resources-tcp-exited', 'workers')
             health = save("health-after-tcp-exit", "health")
             require(health["data"]["monitor"] == "ok" and health["data"]["tcp_health"] == "not_probed",
                     "HTTP health confused with TCP health")

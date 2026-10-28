@@ -1,0 +1,192 @@
+{
+  "scope": "six fixed-tool replay executions on three prior schema-failure questions; not full quality evaluation",
+  "protocol": "DeepSeek beta strict Function Calling with forced submit_diagnosis_report + Pydantic + at most one final-only repair",
+  "capability_probe": [
+    {
+      "mode": "json_schema",
+      "error": "deepseek_http_400"
+    },
+    {
+      "mode": "strict_function",
+      "status": "accepted",
+      "validated": true,
+      "model": "deepseek-flash",
+      "finish_reason": "tool_calls",
+      "usage": {
+        "prompt_tokens": 515,
+        "completion_tokens": 435,
+        "total_tokens": 950,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 515
+      }
+    }
+  ],
+  "attempted": 6,
+  "succeeded": 6,
+  "median_seconds": 20.457,
+  "runs": [
+    {
+      "case_id": "W3",
+      "mode": "hybrid_rerank",
+      "status": "ok",
+      "seconds": 24.9104,
+      "checks": {
+        "citation_ids_exist": true,
+        "required_evidence_present": true,
+        "expected_conclusion_matches": true,
+        "semantic_support": "requires_review",
+        "claim_count": 16
+      },
+      "manifest_sha256": "d9329667e28446da26336ae67006aa835418af96cf93a6e4bb8946ffd84170e2",
+      "report_sha256": "2fe5cd022e8bb88655f56430540c77edac9b81cec746b39efb70015695da91f7",
+      "api_calls": 4,
+      "deepseek_total_tokens": 14030
+    },
+    {
+      "case_id": "W3",
+      "mode": "live_only",
+      "status": "ok",
+      "seconds": 17.5904,
+      "checks": {
+        "citation_ids_exist": true,
+        "required_evidence_present": true,
+        "expected_conclusion_matches": true,
+        "semantic_support": "requires_review",
+        "claim_count": 11
+      },
+      "manifest_sha256": "d9329667e28446da26336ae67006aa835418af96cf93a6e4bb8946ffd84170e2",
+      "report_sha256": "b064c3debf31e1e2fe8a6820d56a6eb14eaafbc62fb6761892ec48fa2ca5a9ec",
+      "api_calls": 3,
+      "deepseek_total_tokens": 10953
+    },
+    {
+      "case_id": "E2",
+      "mode": "hybrid_rerank",
+      "status": "ok",
+      "seconds": 23.6693,
+      "checks": {
+        "citation_ids_exist": true,
+        "required_evidence_present": true,
+        "expected_conclusion_matches": null,
+        "semantic_support": "requires_review",
+        "claim_count": 12
+      },
+      "manifest_sha256": "17bd744a9180d7f64e31f8369e5bcfa4214b2396b06086e797330aa96bd64842",
+      "report_sha256": "2b65b6466e69e463bc7b7aa3bff0124574e175b3acb6d5776673e093586fdf32",
+      "api_calls": 5,
+      "deepseek_total_tokens": 21900
+    },
+    {
+      "case_id": "E2",
+      "mode": "live_only",
+      "status": "ok",
+      "seconds": 10.9562,
+      "checks": {
+        "citation_ids_exist": true,
+        "required_evidence_present": true,
+        "expected_conclusion_matches": null,
+        "semantic_support": "requires_review",
+        "claim_count": 7
+      },
+      "manifest_sha256": "17bd744a9180d7f64e31f8369e5bcfa4214b2396b06086e797330aa96bd64842",
+      "report_sha256": "767a1e3ff6a77ec863397297b33789c1e8b0e35c91235913d7926fd42304ec1d",
+      "api_calls": 2,
+      "deepseek_total_tokens": 6227
+    },
+    {
+      "case_id": "D1",
+      "mode": "hybrid_rerank",
+      "status": "ok",
+      "seconds": 20.7106,
+      "checks": {
+        "citation_ids_exist": true,
+        "required_evidence_present": true,
+        "expected_conclusion_matches": true,
+        "semantic_support": "requires_review",
+        "claim_count": 9
+      },
+      "manifest_sha256": "d3823d8cebda20604145daf6d3c9049a263c5f7300a048c3879ce17695c06752",
+      "report_sha256": "2ecf2b74a48f3ee8bfa9a9911d67df3729b02953a6fa53de593b6da6460a874a",
+      "api_calls": 4,
+      "deepseek_total_tokens": 12784
+    },
+    {
+      "case_id": "D1",
+      "mode": "live_only",
+      "status": "ok",
+      "seconds": 20.2034,
+      "checks": {
+        "citation_ids_exist": true,
+        "required_evidence_present": true,
+        "expected_conclusion_matches": true,
+        "semantic_support": "requires_review",
+        "claim_count": 11
+      },
+      "manifest_sha256": "d3823d8cebda20604145daf6d3c9049a263c5f7300a048c3879ce17695c06752",
+      "report_sha256": "2392f056f464d7e55bfd355e3190859cfc1b5888f4f447dd7bd2ecd38a4485f7",
+      "api_calls": 4,
+      "deepseek_total_tokens": 14847
+    }
+  ],
+  "final_only_probes": [
+    {
+      "case_id": "W3",
+      "mode": "live_only",
+      "scope": "final-report-only from previously saved evidence; no retrieval or tool replay",
+      "source_report_sha256": "b064c3debf31e1e2fe8a6820d56a6eb14eaafbc62fb6761892ec48fa2ca5a9ec",
+      "status": "ok",
+      "repair_errors": [],
+      "seconds": 7.069725990999359
+    },
+    {
+      "case_id": "E2",
+      "mode": "hybrid_rerank",
+      "scope": "final-report-only from previously saved evidence; no retrieval or tool replay",
+      "source_report_sha256": "2b65b6466e69e463bc7b7aa3bff0124574e175b3acb6d5776673e093586fdf32",
+      "status": "ok",
+      "repair_errors": [
+        [
+          {
+            "field": [],
+            "type": "json_invalid"
+          }
+        ]
+      ],
+      "seconds": 10.535051526000643
+    },
+    {
+      "case_id": "D1",
+      "mode": "live_only",
+      "scope": "final-report-only from previously saved evidence; no retrieval or tool replay",
+      "source_report_sha256": "2392f056f464d7e55bfd355e3190859cfc1b5888f4f447dd7bd2ecd38a4485f7",
+      "status": "ok",
+      "repair_errors": [],
+      "seconds": 6.518314776000807
+    },
+    {
+      "case_id": "extra_property_probe",
+      "scope": "adversarial schema enforcement probe",
+      "arguments": {
+        "ok": true,
+        "extra_probe": null
+      },
+      "respected_schema": false
+    }
+  ],
+  "provider_strict_is_a_guarantee": false,
+  "guarantee_note": "Adversarial strict function probe returned extra_probe despite additionalProperties=false; another final-only probe produced invalid JSON and required one backend repair. Accepted strict flag does not prove constrained decoding.",
+  "current_index_update": {
+    "sha256": "a72e497f1c3978d9040365b9fd83d0fe7c7ef090d3a0ab67bf905c596eb990fa",
+    "chunks": 294,
+    "files": 22,
+    "new_embeddings": 7,
+    "reused_vectors": 287
+  },
+  "contract_probe_repeat": {
+    "result": "passed_one_sample",
+    "note": "A separate minimal strict-contract run passed; earlier extra-property counterexample remains valid. One passing sample is not a guarantee."
+  }
+}

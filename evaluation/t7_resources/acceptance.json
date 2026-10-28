@@ -1,0 +1,120 @@
+{
+  "scope": "T7 first increment: Worker CPU and approximate RSS, independent of business snapshots; no full T7 completion",
+  "recorded_at": "2026-10-28T14:20:47.884376+00:00",
+  "checkpoint_commit": "5143efb935ae1b3892aba286baf7379aedc1ca6e",
+  "code_state": "checkpoint plus preserved T11/T12 work and this T7 increment; not committed or pushed",
+  "code_sha256": {
+    "monitor/collector/collector.cxx": "59ba3f68a27679fb1ccd1225c8347cdb692c4ce819c14c0570e64fcff6f3521b",
+    "monitor/collector/collector.h": "d27b1f5e5a251066234cf20d73238ea3b8de893b634cd10fb9d17817cc6ad856",
+    "monitor/http/main.cxx": "d89ffde32b024fc073bd83dfc30f43c46b3801c5bb191922702ee4b419da09a7",
+    "monitor/web/app.js": "13da1d9a1e7600281e7ce80cdb5ffb0261771b56d37b07c89530758ce0de0e9d",
+    "monitor/web/index.html": "025c44cc4331e8586e810405e54fdd4b86b0bdc66158b0d5c61957c4006bc55a",
+    "monitor/build/epoll-monitor": "f8362b5bd3ffe5efb7f692e47cf9dc9021fc88bf4cd6bf6b9b188b89871c7ef7",
+    "monitor/build/epoll-metrics": "6a86c7b8c1b75e7982b5b8997f2af5adfa53a55a65690b12fcf0418c4ac4d5a1",
+    "diagnosis/selection.py": "ed6fcca2e428cabd180d28b6ba32bed162d780ce9cb3032532b59fb6ac4aaedc",
+    "diagnosis/routing.py": "5e7a6b56a799e31880c87e52e04275de5f98b79347d2808fca3f43e1fc549e2b",
+    "diagnosis/evidence.py": "eca92bf89bd212cbd70a46c488460496d69a01df07a67ee10cc92e6531428ed2",
+    "diagnosis/observation_contracts.json": "4c813234b7dfe21ce64c62a4140befb6f63358cb9c62b603ad4873d3c91f4fed",
+    "diagnosis/retrieval.py": "3c695068d65ce82eca2a2454f18d4271874b8f7dbcae29b291a770e07cc1a904",
+    "diagnosis/corpus_policy.json": "f3f8f7cbd9549239e085da3c6876a50f100256d8af676e96ab7c9fd64bc819b1",
+    "docs/T7_WORKER_RESOURCES.md": "108ca1e02c44a22f6537865ec3630b9a52dc003ce5117e893688c6ef64e4e47d",
+    "testscript/test_metrics_collector.py": "a361332bac4527554ab261684d5c8d939145ff412c3edabe9f44cd5ec522be6f",
+    "testscript/test_http_monitor.py": "e01fe86118fa7af01b7d1109e057834723c1b9986912cc090a9c0568747fe524",
+    "testscript/test_http_monitor_live.py": "e837d47414ec548667f68a95526671bd87e9260d1473a2c44e8cad5306a30cab",
+    "testscript/test_diagnosis_render.js": "8a3e07211929483f08f5fb493918e709aae982922823d43b19199d89cc6867c5",
+    "testscript/test_diagnosis_routing.py": "100cced92cf9d8c3bddb72cdb1045e6aa0b99df11575d4639ca68ca505521c46"
+  },
+  "evidence_sha256": {
+    "controlled-worker.json": "29f1d711f913c5ee1e5d07cddfceebd1fe972a0751763adc7d1f049982043e9d",
+    "monitor-tests.log": "c2e1c1abf72f0385d7210406d73675ab60fd88ca62f40c0a1188be9ac8bd6954",
+    "diagnosis-tests.log": "e63146292e290c010003ab79435f5fcabd4df9d652884ce3f79a5d7ecef89015",
+    "tool-evidence.json": "0a6ecdb5ce919ba46b6e2ec669f02a0e1cdc0a5236c038c3359d1ee17a09b76c",
+    "browser-qa.json": "86615d623fc5f92ff392df58be6fb407b547a74c44bced722f5e336fb2013a67",
+    "a11y.json": "ad7069b75cf7746935ce3a268c270b1ac81de73384f490d317838ecab6472599",
+    "desktop.png": "171d3f7fe88066d3b9276d289f07ff47eeda0fbe60cf5328322913b5af1a498c",
+    "mobile.png": "97769f8f437c63f685f1439503b016026d511aa920499837a22c6e8ea1fbc8b9",
+    "mobile-resources.png": "e7338fc9c2fd47b7da218ae130a2c7ae5d90749ea2e9afc5dd3539e73eb48649",
+    "tcp-live/resources-idle.json": "2c53073184b67c02049a0d6afa5d85a0498b2c92317adc0b21dcb11ee1de9092",
+    "tcp-live/resources-paused.json": "745512dca90e44ad8d90dd5fcd7c3bd081b57dd2ece36073c0f3f91a7b891cec",
+    "tcp-live/resources-resumed.json": "3e7a49c648db16a15215a36f1e9627f243407d857162ece33f4087cd446ba676",
+    "tcp-live/resources-tcp-exited.json": "85b4a399951f6a0e3f075a24479e64bcefee69407872bc23d5cd00815ce81f85",
+    "tcp-live/parameters.json": "f7a0f4b731a0b05a71877fa4da005f3cbf5d9b394e988696b0589be73ed22da0"
+  },
+  "checks": {
+    "monitor_regression": {
+      "tests": 31,
+      "seconds": 26.986,
+      "passed": true
+    },
+    "diagnosis_regression": {
+      "tests": 70,
+      "seconds": 3.762,
+      "passed": true
+    },
+    "node_production_render": "passed",
+    "real_tcp": "Ping 0->1->0, CPU/RSS idle, Worker stop/resume, monitoring isolation, fail-stop and cleanup passed",
+    "controlled_process": "busy CPU and RSS, SIGSTOP CPU=0 with stale business and readable RSS, resume and exit nulls passed",
+    "production_tool": "real HTTP get_worker_metrics and support locators/contracts passed; no paid model calls",
+    "browser": {
+      "viewport_sizes": {
+        "desktop.png": [
+          1280,
+          633
+        ],
+        "mobile.png": [
+          390,
+          844
+        ],
+        "mobile-resources.png": [
+          390,
+          844
+        ]
+      },
+      "violations": 0,
+      "incomplete": 1,
+      "document_width_at_390": 390,
+      "initial_scroll_focus_violation": "fixed; original audit preserved",
+      "keyboard_focus_and_horizontal_scroll": "checked"
+    }
+  },
+  "index": {
+    "sources": 26,
+    "chunks": 318,
+    "sha256": "d8227a877c392e9c0362da9aaaa3b722281b8f48c089e14f6794026ffa61945c",
+    "before_sha256": "f2e41e7d018b94421b2c4b96fca2e493d655b2e753664d3964210e85cdbfaf81",
+    "increments": [
+      {
+        "chunks": 317,
+        "new_vectors": 11,
+        "reused_vectors": 306
+      },
+      {
+        "chunks": 318,
+        "new_vectors": 3,
+        "reused_vectors": 315
+      }
+    ],
+    "purpose": "new current resource contract and isolation of superseded capability text; not retrieval quality tuning"
+  },
+  "version_limits": [
+    "Controlled-worker and real-TCP raw samples preceded the final UI-only focus patch; their original per-run monitor binary hashes were not recorded.",
+    "Final monitor binary and final 31-case monitor suite share the same code; earlier core-resource evidence is reused, not claimed as a rerun.",
+    "No formal overhead, performance benchmark, DB persistence, paid model quality evaluation, deployment or push."
+  ],
+  "cleanup": {
+    "own_live_test_processes": "confirmed exited",
+    "tcp_temporary_config": "removed only after TCP group exit",
+    "original_mysql_pid": 2303,
+    "original_local_config_and_frozen_baseline_hashes": "unchanged",
+    "artifacts": "retained; temporary browser package retained for reuse"
+  },
+  "remaining": [
+    "thread/request timing",
+    "error counters",
+    "DB wait evidence",
+    "log instance/time/Worker correlation",
+    "formal overhead acceptance",
+    "deployment",
+    "T11/T12 semantic residuals"
+  ]
+}

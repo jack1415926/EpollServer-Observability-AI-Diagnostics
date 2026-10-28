@@ -1,0 +1,50 @@
+[
+  {
+    "note": "docs/knowledge/LINUX_SIGNALS.md",
+    "note_sha256": "5e3c94bfd70d1f4f0ea56745753f0cc7185c227b3cf229dcc84c58b8e4a274e3",
+    "source_url": "https://www.man7.org/linux/man-pages/man7/signal.7.html",
+    "source_version": "Linux man-pages 6.17",
+    "source_published_on": "2026-02-08",
+    "source_snapshot_sha256": "fe302eafcf235fe9a0451ad53565d06ecd917b67b61a17bc2e2c5f548fa5ff5e",
+    "snapshot_path": "artifacts/knowledge-t5/signal.man",
+    "system_package": "manpages/manpages-dev 6.17-1",
+    "web_cross_check": {
+      "version": "Linux man-pages 6.19",
+      "page_date": "2026-02-08",
+      "checked_on": "2026-10-27",
+      "scope": "selected signal/state/wait semantics only; not full-text equivalence"
+    }
+  },
+  {
+    "note": "docs/knowledge/LINUX_PROC_STATE.md",
+    "note_sha256": "d935d28d6542d38b9f881255a45b1af832e719d01b1fc8df04878b13ca172c2a",
+    "source_url": "https://man7.org/linux/man-pages/man5/proc_pid_stat.5.html",
+    "source_version": "Linux man-pages 6.17",
+    "source_published_on": "2026-02-08",
+    "source_snapshot_sha256": "abb8ad91a13eba469a137b81fc654c5eacb899d3004b6ebfdaa34e643eb1a86b",
+    "snapshot_path": "artifacts/knowledge-t5/proc_pid_stat.man",
+    "system_package": "manpages/manpages-dev 6.17-1",
+    "web_cross_check": {
+      "version": "Linux man-pages 6.19",
+      "page_date": "2026-02-08",
+      "checked_on": "2026-10-27",
+      "scope": "selected signal/state/wait semantics only; not full-text equivalence"
+    }
+  },
+  {
+    "note": "docs/knowledge/LINUX_WAIT_STATE.md",
+    "note_sha256": "5b33f45761d427579bbba2c8ce4cf22fba6847c976ab2cfbf5386e5e55a10507",
+    "source_url": "https://man7.org/linux/man-pages/man2/waitpid.2.html",
+    "source_version": "Linux man-pages 6.17",
+    "source_published_on": "2026-02-08",
+    "source_snapshot_sha256": "d0f4558c8076cc015f96c01e18d332318c8ab0953cb581f400fafde804e41432",
+    "snapshot_path": "artifacts/knowledge-t5/wait.man",
+    "system_package": "manpages/manpages-dev 6.17-1",
+    "web_cross_check": {
+      "version": "Linux man-pages 6.19",
+      "page_date": "2026-06-05",
+      "checked_on": "2026-10-27",
+      "scope": "selected signal/state/wait semantics only; not full-text equivalence"
+    }
+  }
+]

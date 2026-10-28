@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "batch2-knowledge-v1",
+  "revision": "main-integration-20261029",
   "entries": [
     {
       "path": "diagnosis/knowledge/runtime_contract.md",
@@ -10,7 +10,7 @@
         "monitor/collector",
         "monitor/http"
       ],
-      "revision": "fbebd4f+batch2",
+      "revision": "T7+process-resources-20261029",
       "sources": [
         "monitor/collector/collector.cxx",
         "monitor/http/main.cxx"

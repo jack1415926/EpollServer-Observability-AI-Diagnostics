@@ -18,7 +18,7 @@ import httpx
 import numpy as np
 from pydantic import ValidationError
 
-from diagnosis.agent import Analysis, SYSTEM, Tools, diagnose, schemas
+from diagnosis.agent import Analysis, KnowledgeAnswer, SYSTEM, Tools, diagnose, schemas
 from diagnosis.config import ROOT, load_environment
 from diagnosis.providers import Providers, ProviderError
 from diagnosis.retrieval import INDEX, Retriever, tokenize
@@ -138,12 +138,14 @@ class RetrievalComparison:
     async def rankings(self, question, online):
         # Same index, tokenizer, candidate sizes and RRF math as the frozen production implementation.
         query = question[:500]
-        sparse = np.argsort(-self.frozen.bm25.get_scores(tokenize(query)))[:20].tolist()
+        _, allowed = self.frozen.selection(query)
+        if not len(allowed): return {key:[] for key in ('bm25','dense','hybrid','hybrid_rerank')}
+        sparse = allowed[np.argsort(-self.frozen.bm25.get_scores(tokenize(query))[allowed])[:20]].tolist()
         result = {'bm25': sparse[:5]}
         if not online:
             return result
         vector = await self.provider.embed([query])
-        dense = np.argsort(-(self.frozen.vectors @ vector[0]))[:20].tolist()
+        dense = allowed[np.argsort(-(self.frozen.vectors[allowed] @ vector[0]))[:20]].tolist()
         fused = {}
         for ranking in (sparse, dense):
             for rank, index in enumerate(ranking, 1):
@@ -185,7 +187,10 @@ def replay_transport(replay):
 
 
 def structural_checks(report):
-    Analysis.model_validate(report['analysis'])
+    if report.get('kind')=='knowledge' or report.get('answer_mode')=='observation':
+        KnowledgeAnswer.model_validate({k:v for k,v in report['analysis'].items() if k not in ('conclusion','possible_causes','excluded_causes')})
+    else:
+        Analysis.model_validate(report['analysis'])
     ids = {e['id'] for e in report['evidence']}
     return {'schema_valid': True,
             'citations_exist': all(ref in ids for item in report['analysis']['facts']+
@@ -199,7 +204,7 @@ async def generation(case, frozen, args, mode, output):
     async with httpx.AsyncClient(trust_env=False, follow_redirects=False,
             mounts={'http://127.0.0.1': replay_transport(replay)}) as client:
         provider = CachedProviders(client, args.cache, args.online, trace)
-        retriever = Retriever(provider, args.index) if mode == 'rag' else NoKnowledge()
+        retriever = Retriever(provider, args.index, legacy_corpus=args.legacy_index) if mode == 'rag' else NoKnowledge()
         tools = ReplayTools(client, retriever, replay)
         start = time.monotonic()
         try:
@@ -224,7 +229,7 @@ async def generation(case, frozen, args, mode, output):
 async def run(args):
     load_environment()
     suite = json.loads(args.suite.read_text())
-    frozen = Retriever(None, args.index)
+    frozen = Retriever(None, args.index, legacy_corpus=args.legacy_index)
     counts = validate_suite(suite, frozen.chunks)
     if args.validate:
         print(json.dumps(counts)); return
@@ -320,6 +325,7 @@ def main():
     parser.add_argument('--split', choices=('development', 'holdout', 'all'), default='development')
     parser.add_argument('--ids', help='comma-separated case IDs for a small dependency probe')
     parser.add_argument('--online', action='store_true', help='explicitly permit paid remote calls')
+    parser.add_argument('--legacy-index', action='store_true', help='Explicitly read a frozen pre-policy index; does not change production validation')
     parser.add_argument('--diagnose', action='store_true', help='run production Agent and runtime-only ablation')
     parser.add_argument('--validate', action='store_true', help='check case contracts and source anchors only')
     args = parser.parse_args()

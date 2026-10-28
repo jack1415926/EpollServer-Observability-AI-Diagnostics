@@ -1,0 +1,31 @@
+{
+  "scope": "T11/T12 source-based development/holdout review; no formal accuracy claim",
+  "reviewer": "project_assistant_source_and_fixture_review; not external human expert or blind review",
+  "reviewed_on": "2026-10-28",
+  "results_sha256": "fe6116e42dabb2133d750062d7fd56cdce5fabe4a4951ca1534e114e2589f4bb",
+  "interpretation": "supported hypotheses are unverified compatible directions, not proven causes; failures are counted separately",
+  "reviews": [
+    {
+      "id": "C2",
+      "strategy": "targeted",
+      "report_sha256": "ffd457163e629620e5e1a85302509b184f05be83bab6288f8f26caffcd2cbd61",
+      "outcome": "pass",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [],
+        "excluded_causes": []
+      },
+      "summary_support": "supported",
+      "notes": "信号停止/继续与终止宏、业务健康边界以及历史验收范围正确，来源编号不再被误当实测数值。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    }
+  ]
+}

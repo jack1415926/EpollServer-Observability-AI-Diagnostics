@@ -1,0 +1,166 @@
+{
+  "reviewer": "project_assistant_manual; not external blind review",
+  "reviewed_on": "2026-10-27",
+  "hash_format": "SHA256 of UTF-8 json.dumps(report, ensure_ascii=False, sort_keys=True, separators=(comma,colon))",
+  "results_sha256": "b803496da50df00550df1ad14a44af835ce076f85e84eb0923395a1c41fd5f09",
+  "scope": "Evaluate labels and cited evidence, including summary and hypotheses; supported candidate does not mean proven root cause",
+  "reviews": [
+    {
+      "id": "S1",
+      "report_sha256": "112f0091d30eb5cf86b4b6d58746a2ca4fd4412ca39030fc61c99a7572b243e5",
+      "outcome": "pass",
+      "fact_support": [
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported"
+      ],
+      "hypothesis_support": [],
+      "summary_supported": true,
+      "issue_positions": [],
+      "notes": "信号停止/继续与终止、不可捕获SIGSTOP、业务健康边界均表达；事实分别由E1/E3及明确历史范围的E2/E5支持。",
+      "evidence_sources": [
+        "technical_docs"
+      ]
+    },
+    {
+      "id": "S2",
+      "report_sha256": "1f87f851a70e3d84ed947604a0b139e08188e6eda9b85711857358aece1884f4",
+      "outcome": "pass",
+      "fact_support": [
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported"
+      ],
+      "hypothesis_support": [],
+      "summary_supported": true,
+      "issue_positions": [],
+      "notes": "T/t/Z、时钟滴答、PID复用及工具不暴露state均表达；E1/E2与项目身份契约支持。",
+      "evidence_sources": [
+        "technical_docs"
+      ]
+    },
+    {
+      "id": "S3",
+      "report_sha256": "79256243acae360e51f5e8403dd038f4031ac132b87a1a1e3b201fdafc305993",
+      "outcome": "pass",
+      "fact_support": [
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported"
+      ],
+      "hypothesis_support": [],
+      "summary_supported": true,
+      "issue_positions": [],
+      "notes": "正确区分四个WIF宏和僵尸，说明wait选项边界；E1/E3/E4/E5支持。",
+      "evidence_sources": [
+        "technical_docs"
+      ]
+    },
+    {
+      "id": "S4",
+      "report_sha256": "f095b8d95ab6cde0976c14daa1c83cd0b6d921b6907fb0bf87bc7a1ed3063b25",
+      "outcome": "fail",
+      "fact_support": [
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported"
+      ],
+      "hypothesis_support": [
+        "partly_supported",
+        "partly_supported",
+        "supported_as_unverified_candidate",
+        "unsupported"
+      ],
+      "summary_supported": false,
+      "issue_positions": [
+        "summary",
+        "possible_causes[0]",
+        "possible_causes[1]",
+        "possible_causes[3]"
+      ],
+      "notes": "仅取得workers，未取得资料；summary及原因1/2/4出现共享内存/心跳机制，无依据且与文件快照设计不符。保持未知枚举不能抵消该错误。",
+      "evidence_sources": [
+        "workers"
+      ]
+    },
+    {
+      "id": "S5",
+      "report_sha256": "ab7063f42885413384eecb1bba3cf59b68a85afc74b0ffafdd5ad82a6bd9eb58",
+      "outcome": "fail",
+      "fact_support": [
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported"
+      ],
+      "hypothesis_support": [
+        "supported_as_unverified_candidate",
+        "unsupported",
+        "supported_as_unverified_candidate",
+        "unsupported"
+      ],
+      "summary_supported": false,
+      "issue_positions": [
+        "summary",
+        "possible_causes[1]",
+        "possible_causes[3]"
+      ],
+      "notes": "仅取得workers。summary及原因2把SIGSTOP解释为dead，原因4把一般指标不可读取解释为dead，违反CheckProcess与process_unavailable的区分；未知退出信号的边界本身正确。",
+      "evidence_sources": [
+        "workers"
+      ]
+    },
+    {
+      "id": "S6",
+      "report_sha256": "63cfefb26c5cd6c3f7dfd0a30799ba60563486656c51dc58898fb964cef395aa",
+      "outcome": "fail",
+      "fact_support": [
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported",
+        "supported"
+      ],
+      "hypothesis_support": [
+        "partly_supported",
+        "supported_as_unverified_candidate",
+        "partly_supported",
+        "unsupported"
+      ],
+      "summary_supported": true,
+      "issue_positions": [
+        "possible_causes[2]",
+        "possible_causes[3]",
+        "unknowns",
+        "next_steps"
+      ],
+      "notes": "未把process_unavailable断言为退出，也没有执行或建议直接自动修复；但缺少本项目不自动补起的明确策略，原因4把身份不符混为读取不可用，原因3的重启推测无所引证据支持。",
+      "evidence_sources": [
+        "workers"
+      ]
+    }
+  ]
+}

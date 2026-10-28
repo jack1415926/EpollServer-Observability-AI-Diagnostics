@@ -3,12 +3,15 @@ import json
 import os
 from pathlib import Path
 import subprocess
-import signal
 import sys
 import tempfile
 import threading
 import time
 import unittest
+try:
+    from .process_group import start_process_group, stop_process_group, remove_process_directory
+except ImportError:
+    from process_group import start_process_group, stop_process_group, remove_process_directory
 
 ROOT = Path(__file__).resolve().parents[1]
 BOOT = "11111111-2222-3333-4444-555555555555"
@@ -29,9 +32,8 @@ class MetricsCollectorTests(unittest.TestCase):
                         str(ROOT / "testscript/collector_probe.cxx"), "-o", str(cls.binary)], check=True, timeout=90)
 
     def setUp(self):
-        from process_group import remove_process_directory
-        self.processes = []
         self.root = Path(tempfile.mkdtemp(prefix="epoll-collector-test-"))
+        self.processes = []
         self.addCleanup(remove_process_directory, self.root, self.processes)
         self.metrics = self.root / "metrics"
         self.metrics.mkdir(mode=0o700)
@@ -77,96 +79,87 @@ class MetricsCollectorTests(unittest.TestCase):
         # A comm with spaces and ')' catches naive /proc stat tokenization.
         file.write_text(f"{pid} (name with ) spaces) {state} {parent} " + "0 " * 17 + str(ticks) + "\n")
 
-    def resource_process(self, pid=101, ticks=11, parent=100, state='S', user='150', system='25', threads='3', rss='512'):
-        fields = {i: '0' for i in range(3, 25)}
-        fields.update({3: state, 4: str(parent), 14: user, 15: system, 20: threads, 22: str(ticks), 24: rss})
-        (self.proc/str(pid)/'stat').write_text(f'{pid} (resource ) probe) '+
-            ' '.join(fields[i] for i in range(3,25))+'\n')
-
-    def test_process_resources_survive_stale_business_snapshot(self):
-        self.resource_process(state='T')
-        self.samples[0]['sampled_at_boottime_ms'] = self.now()-6000
-        self.write(self.worker_files[0], self.samples[0])
-        sample = self.collect()
-        self.assert_partial(sample, 'stale')
-        resource = sample['workers'][0]['process_resources']
-        self.assertTrue(resource['identity_verified'])
-        self.assertEqual(resource['status'], 'complete')
-        self.assertEqual(resource['leader_state'], 'T')
-        self.assertEqual(resource['cpu_user_ticks'], 150)
-        self.assertEqual(resource['cpu_system_ticks'], 25)
-        self.assertEqual(resource['clock_ticks_per_second'], os.sysconf('SC_CLK_TCK'))
-        self.assertEqual(resource['rss_bytes'], 512*os.sysconf('SC_PAGE_SIZE'))
-        self.assertEqual(resource['threads'], 3)
-
-    def test_process_resources_missing_or_bad_values_remain_null(self):
-        resource = self.collect()['workers'][0]['process_resources']
-        self.assertEqual(resource['status'], 'partial')
-        self.assertIsNone(resource['rss_bytes'])
-        for user, rss in [('bad', '-1'), ('1', str(2**64-1))]:
-            self.resource_process(user=user, rss=rss)
-            result = self.collect()
-            self.assertEqual(result['status'], 'complete')
-            value = result['workers'][0]['process_resources']
-            self.assertIsNone(value['rss_bytes'])
-            if user == 'bad': self.assertIsNone(value['cpu_user_ticks'])
-
-    def test_process_resources_reject_reused_identity(self):
-        self.resource_process(ticks=999)
-        result = self.collect()
-        self.assert_partial(result, 'identity_mismatch')
-        resource = result['workers'][0]['process_resources']
-        self.assertFalse(resource['identity_verified'])
-        self.assertIsNone(resource['leader_state'])
-        self.assertIsNone(resource['rss_bytes'])
-
-    def test_real_proc_stop_and_resume_with_controlled_snapshot(self):
-        from process_group import start_process_group, stop_process_group
-        child = start_process_group(['sleep', '60'])
-        self.processes.append(child)
-        self.addCleanup(stop_process_group, child, timeout=1)
-        def ticks(pid):
-            return int(Path(f'/proc/{pid}/stat').read_text().rsplit(')',1)[1].split()[19])
-        boot = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
-        parent, parent_ticks, child_ticks = os.getpid(), ticks(os.getpid()), ticks(child.pid)
-        member = {'worker_index': 0, 'pid': child.pid, 'process_start_ticks': child_ticks}
-        manifest = self.metrics/f'master-{boot}-{parent}-{parent_ticks}.json'
-        self.write(manifest, {'schema_version': 1, 'boot_id': boot, 'master_pid': parent,
-            'master_start_ticks': parent_ticks, 'sequence': 1, 'write_failures_total': 0,
-            'state': 'running', 'expected_workers': 1, 'workers': [member]})
-        sample = {**member, 'schema_version': 1, 'boot_id': boot, 'master_pid': parent,
-            'master_start_ticks': parent_ticks, 'sequence': 1, 'collection_ok': True,
-            'write_failures_total': 0, 'sampled_at_unix_ms': int(time.time()*1000),
-            'sampled_at_boottime_ms': self.now()-6000, 'connections_current': 0,
-            'receive_queue_messages': 0, 'send_queue_messages': 0}
-        path = self.metrics/f'worker-{boot}-{child.pid}-{child_ticks}.json'
-        self.write(path, sample)
-        def actual():
-            return json.loads(subprocess.check_output([str(self.binary), str(manifest), '3000', '/proc'], text=True, timeout=5))
-        self.assertEqual(ticks(child.pid), child_ticks)
-        os.kill(child.pid, signal.SIGSTOP)
-        try:
-            deadline = time.monotonic()+3
-            while Path(f'/proc/{child.pid}/stat').read_text().rsplit(')',1)[1].split()[0] != 'T':
-                self.assertLess(time.monotonic(), deadline)
-                time.sleep(.01)
-            result = actual()
-            self.assertEqual(result['workers'][0]['status'], 'stale')
-            resource = result['workers'][0]['process_resources']
-            self.assertEqual(resource['leader_state'], 'T')
-            self.assertTrue(resource['identity_verified'])
-            self.assertIsInstance(resource['rss_bytes'], int)
-        finally:
-            self.assertEqual(ticks(child.pid), child_ticks)
-            os.kill(child.pid, signal.SIGCONT)
-        sample['sampled_at_boottime_ms'] = self.now()
-        self.write(path, sample)
-        self.assertEqual(actual()['workers'][0]['status'], 'fresh')
-
     def collect(self, age=3000, manifest=None):
         result = subprocess.run([str(self.binary), str(manifest or self.manifest), str(age), str(self.proc)],
                                 capture_output=True, text=True, timeout=5, check=True)
         return json.loads(result.stdout)
+
+    def resource_process(self, cpu, rss=40, ticks=11, parent=100):
+        fields = ['S', str(parent)] + ['0'] * 20
+        fields[11], fields[12], fields[19], fields[21] = str(cpu), '0', str(ticks), str(rss)
+        (self.proc / '101/stat').write_text('101 (name with ) spaces) ' + ' '.join(fields) + '\n')
+
+    def resource_probe(self):
+        probe = start_process_group([str(self.binary), str(self.manifest), '3000', str(self.proc), 'resources'],
+                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+        self.processes.append(probe)
+        self.addCleanup(stop_process_group, probe, timeout=1)
+        self.addCleanup(probe.stdin.close)
+        self.addCleanup(probe.stdout.close)
+        def take(whole=False):
+            import select
+            probe.stdin.write('sample\n'); probe.stdin.flush()
+            self.assertTrue(select.select([probe.stdout], [], [], 5)[0], 'resource probe timed out')
+            value = json.loads(probe.stdout.readline())
+            return value if whole else value['workers'][0]
+        return take
+
+    def test_resource_rates_rss_and_stale_business_are_independent(self):
+        self.resource_process(100)
+        take = self.resource_probe()
+        first = take()['resources']
+        self.assertIsNone(first['cpu_percent'])
+        self.assertEqual(first['reason'], 'cpu_warming_up')
+        self.assertEqual(first['rss_bytes'], 40 * os.sysconf('SC_PAGE_SIZE'))
+        self.write(self.worker_files[0], {**self.samples[0], 'sampled_at_boottime_ms': self.now()-10000})
+        time.sleep(.05)
+        self.resource_process(120)
+        row = take(); value = row['resources']
+        self.assertEqual(row['status'], 'stale')
+        self.assertIsNone(row['metrics']['connections_current'])
+        self.assertEqual(value['status'], 'available')
+        self.assertAlmostEqual(value['cpu_percent'], 20*100000/os.sysconf('SC_CLK_TCK')/value['interval_ms'])
+        self.assertGreater(value['cpu_percent'], 100, 'multi-core percentages are not clamped')
+
+    def test_resource_reset_failures_and_identity_reuse(self):
+        self.resource_process(100)
+        take = self.resource_probe(); take()
+        time.sleep(.02); self.resource_process(99)
+        self.assertEqual(take()['resources']['reason'], 'cpu_counter_reset')
+        self.resource_process(110, rss='bad')
+        time.sleep(.02)
+        value = take()['resources']
+        self.assertIsNotNone(value['cpu_percent']); self.assertIsNone(value['rss_bytes'])
+        self.assertEqual(value['reason'], 'rss_unavailable')
+        self.resource_process('bad', rss=50)
+        value = take()['resources']
+        self.assertIsNone(value['cpu_percent']); self.assertEqual(value['rss_bytes'], 50*os.sysconf('SC_PAGE_SIZE'))
+        self.resource_process(120)
+        self.assertEqual(take()['resources']['reason'], 'cpu_warming_up')
+        self.resource_process(130, ticks=999)
+        row = take()
+        self.assertEqual(row['resources']['reason'], 'identity_mismatch')
+        self.assertIsNone(row['resources']['rss_bytes'])
+        self.resource_process(140)
+        self.assertEqual(take()['resources']['reason'], 'cpu_warming_up')
+        (self.proc/'101/stat').unlink()
+        self.assertEqual(take()['resources']['reason'], 'dead')
+        self.resource_process(150)
+        self.assertEqual(take()['resources']['reason'], 'cpu_warming_up')
+
+    def test_resource_baseline_does_not_cross_master_restart_or_failed_manifest(self):
+        self.resource_process(100)
+        take = self.resource_probe(); take()
+        self.process(100, 99, 1)
+        self.write(self.manifest, {**self.master, 'master_start_ticks':99})
+        # Invalid instance clears all baselines before a formerly valid identity returns.
+        take(whole=True)
+        self.process(100, 10, 1); self.write(self.manifest, self.master)
+        self.assertEqual(take()['resources']['reason'], 'cpu_warming_up')
+        self.write(self.manifest, {**self.master, 'workers':[]})
+        self.assertEqual(take(whole=True)['workers'], [])
+        self.write(self.manifest, self.master)
+        self.assertEqual(take()['resources']['reason'], 'cpu_warming_up')
 
     def assert_partial(self, result, status):
         self.assertEqual(result["status"], "partial")

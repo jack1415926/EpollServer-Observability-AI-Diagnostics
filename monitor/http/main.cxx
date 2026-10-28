@@ -41,7 +41,7 @@ MonitorJson Unavailable(const char *reason)
             {"workers", MonitorJson::array()}, {"expected_workers", nullptr}, {"valid_workers", 0},
             {"totals", empty}, {"partial_sums", empty}, {"tcp_health", "not_probed"},
             {"max_age_ms", MaxAgeMs}, {"collected_at_unix_ms", nullptr},
-            {"unsupported_metrics", {"cpu_utilization", "cumulative_network", "business_counters", "mysql", "redis"}}};
+            {"unsupported_metrics", {"cumulative_network", "business_counters", "mysql", "redis"}}};
 }
 
 class Sampler {
@@ -54,12 +54,13 @@ class Sampler {
 public:
     explicit Sampler(std::filesystem::path manifest)
         : thread_([this, manifest] {
+            epoll_monitor::ResourceSampler resources;
             for (;;) {
                 // Measure from before I/O so a slow collection cannot extend data validity.
                 const auto started = BootMs();
                 MonitorJson value;
-                try { value = epoll_monitor::Collect(manifest, MaxAgeMs); }
-                catch (const std::exception &) { value = Unavailable("collection_error"); }
+                try { value = epoll_monitor::Collect(manifest, MaxAgeMs, "/proc", &resources); }
+                catch (const std::exception &) { resources.Reset(); value = Unavailable("collection_error"); }
                 uint64_t lifetime = 1500;
                 for (const auto &row : value["workers"])
                     if (row["status"] == "fresh")

@@ -1,0 +1,884 @@
+{
+  "version": "main-integration-20261029",
+  "reviewed_on": "2026-10-28",
+  "sources": {
+    "README.md": {
+      "layer": "current_contract",
+      "published_on": null,
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "project"
+      ],
+      "source_quality": "project_maintained_contract",
+      "reviewed_sha256": "996f53db88ae515e712750418f45807921fa6dcc0db3a4845dd94dd3ede0ccf6",
+      "sections": {
+        "从哪里开始": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal"
+        }
+      }
+    },
+    "docs/DECISIONS.md": {
+      "layer": "planning_progress",
+      "published_on": "2026-10-23",
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "project"
+      ],
+      "source_quality": "project_progress_or_proposal",
+      "reviewed_sha256": "f01588a5bb7f253c5d717c1ff18cc956e04feb3360e0ba5c0f2b566a125dc89c",
+      "sections": {
+        "阶段 5 确认范围（2026-10-25）": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-25"
+        },
+        "用户已确认": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "指标采集的设计约束，阶段 1 前细化": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "NATS 类比的边界": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "阶段 4 确认范围（2026-10-25）": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-25"
+        },
+        "原生json_schema接口修正（2026-10-26）": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-26"
+        },
+        "诊断领域路由与按问题取证（2026-10-26）": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-26"
+        },
+        "本次源码核对与规划调整建议": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal"
+        },
+        "本批范围与下一步": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal"
+        },
+        "阶段 1 第二批进度（2026-10-24）": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-24"
+        },
+        "阶段 1 完成决策与验收（2026-10-24，当前）": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-24"
+        },
+        "阶段 2 开发与验收（2026-10-24，当前）": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-24"
+        },
+        "阶段 3 开发与验收（2026-10-24，当前）": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-24"
+        },
+        "阶段 3 提交授权（2026-10-25）": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-25"
+        },
+        "阶段 3 收尾（2026-10-25）": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-25"
+        },
+        "诊断格式输出修正（2026-10-26）": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record",
+          "superseded_by": [
+            {
+              "path": "docs/STAGE_5_DIAGNOSIS.md",
+              "heading": "2026-10-26：json_schema原生端点修正"
+            }
+          ],
+          "published_on": "2026-10-26"
+        },
+        "T11/T12证据策略与支持校验（2026-10-28）": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-28"
+        },
+        "T7第一批资源观测（2026-10-28）": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-28"
+        },
+        "main分支整合（2026-10-29）": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-29"
+        }
+      }
+    },
+    "docs/DEVELOPMENT_ISSUES.md": {
+      "layer": "historical_case",
+      "published_on": null,
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "project"
+      ],
+      "source_quality": "project_case_record",
+      "reviewed_sha256": "938cef5df78bc3b1793a74364c83bdf3e515af88fff453fd236390d1428a9969",
+      "sections": {
+        "2026-10-26：诊断格式契约与Recall审计": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record",
+          "published_on": "2026-10-26",
+          "superseded_by": [
+            {
+              "path": "docs/STAGE_5_DIAGNOSIS.md",
+              "heading": "2026-10-26：json_schema原生端点修正"
+            }
+          ]
+        },
+        "2026-10-27：T5资料命中与运行态取证遗漏": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-27"
+        },
+        "2026-10-28：T11/T12同类修复与拒绝保真": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-28"
+        },
+        "2026-10-28：T11/T12收尾的模式、时序与控制面校验": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-28"
+        },
+        "2026-10-28：T7资源数据与业务快照分离": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-28"
+        },
+        "2026-10-29：main与T7分支整合": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-29"
+        }
+      }
+    },
+    "docs/STAGE_0_BASELINE.md": {
+      "layer": "planning_progress",
+      "published_on": "2026-10-23",
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "project"
+      ],
+      "source_quality": "project_progress_or_proposal",
+      "reviewed_sha256": "ff2bb86fe0aa6e58a4e66fb1b12ebbf711151c76383ba1be560fcd78ebe108fd",
+      "sections": {
+        "当前证据": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal"
+        },
+        "复现：环境检查与构建": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal"
+        },
+        "环境就绪后的验收顺序": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        },
+        "结果记录表": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        }
+      }
+    },
+    "docs/STAGE_1_COMPLETION.md": {
+      "layer": "planning_progress",
+      "published_on": "2026-10-24",
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "snapshots",
+        "tcp"
+      ],
+      "source_quality": "project_progress_or_proposal",
+      "reviewed_sha256": "16fce0546208b7e36cbedfb3fb671f1e40ac8a1998eedb428023eee74077aad0",
+      "sections": {
+        "已实现的能力": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "读取和汇总语义": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "构建与使用": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "功能合并验收": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        },
+        "小规模采样开关对照": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        },
+        "完成与后续边界": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal"
+        },
+        "阶段 1：端到端采集与汇总验收": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "superseded_by": [
+            {
+              "path": "docs/STAGE_1_COMPLETION.md",
+              "heading": "已实现的能力"
+            }
+          ]
+        }
+      }
+    },
+    "docs/STAGE_1_MASTER_MEMBERSHIP.md": {
+      "layer": "planning_progress",
+      "published_on": "2026-10-24",
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "snapshots",
+        "tcp"
+      ],
+      "source_quality": "project_progress_or_proposal",
+      "reviewed_sha256": "1dc8b15b0acabaf084ea5e6d34c44ee90049127d9e1edf0a937b5c28d9226308",
+      "sections": {
+        "配置与身份": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "更新与故障语义": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "合并验收": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        },
+        "实际验证记录": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        },
+        "阶段 1 第二批：Master Worker 名单": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "superseded_by": [
+            {
+              "path": "docs/STAGE_1_COMPLETION.md",
+              "heading": "已实现的能力"
+            }
+          ]
+        }
+      }
+    },
+    "docs/STAGE_1_WORKER_SNAPSHOT.md": {
+      "layer": "planning_progress",
+      "published_on": "2026-10-24",
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "snapshots",
+        "tcp"
+      ],
+      "source_quality": "project_progress_or_proposal",
+      "reviewed_sha256": "3bcf90c901220016a615223855b04fc7c94571522323c9eea53d3891fb6de77d",
+      "sections": {
+        "范围与启用": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "身份和字段（schema_version=1）": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "文件发布、失败与退出": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "一组合并验收命令": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        },
+        "初始 Windows 验证记录（历史）": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        },
+        "Linux 合并验收记录（2026-10-24）": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record",
+          "published_on": "2026-10-24"
+        },
+        "阶段 1 第一批：Worker 基础快照": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "superseded_by": [
+            {
+              "path": "docs/STAGE_1_COMPLETION.md",
+              "heading": "已实现的能力"
+            }
+          ]
+        }
+      }
+    },
+    "docs/STAGE_2_HTTP_MONITOR.md": {
+      "layer": "planning_progress",
+      "published_on": "2026-10-24",
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "http",
+        "monitor"
+      ],
+      "source_quality": "project_progress_or_proposal",
+      "reviewed_sha256": "30844c5695ac7b8257259d1eb3539fee285a04eb397b7ca2700b220bac6b3021",
+      "sections": {
+        "结构与采样语义": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "构建与启动": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "接口契约": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "验收与证据": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        }
+      },
+      "spans": [
+        {
+          "start_line": 72,
+          "end_line": 72,
+          "layer": "historical_case",
+          "source_quality": "project_case_record",
+          "superseded_by": [
+            {
+              "path": "docs/T7_WORKER_RESOURCES.md",
+              "heading": "数据契约"
+            }
+          ]
+        },
+        {
+          "start_line": 80,
+          "end_line": 81,
+          "layer": "historical_case",
+          "source_quality": "project_case_record",
+          "superseded_by": [
+            {
+              "path": "docs/STAGE_4_EVENTS.md",
+              "heading": "API 与页面"
+            }
+          ]
+        },
+        {
+          "start_line": 85,
+          "end_line": 85,
+          "layer": "historical_case",
+          "source_quality": "project_case_record",
+          "superseded_by": [
+            {
+              "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+              "heading": "API 与对比语义"
+            }
+          ]
+        }
+      ]
+    },
+    "docs/STAGE_3_WEB_EXPERIMENTS.md": {
+      "layer": "planning_progress",
+      "published_on": "2026-10-24",
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "experiments",
+        "monitor"
+      ],
+      "source_quality": "project_progress_or_proposal",
+      "reviewed_sha256": "1d78bc01f8424edb932c7d84a20579aa847997f90014de855289ac78649ae658",
+      "sections": {
+        "页面与服务": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "数据库初始化与启动": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "生成与导入实验": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "API 与对比语义": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "验收": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        },
+        "2026-10-25 收尾补充": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record",
+          "published_on": "2026-10-25"
+        },
+        "2026-10-25：阶段 2 / 3 Review 修复": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record",
+          "published_on": "2026-10-25"
+        }
+      }
+    },
+    "docs/STAGE_4_EVENTS.md": {
+      "layer": "planning_progress",
+      "published_on": "2026-10-25",
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "events",
+        "monitor"
+      ],
+      "source_quality": "project_progress_or_proposal",
+      "reviewed_sha256": "a34cb0dff498241ddff1ee745eceb6f564bba58042011dccd5487340a3241ab9",
+      "sections": {
+        "规则与证据": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "配置、建表与权限": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "API 与页面": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "验收入口": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        },
+        "本批验收结果": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        }
+      }
+    },
+    "docs/STAGE_5_DIAGNOSIS.md": {
+      "layer": "planning_progress",
+      "published_on": "2026-10-25",
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "diagnosis",
+        "monitor"
+      ],
+      "source_quality": "project_progress_or_proposal",
+      "reviewed_sha256": "ab929e8cb6fcfdeb622e94d28110d294a445c04938bf57cbcf117d9553c79718",
+      "sections": {
+        "依赖与来源": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "构建与启动": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "知识与引用": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "任务与故障语义": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "接口与网页": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract"
+        },
+        "2026-10-26：json_schema原生端点修正": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-26"
+        },
+        "2026-10-26：按问题路由取代固定全量初始读取": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-26"
+        },
+        "分层验收": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        },
+        "本批结果": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        },
+        "2026-10-26：最终报告输出协议更新": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record",
+          "superseded_by": [
+            {
+              "path": "docs/STAGE_5_DIAGNOSIS.md",
+              "heading": "2026-10-26：json_schema原生端点修正"
+            }
+          ],
+          "published_on": "2026-10-26"
+        },
+        "2026-10-26：T4语料分层": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-26"
+        },
+        "2026-10-27：T5进程与信号资料主题": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-27"
+        },
+        "2026-10-28：T11/T12证据计划与支持校验": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-28"
+        },
+        "2026-10-29：main整合入口": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-29"
+        }
+      }
+    },
+    "docs/upstream/CURRENT_STATUS_AND_NEXT_STEPS.md": {
+      "layer": "planning_progress",
+      "published_on": "2026-09-15",
+      "applicable_version": "upstream@cda1f36a44fba8fe970b4469568c8bfaa959df2c",
+      "components": [
+        "project"
+      ],
+      "source_quality": "upstream_progress_or_proposal",
+      "reviewed_sha256": "708c01950c700818e42e5a89aa150769775829555d03d8d3f1df986b9868067b",
+      "sections": {
+        "已完成验证": {
+          "layer": "historical_case",
+          "source_quality": "upstream_case_record"
+        },
+        "最终阶段性压测": {
+          "layer": "historical_case",
+          "source_quality": "upstream_case_record"
+        }
+      }
+    },
+    "docs/upstream/EPOLL_REPOSITORY_GUIDELINES.md": {
+      "layer": "planning_progress",
+      "published_on": null,
+      "applicable_version": "upstream@cda1f36a44fba8fe970b4469568c8bfaa959df2c",
+      "components": [
+        "project"
+      ],
+      "source_quality": "upstream_progress_or_proposal",
+      "reviewed_sha256": "2e330907af7c5bd17429459b27077376c4479be0a7e2f3302b5f7628ca0e500d",
+      "sections": {}
+    },
+    "docs/upstream/EPOLL_SERVER_LearningNotes.md": {
+      "layer": "technical_principle",
+      "published_on": null,
+      "applicable_version": "upstream@cda1f36a44fba8fe970b4469568c8bfaa959df2c",
+      "components": [
+        "project"
+      ],
+      "source_quality": "upstream_technical_notes",
+      "reviewed_sha256": "f468d06c20f9ce06336b2b1d3b0c2166818cd22efcfd832e7052041a735191d1",
+      "sections": {
+        "历史 QPS 记录说明": {
+          "layer": "historical_case",
+          "source_quality": "upstream_case_record"
+        }
+      }
+    },
+    "docs/upstream/OPTIMIZATION_AND_AGENT_ROADMAP.md": {
+      "layer": "planning_progress",
+      "published_on": "2026-09-15",
+      "applicable_version": "upstream@cda1f36a44fba8fe970b4469568c8bfaa959df2c",
+      "components": [
+        "project"
+      ],
+      "source_quality": "upstream_progress_or_proposal",
+      "reviewed_sha256": "e6c1c58072e89b1833cf55046520f081bb09627d8a2eba2a27770439d7b2c0c2",
+      "sections": {
+        "3. 推荐的 Agent 方向": {
+          "layer": "planning_progress",
+          "source_quality": "upstream_progress_or_proposal",
+          "superseded_by": [
+            {
+              "path": "docs/STAGE_5_DIAGNOSIS.md",
+              "heading": "2026-10-26：按问题路由取代固定全量初始读取"
+            }
+          ]
+        }
+      }
+    },
+    "docs/upstream/PERFORMANCE_TROUBLESHOOTING.md": {
+      "layer": "historical_case",
+      "published_on": null,
+      "applicable_version": "upstream@cda1f36a44fba8fe970b4469568c8bfaa959df2c",
+      "components": [
+        "tcp",
+        "load_client"
+      ],
+      "source_quality": "upstream_case_record",
+      "reviewed_sha256": "509ab77538e8d01be0834703ca18e8fe0d8bd59b26b75a2120771e99e58ad20a",
+      "sections": {
+        "6. 面试复述顺序": {
+          "layer": "planning_progress",
+          "source_quality": "upstream_progress_or_proposal"
+        }
+      }
+    },
+    "docs/upstream/PERFORMANCE_VALIDATION.md": {
+      "layer": "historical_case",
+      "published_on": "2026-09-15",
+      "applicable_version": "upstream@cda1f36a44fba8fe970b4469568c8bfaa959df2c",
+      "components": [
+        "tcp",
+        "load_client"
+      ],
+      "source_quality": "upstream_case_record",
+      "reviewed_sha256": "ad2175e4a1a3bc119b4030a2bda8b95d100b5fc1887c7b9bf0dceb2b08dbfc6d",
+      "sections": {
+        "简历建议口径": {
+          "layer": "planning_progress",
+          "source_quality": "upstream_progress_or_proposal"
+        }
+      }
+    },
+    "docs/upstream/Redis-Cache-Aside-issues-and-solutions.md": {
+      "layer": "technical_principle",
+      "published_on": null,
+      "applicable_version": "upstream@cda1f36a44fba8fe970b4469568c8bfaa959df2c",
+      "components": [
+        "redis",
+        "tcp"
+      ],
+      "source_quality": "upstream_technical_notes",
+      "reviewed_sha256": "83f0d3843f391fea961c09e7dcb253036b9a826d1baf5f767d75c5d5be60330a",
+      "sections": {
+        "一、当前代码存在的问题": {
+          "layer": "historical_case",
+          "source_quality": "upstream_case_record"
+        },
+        "1.2 JSON 序列化脆弱": {
+          "layer": "historical_case",
+          "source_quality": "upstream_case_record",
+          "superseded_by": [
+            {
+              "path": "docs/DEVELOPMENT_ISSUES.md",
+              "heading": "2026-10-24：阶段 0 / 1 Code Review"
+            }
+          ]
+        }
+      }
+    },
+    "docs/upstream/Redis-fork-fd-share-vs-epoll-thundering-herd.md": {
+      "layer": "technical_principle",
+      "published_on": null,
+      "applicable_version": "upstream@cda1f36a44fba8fe970b4469568c8bfaa959df2c",
+      "components": [
+        "redis",
+        "tcp"
+      ],
+      "source_quality": "upstream_technical_notes",
+      "reviewed_sha256": "3ae42674db2197b1f2fc065dfdc0fcd277a5d3ce9dac8798c90e227b31b6c0a4",
+      "sections": {
+        "问题二：Redis 连接 fork 后共享（已修复并完成运行验收）": {
+          "layer": "historical_case",
+          "source_quality": "upstream_case_record"
+        }
+      }
+    },
+    "docs/upstream/SHUTDOWN_VALIDATION.md": {
+      "layer": "historical_case",
+      "published_on": null,
+      "applicable_version": "upstream@cda1f36a44fba8fe970b4469568c8bfaa959df2c",
+      "components": [
+        "tcp",
+        "lifecycle"
+      ],
+      "source_quality": "upstream_case_record",
+      "reviewed_sha256": "e5a8502caeedee14321412e2175e25a48d8202751790c6f8820649c9b986f19f",
+      "sections": {}
+    },
+    "docs/upstream/code-review-2026-07-06.md": {
+      "layer": "historical_case",
+      "published_on": "2026-07-06",
+      "applicable_version": "upstream@cda1f36a44fba8fe970b4469568c8bfaa959df2c",
+      "components": [
+        "project"
+      ],
+      "source_quality": "upstream_case_record",
+      "reviewed_sha256": "ebf24f8e42ad3a0459960a938d61b35b32a01e7d5775f19b82ae4e89f23cf6fe",
+      "sections": {
+        "1. Redis 连接在 fork 前创建，所有 Worker 共享 TCP socket 导致协议损坏": {
+          "layer": "historical_case",
+          "source_quality": "upstream_case_record",
+          "superseded_by": [
+            {
+              "path": "docs/upstream/CURRENT_STATUS_AND_NEXT_STEPS.md",
+              "heading": "已完成验证"
+            }
+          ]
+        },
+        "2. fd 竞争：`send()` 与 `close()` 无锁保护": {
+          "layer": "historical_case",
+          "source_quality": "upstream_case_record",
+          "superseded_by": [
+            {
+              "path": "docs/upstream/CURRENT_STATUS_AND_NEXT_STEPS.md",
+              "heading": "已完成验证"
+            }
+          ]
+        },
+        "3. `g_stopEvent` 从未被设为 1，关闭路径是不可达死代码": {
+          "layer": "historical_case",
+          "source_quality": "upstream_case_record",
+          "superseded_by": [
+            {
+              "path": "docs/upstream/CURRENT_STATUS_AND_NEXT_STEPS.md",
+              "heading": "已完成验证"
+            }
+          ]
+        },
+        "4. O(n²) goto 重启循环，批量断开时性能退化严重": {
+          "layer": "historical_case",
+          "source_quality": "upstream_case_record",
+          "superseded_by": [
+            {
+              "path": "docs/upstream/CURRENT_STATUS_AND_NEXT_STEPS.md",
+              "heading": "已完成验证"
+            }
+          ]
+        }
+      }
+    },
+    "docs/upstream/问题.md": {
+      "layer": "planning_progress",
+      "published_on": null,
+      "applicable_version": "upstream@cda1f36a44fba8fe970b4469568c8bfaa959df2c",
+      "components": [
+        "project"
+      ],
+      "source_quality": "upstream_progress_or_proposal",
+      "reviewed_sha256": "bf6a9d77d5d5be14b20f1ff507c029194ca579efc7fbe642e30138e96a1bef9d",
+      "sections": {}
+    },
+    "docs/knowledge/LINUX_SIGNALS.md": {
+      "layer": "technical_principle",
+      "published_on": "2026-10-27",
+      "applicable_version": "Linux man-pages 6.17; Linux interfaces, not live process evidence",
+      "components": [
+        "linux_process",
+        "snapshots",
+        "worker_lifecycle"
+      ],
+      "source_quality": "primary_manual_summary",
+      "reviewed_sha256": "5e3c94bfd70d1f4f0ea56745753f0cc7185c227b3cf229dcc84c58b8e4a274e3",
+      "source_url": "https://www.man7.org/linux/man-pages/man7/signal.7.html",
+      "source_version": "Linux man-pages 6.17",
+      "source_published_on": "2026-02-08",
+      "source_snapshot_sha256": "fe302eafcf235fe9a0451ad53565d06ecd917b67b61a17bc2e2c5f548fa5ff5e",
+      "acquired_on": "2026-10-27",
+      "summary_author": "project_assistant",
+      "sections": {
+        "本项目中的快照过期边界": {
+          "layer": "current_contract",
+          "source_quality": "project_interpretation",
+          "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound"
+        }
+      }
+    },
+    "docs/knowledge/LINUX_PROC_STATE.md": {
+      "layer": "technical_principle",
+      "published_on": "2026-10-27",
+      "applicable_version": "Linux man-pages 6.17; Linux interfaces, not live process evidence",
+      "components": [
+        "linux_process",
+        "snapshots",
+        "worker_lifecycle"
+      ],
+      "source_quality": "primary_manual_summary",
+      "reviewed_sha256": "df62221ad1443a24182bed9363ecd26c20a9c88ce32f57f9a68ae5f7667baf90",
+      "source_url": "https://man7.org/linux/man-pages/man5/proc_pid_stat.5.html",
+      "source_version": "Linux man-pages 6.17",
+      "source_published_on": "2026-02-08",
+      "source_snapshot_sha256": "abb8ad91a13eba469a137b81fc654c5eacb899d3004b6ebfdaa34e643eb1a86b",
+      "acquired_on": "2026-10-27",
+      "summary_author": "project_assistant",
+      "sections": {
+        "本项目公开数据的边界": {
+          "layer": "current_contract",
+          "source_quality": "project_interpretation",
+          "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound"
+        }
+      }
+    },
+    "docs/knowledge/LINUX_WAIT_STATE.md": {
+      "layer": "technical_principle",
+      "published_on": "2026-10-27",
+      "applicable_version": "Linux man-pages 6.17; Linux interfaces, not live process evidence",
+      "components": [
+        "linux_process",
+        "snapshots",
+        "worker_lifecycle"
+      ],
+      "source_quality": "primary_manual_summary",
+      "reviewed_sha256": "5b33f45761d427579bbba2c8ce4cf22fba6847c976ab2cfbf5386e5e55a10507",
+      "source_url": "https://man7.org/linux/man-pages/man2/waitpid.2.html",
+      "source_version": "Linux man-pages 6.17",
+      "source_published_on": "2026-02-08",
+      "source_snapshot_sha256": "d0f4558c8076cc015f96c01e18d332318c8ab0953cb581f400fafde804e41432",
+      "acquired_on": "2026-10-27",
+      "summary_author": "project_assistant",
+      "sections": {
+        "本项目的退出证据边界": {
+          "layer": "current_contract",
+          "source_quality": "project_interpretation",
+          "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound"
+        }
+      }
+    },
+    "docs/T7_WORKER_RESOURCES.md": {
+      "layer": "current_contract",
+      "published_on": "2026-10-28",
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "monitor",
+        "diagnosis"
+      ],
+      "source_quality": "project_maintained_contract",
+      "reviewed_sha256": "564b1850531b3d4f67b1b1efe798117e5940f386500c3d373349208241ba48b1",
+      "sections": {
+        "本批验证记录（2026-10-28）": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
+        },
+        "main整合的原始字段兼容（2026-10-29）": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-29"
+        }
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # 当前运行观测契约
 
-适用：本仓库阶段5与第二批采集增量。依据为monitor/collector/collector.cxx、monitor/http/main.cxx及对应回归；这是实现契约，不是某次服务健康证明。
+适用：本仓库阶段5、第二批采集增量与T7合并版本。依据为monitor/collector/collector.cxx、monitor/http/main.cxx及对应回归；这是实现契约，不是某次服务健康证明。
 
 ## 采集完整、连接计数与业务健康
 
@@ -19,3 +19,5 @@ process_resources由监控进程读取/proc，不来自Worker业务快照。iden
 leader_state是进程组主线程的/proc状态；T表示观测到停止状态，S不能证明所有业务线程都空闲。cpu_user_ticks和cpu_system_ticks是累计CPU时间，必须结合clock_ticks_per_second及同一身份的跨时刻差值才能计算区间CPU利用率，单个累计值不能证明当前CPU繁忙。rss_bytes是近似RSS，不是精确内存或PSS；threads是进程线程数，不代表正在处理请求的线程数。
 
 进程资源本轮核验失败时identity_verified=false、数值为null并给出reason；不要使用之前生命周期的数值。当前尚无业务请求耗时、累计错误、锁等待及MySQL/Redis内部指标；这些缺口不能靠技术文档推算为已观测事实。
+
+T7的resources.cpu_percent已提供同一身份相邻采样窗口的CPU百分比，100%代表一个逻辑CPU；首次为null。process_resources中的CPU ticks仍是累计计数，不能当百分比。两组RSS取自同一已核验/proc样本。process_resources.leader_state及threads保留原始进程观测，不等于逐线程分析或业务健康。

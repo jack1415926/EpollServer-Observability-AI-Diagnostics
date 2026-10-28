@@ -193,7 +193,7 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
             chunks = [{'id': str(i), 'text': text, 'heading': 'H', 'path': 'missing.md',
                        'sha256': 'old', 'scope': 'project_document'} for i, text in enumerate(['正常', '队列 持续积压'])]
             np.savez(path, vectors=np.eye(2), metadata=json.dumps(chunks), model='Qwen/Qwen3-Embedding-8B')
-            result = await Retriever(Provider(), path).search('队列积压')
+            result = await Retriever(Provider(), path, legacy_corpus=True).search('队列积压')
             self.assertEqual(result[0]['id'], '1')
             self.assertTrue(result[0]['source_changed'])
         self.assertIn('队列', tokenize('Worker 队列积压'))
@@ -202,8 +202,17 @@ class RetrievalTests(unittest.IsolatedAsyncioTestCase):
         chunks = documents()
         self.assertTrue(chunks)
         self.assertTrue(all(c['start_line'] <= c['end_line'] and len(c['sha256']) == 64 for c in chunks))
-        self.assertEqual({c['scope'] for c in chunks}, {'current_contract', 'verified_incident', 'technical_reference'})
+        self.assertTrue(any(c['scope'] == 'historical_reference' for c in chunks))
         self.assertTrue(any(c['scope'] == 'historical_reference' for c in documents(corpus='legacy')))
+
+
+def report_json(report):
+    return json.dumps(report)
+
+
+def runtime_route(sources=None):
+    return report_json({'intent':'runtime','runtime_sources':sources or ['health','workers'],
+                        'search_query':'诊断指标契约','clarification':''})
 
 
 class AgentTests(unittest.IsolatedAsyncioTestCase):
@@ -213,19 +222,22 @@ class AgentTests(unittest.IsolatedAsyncioTestCase):
         class Provider:
             model = 'test-model'
             rounds = 0
-            async def chat(self, messages, tools=None):
-                if tools:
+            async def chat(self, messages, tools=None, tool_choice=None):
+                if tools and tool_choice is None:
                     self.rounds += 1
                     if self.rounds > 1: return {'content': 'ready'}
                     return {'role': 'assistant', 'content': None, 'tool_calls': [
                         {'id': 'call'+str(i), 'type': 'function', 'function': {
                             'name': 'get_server_health', 'arguments': '{}'}} for i in range(6)]}
+            async def structured(self, messages, schema):
+                if 'intent' in schema['properties']: return runtime_route()
                 replies = [m for m in messages if m['role'] == 'tool']
                 self_test.assertEqual(len(replies), 6)
                 self_test.assertEqual(sum('invalid_or_exhausted' in m['content'] for m in replies), 2)
-                return {'content': json.dumps({'conclusion': 'insufficient_evidence', 'summary': '未知',
-                    'facts': [{'text': '采集不可用', 'evidence_ids': ['E1']}], 'possible_causes': [],
-                    'unknowns': ['根因未知'], 'next_steps': ['检查采集']})}
+                return report_json({'conclusion': 'insufficient_evidence', 'summary': '未知',
+                    'facts': [{'text': '采集不可用', 'evidence_ids': ['E1'], 'basis': 'observation',
+                        'support': [{'evidence_id':'E1','pointer':'/http_status','value':503,'quote':''}]}], 'possible_causes': [],
+                    'unknowns': ['根因未知'], 'next_steps': ['检查采集']})
         self_test = self
         async with httpx.AsyncClient(transport=httpx.MockTransport(lambda req: httpx.Response(503, json={'data': None}))) as client:
             report = await diagnose('why?', Provider(), Tools(client, Retriever()))
@@ -236,11 +248,13 @@ class AgentTests(unittest.IsolatedAsyncioTestCase):
             async def search(self, query): raise ProviderError('embedding_http_402')
         class Provider:
             model = 'test-model'
-            async def chat(self, messages, tools=None):
-                if tools: return {'content': 'ready'}
-                return {'content': json.dumps({'conclusion': 'insufficient_evidence', 'summary': '未知',
+            async def chat(self, messages, tools=None, tool_choice=None):
+                return {'content': 'ready'}
+            async def structured(self, messages, schema):
+                if 'intent' in schema['properties']: return runtime_route()
+                return report_json({'conclusion': 'insufficient_evidence', 'summary': '未知',
                     'facts': [{'text': 'unproven', 'evidence_ids': ['E999']}], 'possible_causes': [],
-                    'unknowns': ['根因未知'], 'next_steps': ['检查采集']})}
+                    'unknowns': ['根因未知'], 'next_steps': ['检查采集']})
         async with httpx.AsyncClient(transport=httpx.MockTransport(lambda req: httpx.Response(503, json={'data': None}))) as client:
             tools = Tools(client, Retriever())
             with self.assertRaisesRegex(ValueError, 'unexpected_tool_arguments'):

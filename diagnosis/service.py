@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from .agent import Tools, diagnose
+from .agent import Tools, diagnose, failure_report
 from .config import load_environment, redact
 from .providers import Providers, ProviderError
 from .retrieval import INDEX, Retriever
@@ -58,14 +58,16 @@ def create_app(store=None, runner=None):
             key, question, enqueued = await queue.get()
             state['running'] += 1
             status, error, report = 'failed', None, None
+            provider = tools = None
             try:
                 await asyncio.to_thread(store.update, key, 'running')
                 if time.monotonic() - enqueued > 30:
                     status, error = 'timed_out', 'queue_timeout'
                 else:
+                    if runner is None:
+                        provider, tools = Providers(client), Tools(client, retriever)
                     async with asyncio.timeout(timeout):
-                        report = await (runner(question) if runner else diagnose(question,
-                            Providers(client), Tools(client, retriever)))
+                        report = await (runner(question) if runner else diagnose(question, provider, tools))
                     # Redact the model output as well as the evidence sent to it.
                     report = json.loads(redact(report))
                     if len(json.dumps(report).encode()) > 1024*1024:
@@ -77,7 +79,8 @@ def create_app(store=None, runner=None):
                 error = str(exc)
             except asyncio.CancelledError:
                 try:
-                    await asyncio.to_thread(store.update, key, 'interrupted', 'service_stopped')
+                    interrupted = json.loads(redact(failure_report(question, 'service_stopped', provider, tools))) if provider else None
+                    await asyncio.to_thread(store.update, key, 'interrupted', 'service_stopped', interrupted)
                 finally:
                     state['running'] -= 1
                     state['outstanding'] -= 1
@@ -92,8 +95,10 @@ def create_app(store=None, runner=None):
                 frame = traceback.extract_tb(exc.__traceback__)[-1]
                 logging.getLogger(__name__).warning('diagnosis_execution_failed type=%s location=%s:%s',
                     type(exc).__name__, frame.name, frame.lineno)
-                known = {'fabricated_evidence_reference', 'invalid_tool_calls', 'report_too_large'}
+                known = {'fabricated_evidence_reference', 'invalid_tool_calls', 'report_too_large', 'report_support_invalid'}
                 error = str(exc) if str(exc) in known else 'diagnosis_execution_failed'
+            if status != 'succeeded' and provider is not None:
+                report = json.loads(redact(failure_report(question, error, provider, tools)))
             state['pending_results'] += 1
             try:
                 # Retain a slot until the terminal result is durable; do not silently lose it on SQL failure.

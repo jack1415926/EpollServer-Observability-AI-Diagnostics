@@ -1,0 +1,154 @@
+{
+  "scope": "T5 selected Linux worker state/signals theme completed; not broad diagnostic quality acceptance",
+  "reviewer": "project_assistant_manual; not external blind review",
+  "local": {
+    "scope": "six T5 development cases; synthetic runtime replay, not live faults or independent accuracy",
+    "mode": "bm25",
+    "cases": 6,
+    "new_note_hit_at_5": {
+      "before": 0,
+      "after": 6
+    },
+    "answers": 0,
+    "route_matches": 0,
+    "required_sources_present": 0,
+    "api_calls": 0,
+    "semantic_review": "not_run"
+  },
+  "remote": {
+    "scope": "six T5 development cases; synthetic runtime replay, not live faults or independent accuracy",
+    "mode": "hybrid_rerank",
+    "cases": 6,
+    "new_note_hit_at_5": {
+      "before": 0,
+      "after": 6
+    },
+    "answers": 6,
+    "route_matches": 6,
+    "required_sources_present": 6,
+    "api_calls": 43,
+    "semantic_review": "pending_manual_review"
+  },
+  "manual_review": {
+    "knowledge_passed": 3,
+    "knowledge_attempted": 3,
+    "runtime_passed": 0,
+    "runtime_attempted": 3,
+    "fact_claims_reviewed": 44,
+    "hypothesis_claims_reviewed": 12,
+    "runtime_document_searches": 0,
+    "failures": [
+      "S4",
+      "S5",
+      "S6"
+    ],
+    "repairs": {
+      "S6": [
+        {
+          "field": [
+            "next_steps_note"
+          ],
+          "type": "extra_forbidden"
+        }
+      ]
+    }
+  },
+  "services": {
+    "EMBEDDING": 9,
+    "RERANK": 15,
+    "DEEPSEEK": 19
+  },
+  "missing_usage": {
+    "RERANK": 15
+  },
+  "indexes": {
+    "pre-t5-index.npz": {
+      "sha256": "807d33989e9775851d6b7f760c7039a6bbb1b0cf827d5120c511aee4f1fa2fef",
+      "chunks": 294
+    },
+    "index.npz": {
+      "sha256": "18a40f1f85db57c90a4b82d90878342afd94aad9ceab61f5858dab313a2cfeb5",
+      "chunks": 303
+    },
+    "final-index.npz": {
+      "sha256": "91af1bd8050d2f330894b1152caa33e639df551ded3e7d53103c642156cd4fb8",
+      "chunks": 305
+    }
+  },
+  "build": {
+    "initial_new_vectors": 9,
+    "initial_reused_vectors": 294,
+    "closing_new_vectors": 5,
+    "closing_reused_vectors": 300,
+    "final_offline_reused_vectors": 305,
+    "successful_embedding_batches": 3
+  },
+  "manifest_files": {
+    "local": {
+      "started_at": "2026-10-26T17:38:04.782025+00:00",
+      "scope": "six T5 development cases; synthetic runtime replay, not live faults or independent accuracy",
+      "mode": "bm25",
+      "index_sha256": "18a40f1f85db57c90a4b82d90878342afd94aad9ceab61f5858dab313a2cfeb5",
+      "policy_sha256": "cb2a2dadc1861117ed004581ee0bfeb29f68b63d083cb6bb47f1862c7a391996",
+      "prompt_sha256": "46e573830b9beaaa7cff6b6b6b2e24020f5207ba8c02336d69b31738dc9f6d76",
+      "data": {
+        "cases.json": "5f4e4c7806eb8b6fd2d470bfb3bd6e2b8ca1f9ca611fb7d5e54a1367bef3460e",
+        "fixtures.json": "720fe62ad1994782ab70c31c9d706e169b03a706e78a57b63811a46a10b1f068",
+        "labels.json": "148f2e2fb29c5cf1eb3b313dbaddd839934d754b0e066778e8b05615deaeb97c",
+        "sources.json": "e199716fabf9b6b30ce293faddb94ed10380707ff29fd48d1a80f09565a3e050"
+      },
+      "files": {
+        "diagnosis/evaluate_knowledge.py": "5e5d28dee933e4a4d35a65700e6f5a325774983ec8a22244a31aa846e7babeb6",
+        "diagnosis/evaluate.py": "70d0cebfc20530a029c03f073916ca95f56a81766c642ff0be59cca0315dec43",
+        "diagnosis/agent.py": "9782bccbe0340303f4a1e1aa6a2b8f938943d7efa93a8f0aa884f7d6d23bc3b8",
+        "diagnosis/providers.py": "0f51f3542c29853ea532fb4031115c5ed1a2ce428e1d692f69f326f1ad419c27",
+        "diagnosis/routing.py": "bf30e382fcd2137fd31513fd5814b7ab1f896884607ff3f896d4c68a697f66bc",
+        "diagnosis/retrieval.py": "321ff50e842d24fe21d0477cebcee19005fee8c597a77a83e544dcb1dbb11ab6",
+        "diagnosis/corpus.py": "bdf96205a759230443c80580f89f90cfac48b6645aaa17d6916153af8e333624"
+      },
+      "models": {
+        "DEEPSEEK_MODEL": "deepseek-flash",
+        "EMBEDDING_MODEL": "Qwen/Qwen3-Embedding-8B",
+        "RERANK_MODEL": "Qwen/Qwen3-Reranker-8B"
+      },
+      "comparison": "same code, ranking parameters and query; before excludes only docs/knowledge and rebuilds BM25; after includes them"
+    },
+    "remote": {
+      "started_at": "2026-10-26T17:39:13.581349+00:00",
+      "scope": "six T5 development cases; synthetic runtime replay, not live faults or independent accuracy",
+      "mode": "hybrid_rerank",
+      "index_sha256": "18a40f1f85db57c90a4b82d90878342afd94aad9ceab61f5858dab313a2cfeb5",
+      "policy_sha256": "cb2a2dadc1861117ed004581ee0bfeb29f68b63d083cb6bb47f1862c7a391996",
+      "prompt_sha256": "46e573830b9beaaa7cff6b6b6b2e24020f5207ba8c02336d69b31738dc9f6d76",
+      "data": {
+        "cases.json": "5f4e4c7806eb8b6fd2d470bfb3bd6e2b8ca1f9ca611fb7d5e54a1367bef3460e",
+        "fixtures.json": "720fe62ad1994782ab70c31c9d706e169b03a706e78a57b63811a46a10b1f068",
+        "labels.json": "148f2e2fb29c5cf1eb3b313dbaddd839934d754b0e066778e8b05615deaeb97c",
+        "sources.json": "e199716fabf9b6b30ce293faddb94ed10380707ff29fd48d1a80f09565a3e050"
+      },
+      "files": {
+        "diagnosis/evaluate_knowledge.py": "5e5d28dee933e4a4d35a65700e6f5a325774983ec8a22244a31aa846e7babeb6",
+        "diagnosis/evaluate.py": "70d0cebfc20530a029c03f073916ca95f56a81766c642ff0be59cca0315dec43",
+        "diagnosis/agent.py": "9782bccbe0340303f4a1e1aa6a2b8f938943d7efa93a8f0aa884f7d6d23bc3b8",
+        "diagnosis/providers.py": "0f51f3542c29853ea532fb4031115c5ed1a2ce428e1d692f69f326f1ad419c27",
+        "diagnosis/routing.py": "bf30e382fcd2137fd31513fd5814b7ab1f896884607ff3f896d4c68a697f66bc",
+        "diagnosis/retrieval.py": "321ff50e842d24fe21d0477cebcee19005fee8c597a77a83e544dcb1dbb11ab6",
+        "diagnosis/corpus.py": "bdf96205a759230443c80580f89f90cfac48b6645aaa17d6916153af8e333624"
+      },
+      "models": {
+        "DEEPSEEK_MODEL": "deepseek-flash",
+        "EMBEDDING_MODEL": "Qwen/Qwen3-Embedding-8B",
+        "RERANK_MODEL": "Qwen/Qwen3-Reranker-8B"
+      },
+      "comparison": "same code, ranking parameters and query; before excludes only docs/knowledge and rebuilds BM25; after includes them"
+    }
+  },
+  "evidence_hashes": {
+    "local/results.jsonl": "bea4d607e7d76ed04b04bede0f2279a93db056fe5a9bc755d83109a059d0a451",
+    "remote/results.jsonl": "b803496da50df00550df1ad14a44af835ce076f85e84eb0923395a1c41fd5f09",
+    "unit-tests-final.log": "51aef58f656b07ddfb120ce04397eeb3ba185caf2688d5180a9b479ae209e684",
+    "measured-corpus-policy.json": "cb2a2dadc1861117ed004581ee0bfeb29f68b63d083cb6bb47f1862c7a391996"
+  },
+  "review_sha256": "f937f956760edfa3ae3abfeb74fc2a64baae2f23638d54c22b8b8f5fef490a13",
+  "comparison_note": "Before new-note hit is zero by construction, not a recall improvement. Baseline chunk IDs/text/source hashes/vectors exactly matched frozen pre-T5 294 chunks. Closing documentation index was not used to rerun quality evaluation."
+}

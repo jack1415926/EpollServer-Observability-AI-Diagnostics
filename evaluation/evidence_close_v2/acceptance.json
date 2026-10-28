@@ -1,0 +1,445 @@
+{
+  "checkpoint_commit": "5143efb",
+  "status": "T11/T12 remain partially complete; residual semantic errors preserved",
+  "scope": "bounded engineering fixes and affected-case validation; no formal accuracy or stability claim",
+  "ledger": [
+    {
+      "run": "c1-control",
+      "results_sha256": "b351ba2ef59bcaedeabbacda8c73c84ca65639f037548e1265c25998b0b1f273",
+      "manifest_sha256": "8594f13d6a592f06eb503e76cdaa464e4fd283c9a350709f08754062e64be03d",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 2,
+      "agent_sha256": "df5f4853afb991945781c9ec1051f137bb512e4353afa8b2c667618519d76a51"
+    },
+    {
+      "run": "c2-control",
+      "results_sha256": "780be970185850870ade4a1720c3b1eb7d5181d91661945fee459530c36c5324",
+      "manifest_sha256": "13ad995806607ecd46919b428b9af4e9d36143da3f91eb15749e8ff56e1c2523",
+      "attempts": 1,
+      "ok": 0,
+      "errors": [
+        {
+          "id": "C2",
+          "strategy": "targeted",
+          "error": "report_support_invalid",
+          "issues": [
+            {
+              "field": [
+                "facts",
+                5,
+                "text"
+              ],
+              "type": "numeric_literal_not_supported"
+            }
+          ]
+        }
+      ],
+      "api_calls": 5,
+      "agent_sha256": "df5f4853afb991945781c9ec1051f137bb512e4353afa8b2c667618519d76a51"
+    },
+    {
+      "run": "c2-knowledge-final",
+      "results_sha256": "e5dec037a66911c5fbaf8105615d1a67dcc3114977cdc70dfe8a58d5f1455e82",
+      "manifest_sha256": "f3dbc07a31b765454ef3f0f05314c71a4a8b7b65b70f40cf9605b69b724f664f",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 5,
+      "agent_sha256": "84a12f4b743c1eb41b23618d3159d3f887dfb9f4bb430b67d451f4b7c847887a"
+    },
+    {
+      "run": "d1-final",
+      "results_sha256": "ad938027ad3db5ee97b61f76766033c1a259fe90a6aac67f2942b2a8669ced26",
+      "manifest_sha256": "fdfc4fb541f0ee368d84b6f32d8c72d44702636cc675717ae0450eb0d2056720",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 5,
+      "agent_sha256": "f814d218c83067bec80bc5762ae2c180ae632fa41909c5df13fdd95c9a89370e"
+    },
+    {
+      "run": "d1-lifecycle-final",
+      "results_sha256": "b0e535bab3d5ea89158dcd02bcbd5c4aa721c743e107711e707b3ece809bfaff",
+      "manifest_sha256": "559a754b4953bc75f3fe3c303e67a937270632743f6af093a976de396e3a39ea",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 7,
+      "agent_sha256": "21ce9056883770fa2f8ec5721c4c2ab0d9d94a8e9dcab51611d433c19430839c"
+    },
+    {
+      "run": "d1-reviewed-final",
+      "results_sha256": "bc672eb841356e8ba9aa634b4b3c7f09da13d36dbb5a2a9bc303e87624d1161e",
+      "manifest_sha256": "c9cb74b707c33a2e9cc4ed238e1ba565f00da3e5890cf022bda33c48a81ad289",
+      "attempts": 1,
+      "ok": 0,
+      "errors": [
+        {
+          "id": "D1",
+          "strategy": "targeted",
+          "error": "report_support_invalid",
+          "issues": [
+            {
+              "field": [
+                "possible_causes",
+                1,
+                "basis"
+              ],
+              "type": "evidence_scope_mismatch"
+            },
+            {
+              "field": [
+                "possible_causes",
+                1,
+                "text"
+              ],
+              "type": "numeric_literal_not_supported"
+            }
+          ]
+        }
+      ],
+      "api_calls": 6,
+      "agent_sha256": "8dede51ada55b93685cc22d7bc3e45574009442a5b93b9a64659a58198516031"
+    },
+    {
+      "run": "d1-time-final",
+      "results_sha256": "3b28e8f1b1519983193d9e5ec2e3c06e00e84aa9b390e965bd6d05d06cdef4da",
+      "manifest_sha256": "f2fa59ca7cc8e204349fcd6ecda1fe16f7a2a0ff7bf1575a6641e2e5ac82815a",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 3,
+      "agent_sha256": "34b2539938ac399ca9b7aee866f53a000c39c77cc0296c352ad68848b88bd82c"
+    },
+    {
+      "run": "d1-timeline-final",
+      "results_sha256": "296e4bde3495534eee0b895b33c29b4d8dbe4ef92bf710a9432fa14acc47fe30",
+      "manifest_sha256": "e9d15504063f80e0b0e002aaa9947fb749d1926b505deb6f1205c54c92111d6d",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 4,
+      "agent_sha256": "8d0b4abbdc9ac5ae81f0cde9aec8d2b04881d06fa45659f643746b4b6910852b"
+    },
+    {
+      "run": "d2-final",
+      "results_sha256": "192eaa68f52bb49145620c5364e381af1f4128da4cf3698be51fd13ee8bd7d4a",
+      "manifest_sha256": "17158bd6b7fb5f1a90484b65bc1972efe2bb2ae45bffe697173573c943adb790",
+      "attempts": 2,
+      "ok": 2,
+      "errors": [],
+      "api_calls": 10,
+      "agent_sha256": "f814d218c83067bec80bc5762ae2c180ae632fa41909c5df13fdd95c9a89370e"
+    },
+    {
+      "run": "d2-reviewed-final",
+      "results_sha256": "c3ce8ad7d255a22249b77139382493e3aa24fd366a7d32e9f4ebfbf6e24e8e9c",
+      "manifest_sha256": "8f6fe1a571981e09d7cb116440bc53c9247443dc371bc54e246ab491b2e2534f",
+      "attempts": 2,
+      "ok": 2,
+      "errors": [],
+      "api_calls": 12,
+      "agent_sha256": "8dede51ada55b93685cc22d7bc3e45574009442a5b93b9a64659a58198516031"
+    },
+    {
+      "run": "h1-final",
+      "results_sha256": "3503c64fbd9341482579749468b9d9693b7d2fd68f535013eb558810a0ca6ef4",
+      "manifest_sha256": "40bd0d669280d0260e5c979b6140d775e95f86a93a90d29eab300c46835f0947",
+      "attempts": 2,
+      "ok": 1,
+      "errors": [
+        {
+          "id": "H1",
+          "strategy": "fixed",
+          "error": "report_support_invalid",
+          "issues": [
+            {
+              "field": [
+                "facts",
+                1,
+                "basis"
+              ],
+              "type": "evidence_scope_mismatch"
+            }
+          ]
+        }
+      ],
+      "api_calls": 10,
+      "agent_sha256": "34b2539938ac399ca9b7aee866f53a000c39c77cc0296c352ad68848b88bd82c"
+    },
+    {
+      "run": "h1-scope-final",
+      "results_sha256": "0efe4d8fda745982f9912dcb92d3412361cd73da61bc409fc0cfa321e80ad61f",
+      "manifest_sha256": "15f3c8fd5be28e9abcf7df1de40a1fc9371bc3f7fa749639d957a5422dd297eb",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 6,
+      "agent_sha256": "1df0ce81c9ea73bb1b71e57df2bd694e243fa57f301f95168bec6657e57242a1"
+    },
+    {
+      "run": "h3-final",
+      "results_sha256": "a2d295e60ece7fad2b0b4ccbd34e0e737332dd0b363ef8c2bb4874b982ee00eb",
+      "manifest_sha256": "dd84aad708e7c6df889c542ea6c154c1889673ef6d7af744c43cc9a165340033",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 4,
+      "agent_sha256": "34b2539938ac399ca9b7aee866f53a000c39c77cc0296c352ad68848b88bd82c"
+    },
+    {
+      "run": "h4-final",
+      "results_sha256": "91aefd0b32f9d3a4df2b9b67660cad594a6f9d0a6b181f3a61f33d3556db9700",
+      "manifest_sha256": "596d86964cff0aaa865d9883cddfe008946996a4402ff4ac82e868fb8be16977",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 2,
+      "agent_sha256": "f814d218c83067bec80bc5762ae2c180ae632fa41909c5df13fdd95c9a89370e"
+    },
+    {
+      "run": "h5-final",
+      "results_sha256": "e7d59574b183deea8f53585ef70d7f9b1ae29e5829ef75c2ff2c032645d84b8a",
+      "manifest_sha256": "50e0cb2ed4a63252dc19f9293716cc30a56f682cea72afe8553cd7a67487c80a",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 7,
+      "agent_sha256": "ba3a4866d6a473ca5c9bb4f26968107c4bc5a4bf86dc7931ce563ae1b71dafed"
+    },
+    {
+      "run": "h5-quote-final",
+      "results_sha256": "f2cc465bcce687b73e5f4a484b075cb281059b38f2594dfeadfe9cd6ed143342",
+      "manifest_sha256": "ecbc73faa4261c8ac6112289ada26b5b51ee27411219e8a9aaca925d129dc5b1",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 7,
+      "agent_sha256": "df5f4853afb991945781c9ec1051f137bb512e4353afa8b2c667618519d76a51"
+    },
+    {
+      "run": "h5-scope-final",
+      "results_sha256": "5a9cf611bdb2735a1fb0221c5b15ae1063e964bf47d917ac0990873ef29f307e",
+      "manifest_sha256": "68a7c30b2e3384661aa7cf5b0beb1daecb763b800067cb4ae6bb9339760b306a",
+      "attempts": 1,
+      "ok": 0,
+      "errors": [
+        {
+          "id": "H5",
+          "strategy": "fixed",
+          "error": "report_support_invalid",
+          "issues": [
+            {
+              "field": [
+                "facts",
+                4,
+                "text"
+              ],
+              "type": "numeric_literal_not_supported"
+            },
+            {
+              "field": [
+                "facts",
+                7,
+                "text"
+              ],
+              "type": "numeric_literal_not_supported"
+            }
+          ]
+        }
+      ],
+      "api_calls": 6,
+      "agent_sha256": "1df0ce81c9ea73bb1b71e57df2bd694e243fa57f301f95168bec6657e57242a1"
+    },
+    {
+      "run": "h6-cardinality-final",
+      "results_sha256": "51d9282949ed9cd0a9aafdaf81612b7a2ab20abd73d1cecd5e3b47f118a30af3",
+      "manifest_sha256": "9b27eb7e4ddc80d4e949df67aa0de603bfc19b079a53d021d3407349d2c8105b",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 4,
+      "agent_sha256": "df5f4853afb991945781c9ec1051f137bb512e4353afa8b2c667618519d76a51"
+    },
+    {
+      "run": "h6-final",
+      "results_sha256": "240e374df45604f24ec1791e0398635f79297256834d320c5dca3140978d9d19",
+      "manifest_sha256": "54132625ffad93e8f98cc12d2e2130d41dd4dd0d193a21a624f39def0db4dd6d",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 5,
+      "agent_sha256": "f814d218c83067bec80bc5762ae2c180ae632fa41909c5df13fdd95c9a89370e"
+    },
+    {
+      "run": "h6-probe",
+      "results_sha256": "fdf0e5ae1d8fa5d56cb210bcd6c45717bad08fc16db1ee95828fc71c8c45057a",
+      "manifest_sha256": "ec0decdf4a695a30e0b8bab3c53c4ab775ca7a26a98774a047822a5135a50228",
+      "attempts": 1,
+      "ok": 0,
+      "errors": [
+        {
+          "id": "H6",
+          "strategy": "targeted",
+          "error": "deepseek_invalid_or_unavailable",
+          "issues": null
+        }
+      ],
+      "api_calls": 1,
+      "agent_sha256": "4e25cfd21709de89643b6bd04b6390a63c1c96cc2f569d40f6be09b2f0706eaa"
+    },
+    {
+      "run": "h6-probe-network",
+      "results_sha256": "c51751ae857214eb2d28dec6059fdfa6c81b26562e33508ddf9ac863605300d1",
+      "manifest_sha256": "37733308e51d7ef638aaaf311dbfd151bacbf1b781ed11e20855e3355290c693",
+      "attempts": 1,
+      "ok": 0,
+      "errors": [
+        {
+          "id": "H6",
+          "strategy": "targeted",
+          "error": "report_support_invalid",
+          "issues": [
+            {
+              "field": [
+                "facts",
+                5,
+                "basis"
+              ],
+              "type": "evidence_scope_mismatch"
+            }
+          ]
+        }
+      ],
+      "api_calls": 5,
+      "agent_sha256": "4e25cfd21709de89643b6bd04b6390a63c1c96cc2f569d40f6be09b2f0706eaa"
+    },
+    {
+      "run": "h6-time-final",
+      "results_sha256": "1b77e84fcf27ed0b7a7058d4a3a4e23fa60c3c3f5458c669e1e8dbd3eda9f4b9",
+      "manifest_sha256": "3a26c7e527e9c6b10d6f50d691d34eee59f4b32ce0bfed0189a1ea2935663f07",
+      "attempts": 1,
+      "ok": 1,
+      "errors": [],
+      "api_calls": 4,
+      "agent_sha256": "ba3a4866d6a473ca5c9bb4f26968107c4bc5a4bf86dc7931ce563ae1b71dafed"
+    }
+  ],
+  "selected_report_reviews": [
+    {
+      "run": "d1-lifecycle-final",
+      "id": "D1",
+      "strategy": "targeted",
+      "outcome": "partial",
+      "notes": "时点与stale/null边界已明确，退出方向移入unknowns；但unknowns把t笼统称停止而未说明跟踪停止，且仍把退出泛列为样本超龄方向。T11-1保留未关闭。"
+    },
+    {
+      "run": "d2-reviewed-final",
+      "id": "D2",
+      "strategy": "targeted",
+      "outcome": "partial",
+      "notes": "dead与单纯暂停、具体终止信号已分开；候选中的“僵尸Z/X/x”将Z与X/x并称不精确，仍需状态术语复核。"
+    },
+    {
+      "run": "d2-reviewed-final",
+      "id": "D2",
+      "strategy": "fixed",
+      "outcome": "partial",
+      "notes": "单纯暂停不再列为dead候选，退出方式及后续时点分开；unknowns称采样年龄阈值未取得，而workers证据已给max_age_ms。不能把已取得字段当缺失。"
+    },
+    {
+      "run": "h1-final",
+      "id": "H1",
+      "strategy": "targeted",
+      "outcome": "pass",
+      "notes": "事件历史与detection分开，历史阈值仅标当时配置，当前阈值未知；来源边界未列作根因。"
+    },
+    {
+      "run": "h1-scope-final",
+      "id": "H1",
+      "strategy": "fixed",
+      "outcome": "partial",
+      "notes": "事件及detection分别标注，历史阈值未冒充当前配置；summary说没有队列实时样本而facts列出已取到的fresh样本，需直接表达样本时间限制，不能笼统称未取得。"
+    },
+    {
+      "run": "h3-final",
+      "id": "H3",
+      "strategy": "targeted",
+      "outcome": "partial",
+      "notes": "测量位置与目标、用户陈述与观测分开；但第五条document事实把validity=unavailable的限定条件缩成validity，不能视为语义完全通过。"
+    },
+    {
+      "run": "h4-final",
+      "id": "H4",
+      "strategy": "targeted",
+      "outcome": "partial",
+      "notes": "合法原文摘录、角色、null与条件差异正确；unknowns中“分位值是否存在可用于推算的数据”的措辞仍可能暗示P95足以推均值，必须继续保留不充分标签。"
+    },
+    {
+      "run": "h5-quote-final",
+      "id": "H5",
+      "strategy": "fixed",
+      "outcome": "pass",
+      "notes": "日志未核验、指令只是数据、Redis未知及TCP未探测边界正确；原文与数字引用通过。事件控制面分组由H1和本地正反例验收，本报告未罗列事件。"
+    },
+    {
+      "run": "h6-cardinality-final",
+      "id": "H6",
+      "strategy": "targeted",
+      "outcome": "pass",
+      "notes": "快照字段不符与实际身份不符分开，首次核验通过与后续退出未知分开；引用模式互斥，无确认崩溃。空事件数量为本次查询观测，未把历史事件正文当当前观测。"
+    },
+    {
+      "run": "c1-control",
+      "id": "C1",
+      "strategy": "targeted",
+      "outcome": "pass",
+      "notes": "普通计数只读workers、完整名单连接数7，未冒充业务健康。"
+    },
+    {
+      "run": "c2-knowledge-final",
+      "id": "C2",
+      "strategy": "targeted",
+      "outcome": "pass",
+      "notes": "只检索文档，SIGSTOP/SIGCONT原理与历史验收分开，准确摘录，无本次运行态取证。"
+    }
+  ],
+  "selected_outcomes": {
+    "pass": 5,
+    "partial": 6,
+    "fail": 0
+  },
+  "interpretation": [
+    "Selected reports come from different versions and targeted reruns; not one batch or an accuracy denominator.",
+    "All original rejections and partial reviews remain unchanged. Later success never backfills an earlier attempt.",
+    "All selected delivered outputs pass the final local support checker and current Pydantic cardinality; semantic labels remain independent."
+  ],
+  "release": {
+    "code_sha256": {
+      "diagnosis/agent.py": "7adc96874be812ecd4d958cbf380f56115cb0299e29dcbb4b9a11ff588c2c8dc",
+      "diagnosis/evidence.py": "c8a323c20178c985a2793934f2382275c395059966ee79e7bb7ea86970f91015",
+      "diagnosis/observation_contracts.json": "1b83dbe35f9d896e35e308bf217d7de44dc8daef642a178dfff2a2c671fe5f16",
+      "diagnosis/corpus_policy.json": "cf3a3b21421cb72279cad66bcb0c4f4a0d54c215a92cd2d9f3fd52656c54188d",
+      "diagnosis/evaluate_evidence.py": "42802899ca7c1fdd442f5433c548891137582b41b76ed4dca9fc459a7e475a5c",
+      "testscript/test_diagnosis_evidence.py": "4c3f4820a5fda3bcfba3767a93b0397fa27f107f41cebb076dff367221cb2a80"
+    },
+    "system_prompt_sha256": "d878eaadde01c6251b160738467da292ba618c6d69b3cd7bdd6e2c9b2de16d2f",
+    "index_sha256": "f2e41e7d018b94421b2c4b96fca2e493d655b2e753664d3964210e85cdbfaf81",
+    "chunks": 309,
+    "sources": 25,
+    "index_new_vectors": 2,
+    "index_reused_vectors": 307,
+    "index_update_scope": "delivery source metadata only; not a rerun of measured retrieval",
+    "index_before_sha256": "7ec14185a71955a72f809169cdcb5d86f1d4a93c65fb42f1c021c28ffc25b030",
+    "unit_cases": 68,
+    "unit_log_sha256": "9d11d0dfa4ee0af5a908034d29482ace8a5d38f6e8730b817a6b617b6e8da3c4",
+    "node_production_render": "passed",
+    "protected_baselines_and_local_config": "unchanged",
+    "model_semantics": "still requires_review; known residuals stay open",
+    "sql_http_browser_tcp_fault": "not_rerun",
+    "deployment_push": "not_done",
+    "test_resource_cleanup": "own blocked unittest PID 9936 verified exited; no persistent service created"
+  }
+}

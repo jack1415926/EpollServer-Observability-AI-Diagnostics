@@ -1,0 +1,108 @@
+{
+  "version": "main-merged-contracts-v1",
+  "reviewed_on": "2026-10-29",
+  "topics": {
+    "sampling": {
+      "title": "文件快照、fresh/stale与null",
+      "text": "本项目通过文件快照采样，不使用共享内存快照或名单心跳。fresh仅表示基础快照有效，不能证明业务健康；stale仅表示样本超龄，不能由此确认SIGSTOP、崩溃、锁等待或文件故障。指标null表示未知，不是0。完整totals与有效部分partial_sums不同；逐字段读取不是同一瞬间的事务。收发队列是业务队列条数，不是内核缓冲区。 validity=unavailable或no_valid_workers仅表示基础采集数据不可用，不是TCP服务或业务不可达。",
+      "references": [
+        {
+          "path": "docs/STAGE_1_COMPLETION.md",
+          "start_line": 7,
+          "end_line": 39,
+          "sha256": "16fce0546208b7e36cbedfb3fb671f1e40ac8a1998eedb428023eee74077aad0"
+        }
+      ]
+    },
+    "worker_states": {
+      "title": "Worker状态的互斥含义",
+      "text": "CheckProcess把确认不存在的/proc记录以及Z/X/x状态归为dead；单纯SIGSTOP暂停的T状态不会直接归为dead。dead不提供退出码、终止信号或具体退出原因，不能确认SIGKILL。process_unavailable表示进程信息不可读取或不可解析，不证明进程已退出。T为信号导致的停止，t为跟踪停止，不可把SIGSTOP与T/t等同。单纯T或t停止状态本身不触发process_unavailable；不要把暂停列为读取/proc失败的直接解释，读取、权限或解析错误须另行核验。identity_mismatch是实际启动身份或父PID不符；snapshot_identity_mismatch是快照字段不符，二者不能混同。missing是快照缺失；stale是样本超龄，不等同以上进程状态。process_resources.leader_state可暴露已核验主线程的T/t状态，须与identity_verified和资源观测时点一起解释，不代表所有线程状态；Master wait状态、退出码和具体终止信号仍未暴露。 stale路径在读取快照和判定年龄之前已经通过/proc身份核验；它不证明报告生成时仍存活，也不能说在那次核验时已被回收。退出或回收假设须绑定明确时点，后续变化未知。 snapshot_identity_mismatch同样发生在首次/proc身份核验通过之后，未通过会先返回dead/process_unavailable/identity_mismatch而非快照字段不符。首次检查之后是否退出是后续未知变化，不能拿它解释之前的样本超龄或字段不符。",
+      "references": [
+        {
+          "path": "monitor/collector/collector.cxx",
+          "start_line": 110,
+          "end_line": 183,
+          "sha256": "1d1caca2387214837b30e92e3f07d5374554c24176abd6ac82b0d910298f0b20"
+        },
+        {
+          "path": "monitor/collector/collector.cxx",
+          "start_line": 335,
+          "end_line": 383,
+          "sha256": "1d1caca2387214837b30e92e3f07d5374554c24176abd6ac82b0d910298f0b20"
+        },
+        {
+          "path": "docs/knowledge/LINUX_PROC_STATE.md",
+          "start_line": 6,
+          "end_line": 16,
+          "sha256": "df62221ad1443a24182bed9363ecd26c20a9c88ce32f57f9a68ae5f7667baf90"
+        }
+      ]
+    },
+    "worker_policy": {
+      "title": "Worker整体退出与不自动补起",
+      "text": "本项目保留Worker意外退出导致整个TCP服务停止的策略，不自动补起，不自动重新fork Worker。Master名单是成功fork且尚未回收的身份集合，不是就绪/存活/业务健康证明。不能由名单PID仍在或master state=running推断Worker正常工作；PID复用需核对boot ID、PID、start_ticks和父进程。建议只能是待人工核验的步骤，诊断器不执行信号、重启或修复。",
+      "references": [
+        {
+          "path": "server/proc/ngx_process_cycle.cxx",
+          "start_line": 94,
+          "end_line": 138,
+          "sha256": "160560ce6c0dfe372bab46c926bbc2d48bc64b81486d394d589608e549d0d4ee"
+        },
+        {
+          "path": "docs/STAGE_1_MASTER_MEMBERSHIP.md",
+          "start_line": 20,
+          "end_line": 36,
+          "sha256": "1dc8b15b0acabaf084ea5e6d34c44ee90049127d9e1edf0a937b5c28d9226308"
+        }
+      ]
+    },
+    "events": {
+      "title": "事件、实例和恢复证据",
+      "text": "事件是历史持久化记录。active仅表示尚无恢复证据，不保证当前仍异常；resolved也不证明之后没有再发生故障。必须区分事件实例和当前监控实例、触发时间和取证时间。缺失样本为未知，不能作为队列恢复或归零证据；不能从旧实例事件推断当前实例故障。 events数组是持久化事件历史；detection对象是本次查询的检测控制面摘要，二者须分项说明。历史事件中的threshold/window只反映当时配置，当前配置未核验时保持未知，不作为当前判定门槛。来源不同时只说明归属边界，不放入故障原因候选。",
+      "references": [
+        {
+          "path": "docs/STAGE_4_EVENTS.md",
+          "start_line": 5,
+          "end_line": 21,
+          "sha256": "a34cb0dff498241ddff1ee745eceb6f564bba58042011dccd5487340a3241ab9"
+        }
+      ]
+    },
+    "experiments": {
+      "title": "历史实验比较的证据标准",
+      "text": "实验为历史记录，不是本次实时测量。same_conditions仅核对已记录字段，不证明环境完全相同；条件变化不能直接归因为某项优化。比较必须保留用户指定baseline/candidate角色。缺失均值为null，不能由P50/P95推出；零基准的百分比变化为null，不能填0或无穷。服务器返回的差值和百分比可复述，新增因果判断仍须区分实验。",
+      "references": [
+        {
+          "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
+          "start_line": 80,
+          "end_line": 107,
+          "sha256": "1d78bc01f8424edb932c7d84a20579aa847997f90014de855289ac78649ae658"
+        }
+      ]
+    },
+    "capabilities": {
+      "title": "当前能力与日志范围",
+      "text": "当前Worker进程CPU与近似RSS已支持，须按resources实际可用状态判断；逐线程状态、请求耗时、累计业务/错误计数及MySQL/Redis内部指标仍不受支持；历史实验资源摘要不代表当前资源。health的HTTP 200只证明监控存活，tcp_health=not_probed不是业务健康。固定日志尾部未核验实例与故障时间窗，只是未核验线索；不能把日志中的数值或错误当作当前实例事实。业务库与监控库不同。用户陈述可以记录为未核验用户信息，不能借用health/workers的引用证明用户说过的话。 用户在另一台主机测量只说明客户端位置，不说明请求目标不同；目标主机/端口和网络路径未核实时不能判断与当前实例无关。",
+      "references": [
+        {
+          "path": "docs/DIAGNOSIS_COVERAGE.md",
+          "start_line": 1,
+          "end_line": 20,
+          "sha256": "a08d49bc790ccf32e2bce177fc4dc4348fc99ae1965cc4a7663fef0293065b08"
+        }
+      ]
+    },
+    "resources": {
+      "title": "Worker CPU与RSS的独立采样",
+      "text": "Worker resources独立于业务快照metrics。cpu_percent为相邻窗口进程CPU平均值，100%是一个逻辑CPU，可超过100%，不是整机占比。rss_bytes为近似常驻内存字节，不证明泄漏。首次CPU为null但RSS可能可用；计数回退、身份变化和读取失败不补零。interval_ms及sampled_at_unix_ms分别说明窗口与资源时点。业务快照stale时资源仍可能可用。CLI单次采样CPU为null。CPU/RSS只说明资源观测，不确定锁等待、DB等待、热点函数或业务健康。 process_resources保留identity_verified、leader_state、cpu_user_ticks/cpu_system_ticks、clock_ticks_per_second、threads与observed_at_boottime_ms；这些CPU ticks为累计计数，不能当百分比。leader_state仅为主线程状态，threads仅为线程数量，不是逐线程分析。",
+      "references": [
+        {
+          "path": "docs/T7_WORKER_RESOURCES.md",
+          "start_line": 5,
+          "end_line": 28,
+          "sha256": "564b1850531b3d4f67b1b1efe798117e5940f386500c3d373349208241ba48b1"
+        }
+      ]
+    }
+  }
+}
