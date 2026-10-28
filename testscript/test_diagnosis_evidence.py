@@ -19,6 +19,103 @@ from diagnosis.selection import contracts
 
 
 class EvidenceTests(unittest.IsolatedAsyncioTestCase):
+    def test_resource_nulls_do_not_become_zero(self):
+        tools = Tools(None, None)
+        tools.record('workers', {'response':{'data':{'workers':[{'worker_index':0,
+            'resources':{'cpu_percent':None,'rss_bytes':None}}]}}}, 'live_observation')
+        for name, text in (('cpu_percent','CPU使用率为0'), ('rss_bytes','RSS为0')):
+            with self.subTest(name=name), self.assertRaises(ReportSupportError):
+                validate_report(self.report(text, '/response/data/workers/0/resources/'+name, None), tools.evidence)
+        validate_report(self.report('CPU未知，不是0', '/response/data/workers/0/resources/cpu_percent', None), tools.evidence)
+
+    def test_locator_schema_expresses_the_backend_exclusive_modes(self):
+        from diagnosis.agent import report_schema
+        schema = report_schema(['E1'], support_required=True)['$defs']['Support']
+        branches = schema.get('oneOf', [])
+        self.assertEqual(len(branches), 3, 'value, length and quote must be exclusive in the provider schema')
+        examples = [
+            ({'pointer':'/value', 'quote':'', 'operation':'value', 'value':None}, True),
+            ({'pointer':'/items', 'quote':'', 'operation':'length', 'value':0}, True),
+            ({'pointer':'', 'quote':'原文', 'operation':'value', 'value':None}, True),
+            ({'pointer':'', 'quote':'原文', 'operation':'value', 'value':'重复原文'}, False),
+            ({'pointer':'/items', 'quote':'', 'operation':'length', 'value':None}, False),
+            ({'pointer':'/items', 'quote':'', 'operation':'length', 'value':-1}, False),
+            ({'pointer':'/items', 'quote':'', 'operation':'length', 'value':True}, False),
+            ({'pointer':'/value', 'quote':'原文', 'operation':'value', 'value':None}, False),
+        ]
+        # Inspect the actual exported restrictions, not a separately maintained schema.
+        for value, valid in examples:
+            def matches(branch):
+                for key, rule in branch['properties'].items():
+                    actual = value[key]
+                    if 'const' in rule and actual != rule['const']: return False
+                    if rule.get('type') == 'integer' and type(actual) is not int: return False
+                    if 'minimum' in rule and actual < rule['minimum']: return False
+                    if rule.get('minLength') and (not isinstance(actual, str) or len(actual) < rule['minLength']): return False
+                    if rule.get('pattern') and not __import__('re').search(rule['pattern'], actual): return False
+                return True
+            with self.subTest(value=value):
+                self.assertEqual(sum(matches(b) for b in branches), int(valid))
+                if valid: Support(evidence_id='E1', **value)
+                else:
+                    from pydantic import ValidationError
+                    with self.assertRaises(ValidationError): Support(evidence_id='E1', **value)
+
+    async def test_quote_repair_supplies_exact_source_and_exclusive_mode_guidance(self):
+        from diagnosis.agent import generate_analysis
+        tools = Tools(None, None)
+        tools.record('technical_docs', {'text':'条件变化不能直接归因为某项优化。'}, 'project_document')
+        report = self.report('资料要求保留因果边界')
+        report['facts'][0].update(basis='document', support=[{
+            'evidence_id':'E1', 'pointer':'', 'quote':'条件不同就没有优化。', 'value':None}])
+        outer = self
+        class Provider:
+            calls = 0
+            async def structured(self, messages, schema):
+                self.calls += 1
+                if self.calls == 2:
+                    feedback = json.loads(messages[-1]['content'].split('\n', 1)[1])
+                    outer.assertEqual(feedback['source_excerpts']['E1'], tools.evidence[0]['excerpt'])
+                    outer.assertIn('value=null', feedback['locator_rules'])
+                    report['facts'][0]['support'][0]['quote'] = '条件变化不能直接归因为某项优化。'
+                return json.dumps(report)
+        # Knowledge schema keeps this focused on the citation repair, without cause fields.
+        from diagnosis.agent import KnowledgeAnswer
+        report.update(unknowns=[], next_steps=[])
+        report.pop('possible_causes'); report.pop('excluded_causes')
+        provider = Provider()
+        answer, repairs = await generate_analysis([], provider, ['E1'], KnowledgeAnswer, evidence=tools.evidence)
+        self.assertEqual(provider.calls, 2)
+        self.assertEqual(len(repairs), 1)
+        self.assertEqual(answer.facts[0].support[0].quote, '条件变化不能直接归因为某项优化。')
+
+    async def test_mixed_document_observation_repair_does_not_relax_scope_check(self):
+        from diagnosis.agent import generate_analysis, KnowledgeAnswer
+        tools = Tools(None, None)
+        tools.record('workers', {'state':'running'}, 'live_observation')
+        tools.record('technical_docs', {'text':'名单不证明业务健康'}, 'project_document')
+        report = {'summary':'名单不证明业务健康', 'facts':[{
+            'text':'名单状态running不证明业务健康', 'basis':'document', 'evidence_ids':['E1','E2'],
+            'support':[{'evidence_id':'E1','pointer':'/state','value':'running','quote':''},
+                       {'evidence_id':'E2','pointer':'','value':None,'quote':'名单不证明业务健康'}]}],
+            'unknowns':[], 'next_steps':[]}
+        with self.assertRaises(ReportSupportError): validate_report(report, tools.evidence)
+        outer = self
+        class Provider:
+            calls = 0
+            async def structured(self, messages, schema):
+                self.calls += 1
+                if self.calls == 2:
+                    feedback = json.loads(messages[-1]['content'].split('\n', 1)[1])
+                    outer.assertIn('evidence_scope_mismatch', str(feedback['fields']))
+                    outer.assertIn('observation', feedback['scope_rules'])
+                    report['facts'][0]['basis'] = 'observation'
+                return json.dumps(report)
+        provider = Provider()
+        answer, repairs = await generate_analysis([], provider, ['E1','E2'], KnowledgeAnswer, evidence=tools.evidence)
+        self.assertEqual(answer.facts[0].basis, 'observation')
+        self.assertEqual(provider.calls, 2)
+
     def test_semantic_review_is_bound_to_reports_and_claim_counts(self):
         import tempfile,hashlib
         from pathlib import Path
@@ -135,6 +232,8 @@ class EvidenceTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(ReportSupportError):validate_report(report,tools.evidence)
         report=self.report('当前实例'+'a'*64,'/response/data/detection/instance','a'*64)
         validate_report(report,tools.evidence)
+        report['facts'][0]['basis']='historical'
+        with self.assertRaises(ReportSupportError): validate_report(report,tools.evidence)
 
     def test_exclusion_can_combine_contract_and_observation_and_source_stage_is_not_a_metric(self):
         evidence=self.payload();tools=Tools(None,None);tools.evidence=evidence
@@ -158,6 +257,25 @@ class EvidenceTests(unittest.IsolatedAsyncioTestCase):
         report['facts'][0]['text']='signal(99)不是运行观测'
         with self.assertRaises(ReportSupportError):validate_report(report,tools.evidence)
 
+    def test_document_numeric_claim_requires_quote_covering_the_number(self):
+        from diagnosis.agent import Analysis, KnowledgeAnswer
+        from pydantic import ValidationError
+        tools = Tools(None, None)
+        tools.record('technical_docs', {'text':'指标null表示未知，不是0。health的HTTP 200只证明监控存活。'}, 'project_document')
+        report = self.report('指标null表示未知，不是0。')
+        report['facts'][0].update(basis='document', support=[{
+            'evidence_id':'E1','pointer':'','value':None,'quote':'指标null表示未知'}])
+        report['summary']='指标未知'
+        with self.assertRaises(ReportSupportError): validate_report(report, tools.evidence)
+        report['facts'][0]['support'][0]['quote']='指标null表示未知，不是0。'
+        validate_report(report, tools.evidence)
+        for model in (Analysis, KnowledgeAnswer):
+            self.assertEqual(model.model_json_schema()['properties']['facts']['maxItems'], 6)
+            with self.assertRaises(ValidationError):
+                model.model_validate({'summary':'指标未知','facts':report['facts']*7,
+                    'unknowns':['待核验'],'next_steps':['人工核验'], **(
+                        {'conclusion':'insufficient_evidence','possible_causes':[]} if model is Analysis else {})})
+
     def test_known_contradictions_are_checked_outside_facts_too(self):
         evidence = self.payload()
         value = json.loads(evidence[0]['excerpt']); value['response']['data']['workers'][0]['status'] = 'dead'
@@ -173,6 +291,32 @@ class EvidenceTests(unittest.IsolatedAsyncioTestCase):
         report=self.report('进程状态未知','/response/data/workers/0/status','process_unavailable')
         report['possible_causes']=[{**report['facts'][0],'text':'SIGSTOP暂停导致process_unavailable'}]
         with self.assertRaises(ReportSupportError):validate_report(report,tools.evidence)
+
+    def test_lifecycle_hypotheses_respect_process_check_time_and_exclusions(self):
+        tools = Tools(None, None)
+        tools.record('workers', {'response':{'data':{'workers':[{'status':'stale'}]}}}, 'live_observation')
+        report = self.report('样本过期', '/response/data/workers/0/status', 'stale')
+        report['possible_causes'] = [{**report['facts'][0],
+            'text':'推测：Worker可能已经崩溃或被回收，导致样本停止更新。'}]
+        with self.assertRaises(ReportSupportError): validate_report(report, tools.evidence)
+        report['possible_causes'][0]['text'] = '在快照过期之前可能已异常退出；核验不能证明报告生成时仍存活，后续变化未知。'
+        with self.assertRaises(ReportSupportError): validate_report(report, tools.evidence)
+        report['possible_causes'][0]['text'] = '首次进程检查之后可能退出，后续状态待核验。'
+        with self.assertRaises(ReportSupportError): validate_report(report, tools.evidence)
+        report['unknowns'] = [report['possible_causes'][0]['text']]
+        report['possible_causes'] = []
+        validate_report(report, tools.evidence)
+        report['possible_causes'] = [{**report['facts'][0]}]
+        report['possible_causes'][0]['text'] = '文件发布延迟可能造成样本过期，不能确认崩溃。'
+        validate_report(report, tools.evidence)
+        tools = Tools(None, None)
+        tools.record('workers', {'response':{'data':{'workers':[{'status':'dead'}]}}}, 'live_observation')
+        report = self.report('进程状态dead', '/response/data/workers/0/status', 'dead')
+        report['possible_causes'] = [{**report['facts'][0],
+            'text':'推测：Worker也可能只是处于暂停（T/t）状态，但当前dead状态本身不被约定视为T状态。'}]
+        with self.assertRaises(ReportSupportError): validate_report(report, tools.evidence)
+        report['possible_causes'][0]['text'] = '缺少信号证据；不能把单纯暂停作为本次dead的解释。'
+        validate_report(report, tools.evidence)
         tools=Tools(None,None);tools.record('workers',{'http_status':503},'live_observation')
         report=self.report('HTTP503','/http_status',503);report['summary']='overview返回HTTP503'
         with self.assertRaises(ReportSupportError):validate_report(report,tools.evidence)

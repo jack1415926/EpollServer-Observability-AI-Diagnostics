@@ -13,14 +13,16 @@ PLANNER_VERSION = 'minimum-evidence-v1'
 
 def observation_only(question, route):
     return route.intent == 'runtime' and not re.search(
-        r'为什么|原因|能否|能不能|断定|区分|故障|异常|重启|崩溃|业务健康', question) and bool(re.search(
-        r'(?:连接数|队列|有效Worker).{0,12}(?:多少|为几)|监控是否存活', question, re.I))
+        r'为什么|原因|能否|能不能|断定|区分|故障|异常|重启|崩溃|业务健康|分析|解释|说明|意味着|推断', question) and bool(re.search(
+        r'(?:连接数|队列|有效Worker).{0,12}(?:多少|为几)|监控是否存活|CPU|RSS|内存', question, re.I))
 
 
 def contract_topics(question, route, evidence):
     sources = {e['source'] for e in evidence}
     explain = bool(re.search(r'为什么|原因|能否|是否|能不能|意味着|断定|判断|解释|区分|故障|异常|重启|补起|dead|stale|unavailable|mismatch', question, re.I))
     topics = set()
+    if 'workers' in sources and re.search(r'CPU|RSS|内存|资源', question, re.I):
+        topics.add('resources')
     statuses = set()
     for e in evidence:
         if e['source'] == 'workers':
@@ -29,7 +31,7 @@ def contract_topics(question, route, evidence):
                 statuses.update(w.get('status') for w in data.get('workers', []))
             except (ValueError, TypeError, AttributeError): pass
     if observation_only(question, route) and not statuses - {'fresh'}:
-        return []
+        return sorted(topics)
     if 'workers' in sources and (explain or statuses - {'fresh'}):
         topics.update(('sampling', 'worker_states'))
     if 'health' in sources and explain:

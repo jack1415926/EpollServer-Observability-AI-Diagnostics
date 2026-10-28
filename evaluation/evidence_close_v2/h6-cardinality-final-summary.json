@@ -1,0 +1,33 @@
+{
+  "scope": "previously reviewed development regressions, bounded known-issue checks; not a new blind quality set",
+  "reviewer": "project assistant source/fixture review, not external human expert",
+  "by_strategy": {
+    "targeted": {
+      "attempts": 1,
+      "delivered": 1,
+      "rejected": 0,
+      "semantic_outcomes": {
+        "pass": 1
+      },
+      "all_attempt_seconds_median": 19.6835,
+      "executed_tool_calls": 3,
+      "services": {
+        "DEEPSEEK": {
+          "calls": 4,
+          "missing_usage": 0,
+          "available_usage_sums": {
+            "prompt_tokens": 16707,
+            "completion_tokens": 1866,
+            "input_tokens": 10601,
+            "output_tokens": 2046,
+            "total_tokens": 31220
+          }
+        }
+      }
+    }
+  },
+  "paired_cases": [],
+  "paired": {},
+  "failed_attempts": [],
+  "warning": "semantic labels are source-based reviewer judgments, not automatic truth; failed attempts stay outside semantic denominators"
+}

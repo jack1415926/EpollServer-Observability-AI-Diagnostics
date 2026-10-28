@@ -5,6 +5,37 @@ import httpx
 from diagnosis.agent import Tools, diagnose
 
 class RoutingTests(unittest.IsolatedAsyncioTestCase):
+    async def test_resource_observation_preserves_real_tool_fields_and_does_not_run_agent(self):
+        outer = self
+        class Provider:
+            model='test'
+            async def structured(self,messages,schema):
+                if 'intent' in schema['properties']:
+                    return json.dumps({'intent':'runtime','runtime_sources':['workers'],'search_query':'','clarification':''})
+                payload=json.loads(messages[1]['content'])
+                outer.assertIn('resources',payload['evidence_plan']['contract_topics'])
+                observed=next(e for e in payload['initial_evidence'] if e['source']=='workers')
+                outer.assertEqual(json.loads(observed['excerpt'])['response']['data']['workers'][0]['resources']['rss_bytes'],4096000)
+                return json.dumps({'summary':'Worker CPU使用率12.5%，RSS4096000字节',
+                    'facts':[{'text':'Worker CPU使用率12.5%，RSS4096000字节','basis':'observation','evidence_ids':['E1'],
+                    'support':[{'evidence_id':'E1','pointer':'/response/data/workers/0/resources/cpu_percent','value':12.5,'quote':''},
+                        {'evidence_id':'E1','pointer':'/response/data/workers/0/resources/rss_bytes','value':4096000,'quote':''}]}],
+                    'unknowns':[],'next_steps':[]})
+            async def chat(self,*args,**kwargs):raise AssertionError('resource observation must not select more tools')
+        def transport(request):
+            outer.assertEqual(request.url.path,'/api/v1/workers')
+            return httpx.Response(200,json={'data':{'workers':[{'status':'fresh','resources':{
+                'status':'available','cpu_percent':12.5,'rss_bytes':4096000,'interval_ms':500}}]}})
+        async with httpx.AsyncClient(transport=httpx.MockTransport(transport)) as client:
+            report=await diagnose('当前Worker CPU和RSS是多少？',Provider(),Tools(client,None))
+        self.assertEqual(report['answer_mode'],'observation')
+        self.assertEqual(report['analysis']['possible_causes'],[])
+        self.assertEqual([e['source'] for e in report['evidence']],['workers','technical_docs'])
+        from diagnosis.selection import observation_only
+        from diagnosis.routing import QuestionRoute
+        route=QuestionRoute(intent='runtime',runtime_sources=['workers'],search_query='',clarification='')
+        self.assertFalse(observation_only('当前Worker CPU偏高说明什么？',route))
+
     async def test_explicit_runtime_read_has_narrow_backend_correction_and_respects_negation(self):
         from diagnosis.routing import route_question
         class Provider:

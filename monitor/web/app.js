@@ -113,11 +113,14 @@ function renderLive(overview, workers) {
   $("worker-rows").replaceChildren(...rows.map(worker => {
     const row = document.createElement("tr"), name = text("span", `Worker ${worker.worker_index}`);
     name.append(text("small", `PID ${worker.pid} · ticks ${worker.process_start_ticks}`));
-    cells(row, [name, badge(worker.status), fmt(worker.metrics?.connections_current), fmt(worker.metrics?.receive_queue_messages), fmt(worker.metrics?.send_queue_messages), worker.age_ms == null ? "—" : `${fmt(worker.age_ms)} ms`]);
+    const resource = worker.resources || {}, resourceState = text("span", {available: "可用", partial: "部分可用", unavailable: "不可用"}[resource.status] || "未采集");
+    if (resource.reason === "cpu_warming_up") resourceState.append(text("small", "CPU 等待第二次采样"));
+    if (resource.sampled_at_unix_ms != null) resourceState.append(text("small", `${new Date(resource.sampled_at_unix_ms).toLocaleTimeString("zh-CN")} · CPU 窗口 ${fmt(resource.interval_ms)} ms`));
+    cells(row, [name, badge(worker.status), fmt(worker.metrics?.connections_current), fmt(worker.metrics?.receive_queue_messages), fmt(worker.metrics?.send_queue_messages), worker.age_ms == null ? "—" : `${fmt(worker.age_ms)} ms`, resource.cpu_percent == null ? "—" : `${fmt(resource.cpu_percent, 1)}%`, resource.rss_bytes == null ? "—" : `${fmt(resource.rss_bytes / 1048576, 1)} MiB`, resourceState]);
     return row;
   }));
   if (overview.validity !== "complete") $("partial-note").textContent = `完整总量不可用。有效部分：连接 ${fmt(data.partial_sums?.connections_current)}，接收队列 ${fmt(data.partial_sums?.receive_queue_messages)}，发送队列 ${fmt(data.partial_sums?.send_queue_messages)}；仅代表已采集 Worker。`;
-  else $("partial-note").textContent = "当前基础指标完整。逐字段采样，不是所有进程同一瞬间的事务快照。";
+  else $("partial-note").textContent = "当前连接与队列快照完整；CPU/RSS 按各 Worker 的资源采集状态判断。逐字段采样，不是同一瞬间的事务快照。";
   $("updated").textContent = data.collected_at_unix_ms ? `采集于 ${new Date(data.collected_at_unix_ms).toLocaleTimeString("zh-CN")} · 每 2 秒刷新` : "当前无有效采集时间";
   notice(overview.validity === "complete" ? "已连接 · 实时指标每 2 秒刷新。TCP 业务健康未主动探测。" : `监控服务可达，采集状态：${labels[overview.validity] || overview.validity} · ${data.reason}`, overview.validity !== "complete");
 }

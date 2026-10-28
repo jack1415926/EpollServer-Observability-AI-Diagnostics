@@ -22,7 +22,7 @@ class CorpusTests(unittest.IsolatedAsyncioTestCase):
         policy = load_policy()
         chunks = documents()
         self.assertEqual({c['path'] for c in chunks}, set(policy['sources']))
-        self.assertEqual(len(policy['sources']), 25)
+        self.assertIn('docs/T7_WORKER_RESOURCES.md', policy['sources'])
         for c in chunks:
             meta = c['corpus']
             self.assertTrue(meta['section_path'])

@@ -1,0 +1,34 @@
+{
+  "scope": "previously reviewed development regressions, bounded known-issue checks; not a new blind quality set",
+  "reviewer": "project assistant source/fixture review, not external human expert",
+  "reviewed_on": "2026-10-28",
+  "results_sha256": "51d9282949ed9cd0a9aafdaf81612b7a2ab20abd73d1cecd5e3b47f118a30af3",
+  "reviews": [
+    {
+      "id": "H6",
+      "strategy": "targeted",
+      "report_sha256": "70ab1be1b0e81e3095db62e8af9468e500dd6f433ef61818cb8be9bb9107eaad",
+      "outcome": "pass",
+      "claim_support": {
+        "facts": [
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "possible_causes": [],
+        "excluded_causes": [
+          "supported",
+          "supported",
+          "supported"
+        ]
+      },
+      "summary_support": "supported",
+      "notes": "快照字段不符与实际身份不符分开，首次核验通过与后续退出未知分开；引用模式互斥，无确认崩溃。空事件数量为本次查询观测，未把历史事件正文当当前观测。",
+      "proven_root_cause": false,
+      "automatic_actions_executed": false
+    }
+  ]
+}

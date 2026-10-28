@@ -47,3 +47,33 @@ console.log("PASS: routed report labels, empty sections and legacy report render
   assert(!texts(target).includes("证据不足，无法确定根因。"));
 }
 console.log("PASS: support provenance, exclusions and failed-run record rendering");
+{
+  const elements = new Map();
+  const document = {createElement: tag => new Element(tag), addEventListener() {},
+    createTextNode: value => Object.assign(new Element("text"), {textContent: value}),
+    getElementById: id => {
+      if (!elements.has(id)) elements.set(id, new Element("div"));
+      return elements.get(id);
+    }};
+  Element.prototype.replaceWith = function () {};
+  const context = vm.createContext({document, Node: Element});
+  vm.runInContext(source.slice(0, source.indexOf("async function refreshLive")) + "\nglobalThis.renderLiveTest=renderLive;", context);
+  const worker = {worker_index: 0, pid: 12, process_start_ticks: 34, status: "stale", metrics: {}, age_ms: 5000,
+    resources: {status:"available", cpu_percent:12.5, rss_bytes:1572864, interval_ms:500, sampled_at_unix_ms:1793000000000}};
+  const overview = {validity:"partial", data:{totals:{},partial_sums:{},master:{},valid_workers:0,expected_workers:1}};
+  context.renderLiveTest(overview, {data:{workers:[worker]}});
+  let values = texts(elements.get("worker-rows"));
+  assert(values.includes("12.5%")); assert(values.includes("1.5 MiB")); assert(values.includes("已过期"));
+  assert(values.some(v => v.includes("CPU 窗口 500 ms")));
+  worker.resources.cpu_percent = null; worker.resources.status="partial"; worker.resources.reason="cpu_warming_up";
+  context.renderLiveTest(overview, {data:{workers:[worker]}});
+  values = texts(elements.get("worker-rows"));
+  assert(!values.includes("0%")); assert(values.includes("CPU 等待第二次采样"));
+  worker.resources.cpu_percent = 0;
+  context.renderLiveTest(overview, {data:{workers:[worker]}});
+  assert(texts(elements.get("worker-rows")).includes("0%"));
+  delete worker.resources;
+  context.renderLiveTest(overview, {data:{workers:[worker]}});
+  assert(texts(elements.get("worker-rows")).includes("未采集"));
+}
+console.log("PASS: Worker CPU/RSS, warmup null, zero, stale business and legacy rendering");

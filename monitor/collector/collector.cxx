@@ -107,7 +107,18 @@ std::string BootId(const std::filesystem::path &procRoot)
     return value;
 }
 
-struct Process { uint64_t ticks; int parent; char state; };
+struct Process {
+    uint64_t ticks, cpu = 0, rss = 0;
+    int parent;
+    char state;
+    bool cpuValid = false, rssValid = false;
+};
+bool Counter(const std::string &token, uint64_t &value)
+{
+    if (token.empty() || token.find_first_not_of("0123456789") != std::string::npos) return false;
+    try { value = std::stoull(token); return true; }
+    catch (const std::exception &) { return false; }
+}
 Process ReadProcess(const std::filesystem::path &procRoot, int pid)
 {
     const auto file = procRoot / std::to_string(pid) / "stat";
@@ -124,15 +135,25 @@ Process ReadProcess(const std::filesystem::path &procRoot, int pid)
         throw Error("process_unavailable");
     std::istringstream fields(line.substr(end + 1));
     Process result{};
+    uint64_t user = 0, system = 0;
+    bool userValid = false, systemValid = false;
     std::string token;
-    for (int field = 3; field <= 22; ++field) {
-        if (!(fields >> token))
+    for (int field = 3; field <= 24; ++field) {
+        if (!(fields >> token)) {
+            if (field > 22) break; // Optional resources must not invalidate the existing identity contract.
             throw Error("process_unavailable");
+        }
         try {
             if (field == 3) {
                 if (token.size() != 1)
                     throw Error("process_unavailable");
                 result.state = token[0];
+            } else if (field == 14) {
+                userValid = Counter(token, user);
+            } else if (field == 15) {
+                systemValid = Counter(token, system);
+            } else if (field == 24) {
+                result.rssValid = Counter(token, result.rss);
             } else if (field == 4 || field == 22) {
                 size_t used = 0;
                 if (token.empty() || token[0] == '-')
@@ -146,6 +167,8 @@ Process ReadProcess(const std::filesystem::path &procRoot, int pid)
         } catch (const std::invalid_argument &) { throw Error("process_unavailable"); }
         catch (const std::out_of_range &) { throw Error("process_unavailable"); }
     }
+    result.cpuValid = userValid && systemValid && user <= UINT64_MAX - system;
+    if (result.cpuValid) result.cpu = user + system;
     return result;
 }
 
@@ -199,16 +222,75 @@ Json EmptyMetrics()
 }
 }
 
-Json Collect(const std::filesystem::path &manifest, uint64_t maxAgeMs,
-             const std::filesystem::path &procRoot)
+void ResourceSampler::Enrich(Json &sample, const std::filesystem::path &procRoot)
 {
+    if (!sample["master"].is_object()) { Reset(); return; }
+    const auto &master = sample["master"];
+    const std::string instance = procRoot.string() + ":" + master["boot_id"].get<std::string>() + ":" +
+        master["master_pid"].dump() + ":" + master["master_start_ticks"].dump();
+    if (instance != instance_) { previous_.clear(); instance_ = instance; }
+    std::map<int, Previous> next;
+    const long hz = sysconf(_SC_CLK_TCK), page = sysconf(_SC_PAGESIZE);
+    for (auto &worker : sample["workers"]) {
+        Json value = {{"source", "linux_proc_stat"}, {"status", "unavailable"}, {"reason", "process_unavailable"},
+                      {"cpu_percent", nullptr}, {"rss_bytes", nullptr}, {"interval_ms", nullptr},
+                      {"sampled_at_unix_ms", nullptr}, {"sampled_at_boottime_ms", nullptr},
+                      {"cpu_percent_basis", "one_logical_cpu_100_percent"}};
+        try {
+            const int pid = worker["pid"].get<int>(), parent = master["master_pid"].get<int>();
+            const uint64_t start = worker["process_start_ticks"].get<uint64_t>();
+            const Process process = ReadProcess(procRoot, pid);
+            if (process.state == 'Z' || process.state == 'X' || process.state == 'x') throw Error("dead");
+            if (process.ticks != start || process.parent != parent) throw Error("identity_mismatch");
+            const uint64_t now = BootTimeMs();
+            std::string reason = "cpu_warming_up";
+            if (process.cpuValid && hz > 0) {
+                const auto old = previous_.find(pid);
+                if (old != previous_.end() && old->second.start == start) {
+                    if (process.cpu < old->second.cpu) reason = "cpu_counter_reset";
+                    else if (now <= old->second.time) reason = "cpu_interval_unavailable";
+                    else {
+                        const uint64_t interval = now - old->second.time;
+                        value["interval_ms"] = interval;
+                        value["cpu_percent"] = static_cast<double>(process.cpu - old->second.cpu) * 100000.0 / hz / interval;
+                        reason = "ok";
+                    }
+                }
+                next[pid] = {start, process.cpu, now};
+            } else reason = "cpu_unavailable";
+            if (process.rssValid && page > 0 && process.rss <= UINT64_MAX / static_cast<uint64_t>(page))
+                value["rss_bytes"] = process.rss * static_cast<uint64_t>(page);
+            CheckProcess(procRoot, pid, start, parent);
+            value["sampled_at_boottime_ms"] = now;
+            value["sampled_at_unix_ms"] = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
+            const bool cpu = !value["cpu_percent"].is_null(), rss = !value["rss_bytes"].is_null();
+            value["status"] = cpu && rss ? "available" : cpu || rss ? "partial" : "unavailable";
+            value["reason"] = rss ? reason : cpu ? "rss_unavailable" : "resource_fields_unavailable";
+        } catch (const Error &error) {
+            next.erase(worker["pid"].get<int>());
+            value["cpu_percent"] = nullptr;
+            value["rss_bytes"] = nullptr;
+            value["interval_ms"] = nullptr;
+            value["reason"] = error.what();
+        }
+        worker["resources"] = std::move(value);
+    }
+    previous_ = std::move(next); // Removed/unreadable Workers cannot retain a CPU baseline.
+}
+
+Json Collect(const std::filesystem::path &manifest, uint64_t maxAgeMs,
+             const std::filesystem::path &procRoot, ResourceSampler *resources)
+{
+    ResourceSampler single;
+    auto &sampler = resources ? *resources : single;
     Json result = {{"schema_version", 1}, {"status", "unavailable"}, {"reason", "initializing"},
                    {"master", nullptr}, {"workers", Json::array()}, {"expected_workers", nullptr},
                    {"valid_workers", 0}, {"totals", EmptyMetrics()}, {"partial_sums", EmptyMetrics()},
                    {"max_age_ms", maxAgeMs}, {"tcp_health", "not_probed"},
                    {"collected_at_unix_ms", std::chrono::duration_cast<std::chrono::milliseconds>(
                        std::chrono::system_clock::now().time_since_epoch()).count()},
-                   {"unsupported_metrics", {"cpu_memory", "cumulative_network", "business_counters", "mysql", "redis"}}};
+                   {"unsupported_metrics", {"cumulative_network", "business_counters", "mysql", "redis"}}};
     try {
         if (maxAgeMs == 0 || maxAgeMs > 60000)
             throw Error("invalid_max_age");
@@ -282,13 +364,14 @@ Json Collect(const std::filesystem::path &manifest, uint64_t maxAgeMs,
             }
             result["workers"].push_back(row);
         }
+        sampler.Enrich(result, procRoot);
         // Never report a mixture of memberships across a lifecycle transition.
         try {
             CheckProcess(procRoot, masterPid, masterTicks);
             if (ReadFile(fd.value, manifest.filename().string(), 1024 * 1024) != original)
                 throw Error("changed");
             for (const auto &row : result["workers"])
-                if (row["status"] == "fresh")
+                if (row["status"] == "fresh" || row["resources"]["status"] != "unavailable")
                     CheckProcess(procRoot, row["pid"].get<int>(), row["process_start_ticks"].get<uint64_t>(), masterPid);
             const uint64_t finished = BootTimeMs();
             result["collected_at_boottime_ms"] = finished;
@@ -300,6 +383,7 @@ Json Collect(const std::filesystem::path &manifest, uint64_t maxAgeMs,
                     row["age_ms"] = finished - sampled;
                 }
         } catch (const Error &) {
+            sampler.Reset();
             result["workers"] = Json::array();
             result["status"] = "instance_changed";
             result["reason"] = "identity_membership_or_freshness_changed_during_read";
@@ -322,10 +406,13 @@ Json Collect(const std::filesystem::path &manifest, uint64_t maxAgeMs,
             result["totals"] = sums;
         }
     } catch (const Error &error) {
+        sampler.Reset();
         result["reason"] = error.what();
     } catch (const Json::exception &) {
+        sampler.Reset();
         result["reason"] = "invalid_fields";
     } catch (const std::exception &) {
+        sampler.Reset();
         result["reason"] = "collection_error";
     }
     return result;

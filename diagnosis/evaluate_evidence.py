@@ -73,7 +73,7 @@ async def run(args):
     files.update(ref['path'] for topic in read(REGISTRY)['topics'].values() for ref in topic['references'])
     files=sorted(files)
     manifest={'started_at':datetime.now(timezone.utc).isoformat(), 'dataset':frozen,
-              'scope':'synthetic contract replay; new holdout families not used to tune prompts; project assistant authored',
+              'scope':'synthetic contract replay; project assistant authored; previously reviewed cases are development regressions, not a new blind holdout',
               'index_sha256':digest(args.index),'files':{name:digest(ROOT/name) for name in files},
               'split':args.split,'case':args.case,'strategy':args.strategy,'compare':args.compare,
               'comparison':'same implementation/prompt/guards; fixed eagerly reads all five fixture sources and all contracts, targeted follows route plus minimum contracts; independent model routing/generation calls'}

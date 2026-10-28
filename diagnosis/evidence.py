@@ -11,7 +11,15 @@ BASIS = Literal['observation', 'document', 'historical', 'user_statement', 'unve
 
 
 class Support(BaseModel):
-    model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
+    model_config = ConfigDict(extra='forbid', allow_inf_nan=False, json_schema_extra={
+        'required': ['evidence_id', 'pointer', 'value', 'quote', 'operation'],
+        'oneOf': [
+            {'properties': {'pointer': {'pattern': '^/'}, 'quote': {'const': ''}, 'operation': {'const': 'value'}}},
+            {'properties': {'pointer': {'pattern': '^/'}, 'quote': {'const': ''}, 'operation': {'const': 'length'},
+                            'value': {'type': 'integer', 'minimum': 0}}},
+            {'properties': {'pointer': {'const': ''}, 'quote': {'pattern': r'\S', 'minLength': 1},
+                            'operation': {'const': 'value'}, 'value': {'const': None}}}
+        ]})
     evidence_id: str = Field(min_length=1, max_length=20)
     pointer: str = Field(max_length=1000)
     value: str | StrictInt | StrictFloat | StrictBool | None
@@ -25,6 +33,8 @@ class Support(BaseModel):
         if bool(self.pointer) == bool(self.quote.strip()) or (self.quote and (
                 self.value is not None or self.operation != 'value')):
             raise ValueError('one_support_locator_required')
+        if self.operation == 'length' and (type(self.value) is not int or self.value < 0):
+            raise ValueError('length_requires_nonnegative_integer')
         return self
 
 
@@ -150,6 +160,8 @@ def support_categories(item, support):
     base = evidence_basis(item)
     allowed = {base}
     pointer = support.get('pointer', '')
+    if item['source'] == 'events' and pointer.startswith('/response/data/detection/'):
+        return {'observation'}
     # Query availability/counts describe this read, not when the stored records happened.
     if item['source'] in ('events', 'experiments', 'experiments/compare') and (
             pointer in ('/http_status', '/response/code', '/response/validity', '/response/data_valid', '/response/timestamp_unix_ms') or
@@ -204,7 +216,7 @@ def validate_report(analysis, evidence):
                 if item['scope'] == 'unavailable':
                     issues.append({'field': where, 'type': 'unavailable_evidence_not_support'}); continue
                 options = support_categories(item, support)
-                categories.add(claim.get('basis') if claim.get('basis') in options else evidence_basis(item))
+                categories.update({claim['basis']} if claim.get('basis') in options else options)
                 if support['quote']:
                     if not quote_matches(item, support['quote']):
                         issues.append({'field': where+['quote'], 'type': 'quote_not_in_excerpt'}); continue
@@ -238,7 +250,8 @@ def validate_report(analysis, evidence):
                     field = support['pointer'].rsplit('/', 1)[-1]
                     aliases = {'connections_current':'连接数|connections_current',
                         'receive_queue_messages':'接收队列|收队列|receive_queue_messages',
-                        'send_queue_messages':'发送队列|发队列|send_queue_messages', 'age_ms':'样本年龄|age_ms'}
+                        'send_queue_messages':'发送队列|发队列|send_queue_messages', 'age_ms':'样本年龄|age_ms',
+                        'cpu_percent':'CPU(?:使用率|占用率)?|cpu_percent', 'rss_bytes':'RSS|常驻内存|rss_bytes'}
                     if actual is None and field in aliases and any(positive_clauses(claim['text'],
                             r'(?:'+aliases[field]+r')[^，,。；]{0,10}(?:为|是|=|：|:)\s*(?:0|零)(?!\d)')):
                         issues.append({'field': location+['text'], 'type': 'null_reported_as_zero'})
@@ -263,6 +276,14 @@ def validate_report(analysis, evidence):
                 statuses.update(w.get('status') for w in value.get('workers', []))
             except (ValueError, KeyError, TypeError, AttributeError): pass
     if any(item['source']=='workers' for item in evidence):
+        for index, claim in enumerate(analysis.get('possible_causes', [])):
+            text = claim['text']
+            # Narrow known contradictions only; mixed Worker states need entity-level review.
+            if statuses and statuses <= {'stale', 'snapshot_identity_mismatch'} and any(
+                    positive_clauses(text, r'崩溃|退出|回收')):
+                issues.append({'field': ['possible_causes', index, 'text'], 'type': 'postcheck_lifecycle_belongs_in_unknowns'})
+            if statuses == {'dead'} and any(positive_clauses(text, r'(?:只是|单纯).{0,12}(?:SIGSTOP|暂停)')):
+                issues.append({'field': ['possible_causes', index, 'text'], 'type': 'stop_is_not_dead'})
         texts = [(['summary'], analysis['summary'])]
         texts += [([group, i, 'text'], c['text']) for group in groups for i, c in enumerate(analysis.get(group, []))
                   if c.get('basis') != 'user_statement']

@@ -1,5 +1,5 @@
 {
-  "version": "t11-t12-evidence-v1",
+  "version": "t7-resources-v1",
   "reviewed_on": "2026-10-28",
   "sources": {
     "README.md": {
@@ -10,7 +10,7 @@
         "project"
       ],
       "source_quality": "project_maintained_contract",
-      "reviewed_sha256": "97bb368539d4c7f04712e8e07c3c6918f8879c9a35745a713af8e49538e5efe8",
+      "reviewed_sha256": "31a66c7760e9977e818e57cebc7907703c94302f7959aaa71dd04d9423e10886",
       "sections": {
         "从哪里开始": {
           "layer": "planning_progress",
@@ -26,7 +26,7 @@
         "project"
       ],
       "source_quality": "project_progress_or_proposal",
-      "reviewed_sha256": "3f8db5883755d872752c1c5877a367df5ff639237a08ef4dce4b6545489f328a",
+      "reviewed_sha256": "5caf533a00c6f37681bb0fdd4c7236cdc2f31ca0235ee322b2912094cd734a2d",
       "sections": {
         "阶段 5 确认范围（2026-10-25）": {
           "layer": "current_contract",
@@ -113,6 +113,11 @@
           "layer": "current_contract",
           "source_quality": "project_maintained_contract",
           "published_on": "2026-10-28"
+        },
+        "T7第一批资源观测（2026-10-28）": {
+          "layer": "current_contract",
+          "source_quality": "project_maintained_contract",
+          "published_on": "2026-10-28"
         }
       }
     },
@@ -124,7 +129,7 @@
         "project"
       ],
       "source_quality": "project_case_record",
-      "reviewed_sha256": "468baf1d2c345e340e33a2e323548f437a6962415b1167ec806db8a93149fbef",
+      "reviewed_sha256": "f286f553360ecba9665967b3e7eb19c3bfe077e9c46768c9623565a53b48c0b9",
       "sections": {
         "2026-10-26：诊断格式契约与Recall审计": {
           "layer": "historical_case",
@@ -143,6 +148,16 @@
           "published_on": "2026-10-27"
         },
         "2026-10-28：T11/T12同类修复与拒绝保真": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-28"
+        },
+        "2026-10-28：T11/T12收尾的模式、时序与控制面校验": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-28"
+        },
+        "2026-10-28：T7资源数据与业务快照分离": {
           "layer": "planning_progress",
           "source_quality": "project_progress_or_proposal",
           "published_on": "2026-10-28"
@@ -340,6 +355,18 @@
         }
       },
       "spans": [
+        {
+          "start_line": 72,
+          "end_line": 72,
+          "layer": "historical_case",
+          "source_quality": "project_case_record",
+          "superseded_by": [
+            {
+              "path": "docs/T7_WORKER_RESOURCES.md",
+              "heading": "数据契约"
+            }
+          ]
+        },
         {
           "start_line": 80,
           "end_line": 81,
@@ -813,6 +840,23 @@
           "layer": "current_contract",
           "source_quality": "project_interpretation",
           "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound"
+        }
+      }
+    },
+    "docs/T7_WORKER_RESOURCES.md": {
+      "layer": "current_contract",
+      "published_on": "2026-10-28",
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "monitor",
+        "diagnosis"
+      ],
+      "source_quality": "project_maintained_contract",
+      "reviewed_sha256": "108ca1e02c44a22f6537865ec3630b9a52dc003ce5117e893688c6ef64e4e47d",
+      "sections": {
+        "本批验证记录（2026-10-28）": {
+          "layer": "historical_case",
+          "source_quality": "project_case_record"
         }
       }
     }
