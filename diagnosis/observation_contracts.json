@@ -1,6 +1,6 @@
 {
-  "version": "main-merged-contracts-v1",
-  "reviewed_on": "2026-10-29",
+  "version": "documentation-source-review-20261030",
+  "reviewed_on": "2026-10-30",
   "topics": {
     "sampling": {
       "title": "文件快照、fresh/stale与null",
@@ -8,9 +8,9 @@
       "references": [
         {
           "path": "docs/STAGE_1_COMPLETION.md",
-          "start_line": 7,
-          "end_line": 39,
-          "sha256": "16fce0546208b7e36cbedfb3fb671f1e40ac8a1998eedb428023eee74077aad0"
+          "start_line": 9,
+          "end_line": 41,
+          "sha256": "1d7609fba7ee61a6fc3254d519ccb755060f343cf9ae19ccc2c5e2d5c8a54739"
         }
       ]
     },
@@ -50,9 +50,9 @@
         },
         {
           "path": "docs/STAGE_1_MASTER_MEMBERSHIP.md",
-          "start_line": 20,
-          "end_line": 36,
-          "sha256": "1dc8b15b0acabaf084ea5e6d34c44ee90049127d9e1edf0a937b5c28d9226308"
+          "start_line": 22,
+          "end_line": 38,
+          "sha256": "e19ecc6433aecc02dfbe100ffa219c25bffa5300e9684aab09b63136b793d7b0"
         }
       ]
     },
@@ -62,9 +62,9 @@
       "references": [
         {
           "path": "docs/STAGE_4_EVENTS.md",
-          "start_line": 5,
-          "end_line": 21,
-          "sha256": "a34cb0dff498241ddff1ee745eceb6f564bba58042011dccd5487340a3241ab9"
+          "start_line": 7,
+          "end_line": 23,
+          "sha256": "42b4175a2c65ff469ec0e8759a799f8ccf4a440eab8e8b2d3ba2e26b667f70d3"
         }
       ]
     },
@@ -74,9 +74,9 @@
       "references": [
         {
           "path": "docs/STAGE_3_WEB_EXPERIMENTS.md",
-          "start_line": 80,
-          "end_line": 107,
-          "sha256": "1d78bc01f8424edb932c7d84a20579aa847997f90014de855289ac78649ae658"
+          "start_line": 82,
+          "end_line": 109,
+          "sha256": "fad9fe17d43ac817d669a644b941e29691b83d4b8c3246f3391bf28cb35a02d2"
         }
       ]
     },
@@ -88,7 +88,7 @@
           "path": "docs/DIAGNOSIS_COVERAGE.md",
           "start_line": 1,
           "end_line": 20,
-          "sha256": "a08d49bc790ccf32e2bce177fc4dc4348fc99ae1965cc4a7663fef0293065b08"
+          "sha256": "8f61dbff3aa2289c461ea3aa8dda6784412cee828ca23e139cd83392b4df5260"
         }
       ]
     },
@@ -98,9 +98,9 @@
       "references": [
         {
           "path": "docs/T7_WORKER_RESOURCES.md",
-          "start_line": 5,
-          "end_line": 28,
-          "sha256": "564b1850531b3d4f67b1b1efe798117e5940f386500c3d373349208241ba48b1"
+          "start_line": 7,
+          "end_line": 30,
+          "sha256": "598de6e839702855acedff9ae40bff2623ed6b0c968d5d9aeedeb258ad83ff2b"
         }
       ]
     }

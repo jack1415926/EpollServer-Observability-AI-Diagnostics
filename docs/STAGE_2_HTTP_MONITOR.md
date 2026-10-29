@@ -1,5 +1,7 @@
 # 阶段 2：独立 Drogon HTTP 监控
 
+历史阶段：本页四接口与未实现事件的描述保留阶段2范围；事件/Web/诊断及CPU/RSS后续已交付。当前状态见[统一入口](CURRENT_STATUS.md)，最新开销见[正式评估](MONITOR_OVERHEAD.md)。
+
 2026-10-24，本批完成功能验收。范围按 `DECISIONS.md` 调整：只交付 health、overview、workers、metrics；事件检测及查询在阶段 4 实现。
 
 ## 结构与采样语义

@@ -1,6 +1,6 @@
 {
-  "version": "main-integration-20261029",
-  "reviewed_on": "2026-10-28",
+  "version": "documentation-status-20261030",
+  "reviewed_on": "2026-10-30",
   "sources": {
     "README.md": {
       "layer": "current_contract",
@@ -10,9 +10,13 @@
         "project"
       ],
       "source_quality": "project_maintained_contract",
-      "reviewed_sha256": "996f53db88ae515e712750418f45807921fa6dcc0db3a4845dd94dd3ede0ccf6",
+      "reviewed_sha256": "25d1bc5873d3d222b5294674abbac2b62c8154e1d285eaeeebeed0f8b914d53d",
       "sections": {
         "从哪里开始": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal"
+        },
+        "当前状态": {
           "layer": "planning_progress",
           "source_quality": "project_progress_or_proposal"
         }
@@ -26,7 +30,7 @@
         "project"
       ],
       "source_quality": "project_progress_or_proposal",
-      "reviewed_sha256": "f01588a5bb7f253c5d717c1ff18cc956e04feb3360e0ba5c0f2b566a125dc89c",
+      "reviewed_sha256": "1949442dc5763c9a7e581251161a71e13677ef2d468ccacc869ab2b21cbec645",
       "sections": {
         "阶段 5 确认范围（2026-10-25）": {
           "layer": "current_contract",
@@ -134,7 +138,7 @@
         "project"
       ],
       "source_quality": "project_case_record",
-      "reviewed_sha256": "938cef5df78bc3b1793a74364c83bdf3e515af88fff453fd236390d1428a9969",
+      "reviewed_sha256": "6a391325b339483abd10678620d8fcb177bdaeeddf694c8ed158de71344f11af",
       "sections": {
         "2026-10-26：诊断格式契约与Recall审计": {
           "layer": "historical_case",
@@ -171,6 +175,11 @@
           "layer": "planning_progress",
           "source_quality": "project_progress_or_proposal",
           "published_on": "2026-10-29"
+        },
+        "2026-10-30：文档状态不一致导致重复建议旧任务": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-30"
         }
       }
     },
@@ -182,7 +191,7 @@
         "project"
       ],
       "source_quality": "project_progress_or_proposal",
-      "reviewed_sha256": "ff2bb86fe0aa6e58a4e66fb1b12ebbf711151c76383ba1be560fcd78ebe108fd",
+      "reviewed_sha256": "aa3a4f5fcd63c2f5da348a4bc9c69dd1a96c6c785c38d5ea58a9af3a8c85f113",
       "sections": {
         "当前证据": {
           "layer": "planning_progress",
@@ -211,7 +220,7 @@
         "tcp"
       ],
       "source_quality": "project_progress_or_proposal",
-      "reviewed_sha256": "16fce0546208b7e36cbedfb3fb671f1e40ac8a1998eedb428023eee74077aad0",
+      "reviewed_sha256": "1d7609fba7ee61a6fc3254d519ccb755060f343cf9ae19ccc2c5e2d5c8a54739",
       "sections": {
         "已实现的能力": {
           "layer": "current_contract",
@@ -258,7 +267,7 @@
         "tcp"
       ],
       "source_quality": "project_progress_or_proposal",
-      "reviewed_sha256": "1dc8b15b0acabaf084ea5e6d34c44ee90049127d9e1edf0a937b5c28d9226308",
+      "reviewed_sha256": "e19ecc6433aecc02dfbe100ffa219c25bffa5300e9684aab09b63136b793d7b0",
       "sections": {
         "配置与身份": {
           "layer": "current_contract",
@@ -297,7 +306,7 @@
         "tcp"
       ],
       "source_quality": "project_progress_or_proposal",
-      "reviewed_sha256": "3bcf90c901220016a615223855b04fc7c94571522323c9eea53d3891fb6de77d",
+      "reviewed_sha256": "d5cb84e57fb01c757180ad9807fba63e832aed0d7afb8106430006243fc23381",
       "sections": {
         "范围与启用": {
           "layer": "current_contract",
@@ -345,7 +354,7 @@
         "monitor"
       ],
       "source_quality": "project_progress_or_proposal",
-      "reviewed_sha256": "30844c5695ac7b8257259d1eb3539fee285a04eb397b7ca2700b220bac6b3021",
+      "reviewed_sha256": "d0203162c407540e9a7648acf7cf6749545ebec8bd8ad01c608a4dcd06efa237",
       "sections": {
         "结构与采样语义": {
           "layer": "current_contract",
@@ -366,8 +375,8 @@
       },
       "spans": [
         {
-          "start_line": 72,
-          "end_line": 72,
+          "start_line": 74,
+          "end_line": 74,
           "layer": "historical_case",
           "source_quality": "project_case_record",
           "superseded_by": [
@@ -378,8 +387,8 @@
           ]
         },
         {
-          "start_line": 80,
-          "end_line": 81,
+          "start_line": 82,
+          "end_line": 83,
           "layer": "historical_case",
           "source_quality": "project_case_record",
           "superseded_by": [
@@ -390,8 +399,8 @@
           ]
         },
         {
-          "start_line": 85,
-          "end_line": 85,
+          "start_line": 87,
+          "end_line": 87,
           "layer": "historical_case",
           "source_quality": "project_case_record",
           "superseded_by": [
@@ -412,7 +421,7 @@
         "monitor"
       ],
       "source_quality": "project_progress_or_proposal",
-      "reviewed_sha256": "1d78bc01f8424edb932c7d84a20579aa847997f90014de855289ac78649ae658",
+      "reviewed_sha256": "fad9fe17d43ac817d669a644b941e29691b83d4b8c3246f3391bf28cb35a02d2",
       "sections": {
         "页面与服务": {
           "layer": "current_contract",
@@ -455,7 +464,7 @@
         "monitor"
       ],
       "source_quality": "project_progress_or_proposal",
-      "reviewed_sha256": "a34cb0dff498241ddff1ee745eceb6f564bba58042011dccd5487340a3241ab9",
+      "reviewed_sha256": "42b4175a2c65ff469ec0e8759a799f8ccf4a440eab8e8b2d3ba2e26b667f70d3",
       "sections": {
         "规则与证据": {
           "layer": "current_contract",
@@ -488,7 +497,7 @@
         "monitor"
       ],
       "source_quality": "project_progress_or_proposal",
-      "reviewed_sha256": "ab929e8cb6fcfdeb622e94d28110d294a445c04938bf57cbcf117d9553c79718",
+      "reviewed_sha256": "5322cd756223b268dc1ef3377f02bc58f8deba72d288c6792046458090dbcfcd",
       "sections": {
         "依赖与来源": {
           "layer": "current_contract",
@@ -867,7 +876,7 @@
         "diagnosis"
       ],
       "source_quality": "project_maintained_contract",
-      "reviewed_sha256": "564b1850531b3d4f67b1b1efe798117e5940f386500c3d373349208241ba48b1",
+      "reviewed_sha256": "598de6e839702855acedff9ae40bff2623ed6b0c968d5d9aeedeb258ad83ff2b",
       "sections": {
         "本批验证记录（2026-10-28）": {
           "layer": "historical_case",

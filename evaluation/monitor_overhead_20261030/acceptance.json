@@ -1,0 +1,445 @@
+{
+  "recorded_on": "2026-10-30",
+  "scope": "same-host Debug Ping matched monitoring overhead",
+  "baseline_commit": "e716e25b89584cc6c79c261f899cb9b2840c6de5",
+  "system": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+  "python": "3.14.4",
+  "source_hashes": {
+    "server/nginx": "c0d7f70c1e15b2f28fcad3c315272c759a53caf968333996a7c097b4a600f24a",
+    "monitor/build/epoll-monitor": "368e3dbd2609d7acd3eb96b28b0c0662505aaf22b36d6c36826f914f69600e25",
+    "artifacts/stage3-live-dvpeok8b/experiments/round-1-experiment.json": "3b36b1a9514c6d4c0399561d0c31004707f95fda63718f0dc4ae68c6f1eab64c",
+    "testscript/benchmark_monitor_overhead.py": "7f8751e74e44784a15a0189a52cc7a9bff57d0bd1ef98f81bb83212dac92ed82",
+    "testscript/tcp_stress_test.py": "9c3474af69d529986246906de1426f4baecd59197d22e0463128a57d22183b7c",
+    "testscript/performance_sampler.py": "f3165e33f7c0c3342ea9d832b526cae5da6a19e1c60715c4f538004503ff25fb",
+    "testscript/benchmark_worker_snapshot.py": "c255efc02fcdd7ad530edab71773f4222227403266160a93be22380d6ac11f25",
+    "testscript/process_group.py": "3466b97e53c2f8bbc8551620871979224c59e9fd359874d599b561759287a21e",
+    "testscript/test_stage3_live.py": "fb05e1fdfe19f8b1784b7e33b7f3eddfd3219f5f62f0602b0704a2110dfd0f5c",
+    "testscript/test_shutdown.py": "c09adf4b45cd275fa5f7248f7a9d326900434d9070879bfd8f1bda5aa486da0e"
+  },
+  "evidence_root": "artifacts/monitor-overhead-formal-3cqzcz2j",
+  "raw_evidence_sha256": {
+    "manifest.json": "0ffcdefaba21fe2998ea044017b65ba3de3ffd628a1fafff5a4ba6b4c2d88eab",
+    "owned-services.json": "2e000497a59100d660f1888e208e32de698e8cf7f27511bc6bfa3630d1fbb708",
+    "runs.json": "f0cf50d0934206e30f04aceab93c27ff59cf0a2084ecc7c8e60ba2ef19025012",
+    "summary.json": "7925278940c84c21ae0f02d6e8c63d7f1ea3183a1f77472803d2951f3f216693",
+    "01-off/cleanup.json": "e4443e0060514de9efe5100589800f8bdcec9178fbff587dd3811f2cf3dfbf3d",
+    "01-off/context.json": "3e172afff5ce851b25feb7ed5e0c68b4781d94cc10a999890d2f89e80fb9bb45",
+    "01-off/measured-resources.json": "99ce6153d5d5c649943b856254bb19e1a7a394f78521c95d8b6c98aa2ed17630",
+    "01-off/measured.json": "f82fb123cd80e9e34df0138ee0deb19f5c0d13cf5b004185720e666cd81dc092",
+    "01-off/warmup-resources.json": "a224106acd9e2cd93a4a64c108081f14329680730ddc454c9dda859bb9cd81ef",
+    "01-off/warmup.json": "a5584f1008254b68cf62eaf2866aecee6a3ccfd37ede60499cf86617a62b47ee",
+    "02-snapshot/cleanup.json": "3e3bd2f1b01d478e67c72a7ff26e24fd84d4307e07a79aeb190f653bfdcf3b23",
+    "02-snapshot/context.json": "5579fd7601df92aed62eb920831a0fa530f9aa892203b3a3c225d27663ad574e",
+    "02-snapshot/measured-resources.json": "d1bed8a4c8f0dc0d960408125e6646f8c518736189aa1c43b503ac5b43d428e0",
+    "02-snapshot/measured.json": "53467f521cf82c6f637ad25cb1f1eb1948eed2c1962c86f7ce85ec2705f79553",
+    "02-snapshot/warmup-resources.json": "9eaf3f2eb8e1831c3a27580c1c734919ef088e06871993c94d3a7046805fe96d",
+    "02-snapshot/warmup.json": "1eedbfac85bc2692e525267581bc81aad2fc8c469bfd391f3596b3afec37e261",
+    "03-full/cleanup.json": "fce466dd4bd1cdef9d198df404585b5aa858b41b2d28ea0eec343d32da172a95",
+    "03-full/context.json": "6ba3bf3a4aa0b41cb6bf8d0bef039a4f0f616a0d4ed919b7b7ea421288363a81",
+    "03-full/http-samples.json": "148f66f790b224622d3a663a59312183796fe347d21bcf4360ce20caf0b9f24b",
+    "03-full/import-readback.json": "aa6a39ca8e8e2403cffe4a1dae75908aa14a68548a25b6b58d41e339a1a12664",
+    "03-full/measured-resources.json": "352c3127264710bf788a9a3ab9f9b683cd120e625baf19c212730799f830eab7",
+    "03-full/measured.json": "31dadeb3a26971ae79826221be700089063fc0a592410fedde7b1e87c11c9179",
+    "03-full/warmup-resources.json": "9ff278165427a97e4dbee868d41d5785c6bd017b27e2a74e6229db6d82956355",
+    "03-full/warmup.json": "de1dea91ffd564a2ec369565704638a9fa3763e7df6d16ad63cd9174277e1df7",
+    "04-full/cleanup.json": "8ac61b97406f37f084ee642ee8136c49b1d23c8a4cb8b44e564b553047ca34cc",
+    "04-full/context.json": "517a22e2ea45d860d785b0df39831df1761fc5a151fcd0b14e5d458f5d9b8633",
+    "04-full/http-samples.json": "6802bd595a86e19f1b2cf4159320bf97a379793662c10f1399a817393fbff87e",
+    "04-full/measured-resources.json": "9e3f7711c52932670a41400f7453cc79ee882d654f1657f7d47b2937d5529f27",
+    "04-full/measured.json": "43459e24dbd51369d1230624a09dfe25fc67831af22253992f5e5727a673856c",
+    "04-full/warmup-resources.json": "a15fac210367cb08f14700c845029c8fef5f0364c984ec4e3822e5b3eb927450",
+    "04-full/warmup.json": "d29d151b8744f66e0d29f8e9ce08e9a628adf1cb926d8445fb2574fffdad0fa1",
+    "05-off/cleanup.json": "0968aec4a08a0d6ef601fb4c9ac01e8d672ccecbc83ccb9589b6f61e12ee7dfe",
+    "05-off/context.json": "7db9a318e72555502c8adaffb09aa51c767420ca5781e7e25401adc635ebbedc",
+    "05-off/measured-resources.json": "540cec214e1403c7214aaa4db593e1a84c609f23063cf77e8a265f2edce44ef7",
+    "05-off/measured.json": "778af8479314c66c1f29993491ee026a4476072d91997d9502510a99d3af5d8e",
+    "05-off/warmup-resources.json": "4c41ec2b39977794a10a696fb7db3832d873e5cb5c48ff24853a5d626a135dfc",
+    "05-off/warmup.json": "024284b1cf8d913d581153d2b611aa39ca2fd9292a67371a3a48f744bedc9235",
+    "06-snapshot/cleanup.json": "885c0e0cd348b43c0c6a15b213396ba7e72de8017ecbf5c4defca82f9b29aa8f",
+    "06-snapshot/context.json": "b353feb55912e0a8296ad4fc72c866c9df0a169a77eafed227444c255d5f49be",
+    "06-snapshot/measured-resources.json": "5385a9aa7f018d8c602c850d3475d965e972704c8e3b848e34b47acfdaa95d2d",
+    "06-snapshot/measured.json": "5b149dcc458ca694a2c93741dfe77ca9b1d1b98ffb642710ecaf88a6e5d250fe",
+    "06-snapshot/warmup-resources.json": "c306c927adba9df6119cc088425ad59e0b2484910d4a050ba5cac341d58055cb",
+    "06-snapshot/warmup.json": "004a59f45aafbc41e204e68749e5c1b0658c5ba8cd3680b206352b0db2e41ad8",
+    "07-snapshot/cleanup.json": "ef816a4982a293d43949063801d1ff6c6c97988dab4418823595572dbbb59aa1",
+    "07-snapshot/context.json": "7e7bfaec70ade2b41ed14eb940eb9ba9e0593d9cc12063f5b617e7818b39bfbb",
+    "07-snapshot/measured-resources.json": "48cd87c59cba2f2deea336b2126b5c570ccfca56e643a4b7df735673b451ad97",
+    "07-snapshot/measured.json": "2785c97c508b4ea2ea687c0f7c69de077d730568f33993690f939468f71ec557",
+    "07-snapshot/warmup-resources.json": "e1e8edcd27bf301c1b7311fdf8106da4ea3634955c643c8e84a7c901eda46dfb",
+    "07-snapshot/warmup.json": "8cfe831d775f1b62d9da7ab293c7ac541b3782b42ecddef078a92d996697b618",
+    "08-full/cleanup.json": "d6ea11896ef663c7084a25684630c83a21b6cc22f79e15a00a58028eb085d049",
+    "08-full/context.json": "ffd05f49a116acf8f2243cf4767fe38a73f2c22d32c7ad966b97b2f001c87c6d",
+    "08-full/http-samples.json": "6b9be2787f3438d805ed4af20d3c77ce0ef80e50c02fc864702629d05b2ff679",
+    "08-full/measured-resources.json": "fca6e466a51b1422379a24a48804c5070a47f07a7973c614121308685d3840e4",
+    "08-full/measured.json": "a31cc30f7604ce45863a2d27768c4871e622211b4d72cd5bb5d0fbcd4f5f8c39",
+    "08-full/warmup-resources.json": "593d13858dfa59dfed81b5dd4ccffe8e66aae9f049b107235922cdc325d57435",
+    "08-full/warmup.json": "e706e264cf9e76ed2532cda5ce33dc7bc12a45c17d6fcfe2ffb1b2f56978bae0",
+    "09-off/cleanup.json": "0cec8e887af94a377bb5629e246e73321560b2229641fa14f8f7e13be1e62145",
+    "09-off/context.json": "5b3b7ff6e8e03006e2dc993848e5e54a8edf538b4484c2c838ee87458e690476",
+    "09-off/measured-resources.json": "7406a689044486e5f0f45a2ed0ca42c9c024b59c2aa46988c2639c518dae80f3",
+    "09-off/measured.json": "50e0023b0b7dff600b45beaed3148e830cd4f1f3a4042a361f9f0eba7b52268b",
+    "09-off/warmup-resources.json": "5d3a543174158821070c0834e081b2554af1e8739564492daf79ddce8efdcd06",
+    "09-off/warmup.json": "33054c114776a8bbc43fe0e47bcf4cb86c38c5988d74c4fdada0e88fa3fd60ae"
+  },
+  "formal_successful": 18000000,
+  "formal_failed": 0,
+  "warmup_successful": 900000,
+  "groups": {
+    "off": {
+      "median_qps": 31933.946,
+      "median_sampled_p95_ms": 9.829,
+      "qps_range": [
+        31776.939,
+        35632.517
+      ],
+      "sampled_p95_range_ms": [
+        9.152,
+        10.322
+      ]
+    },
+    "snapshot": {
+      "median_qps": 33493.499,
+      "median_sampled_p95_ms": 9.421,
+      "qps_range": [
+        31835.731,
+        36523.936
+      ],
+      "sampled_p95_range_ms": [
+        9.352,
+        10.018
+      ],
+      "qps_change_percent": 4.883683964393271,
+      "p95_change_percent": -4.150981788584818,
+      "within_target": true
+    },
+    "full": {
+      "median_qps": 27557.525,
+      "median_sampled_p95_ms": 10.563,
+      "qps_range": [
+        27464.863,
+        31435.422
+      ],
+      "sampled_p95_range_ms": [
+        10.367,
+        10.761
+      ],
+      "qps_change_percent": -13.704604498297822,
+      "p95_change_percent": 7.467697629463821,
+      "within_target": false
+    }
+  },
+  "runs": [
+    {
+      "run": "01-off",
+      "mode": "off",
+      "successful": 2000000,
+      "failed": 0,
+      "qps": 35632.517,
+      "sampled_p95_ms": 9.152,
+      "latency_sample_count": 20000,
+      "system_summary": {
+        "avg_cpu_busy_percent": 32.84,
+        "max_cpu_busy_percent": 39.24,
+        "avg_cpu_user_percent": 7.94,
+        "max_cpu_user_percent": 10.9,
+        "avg_cpu_system_percent": 24.9,
+        "max_cpu_system_percent": 29.81,
+        "avg_cpu_iowait_percent": 0.01,
+        "max_cpu_iowait_percent": 0.45,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 239207.81,
+        "max_context_switches_per_sec": 271615.61
+      }
+    },
+    {
+      "run": "02-snapshot",
+      "mode": "snapshot",
+      "successful": 2000000,
+      "failed": 0,
+      "qps": 36523.936,
+      "sampled_p95_ms": 9.352,
+      "latency_sample_count": 20000,
+      "system_summary": {
+        "avg_cpu_busy_percent": 35.37,
+        "max_cpu_busy_percent": 42.79,
+        "avg_cpu_user_percent": 8.79,
+        "max_cpu_user_percent": 12.79,
+        "avg_cpu_system_percent": 26.58,
+        "max_cpu_system_percent": 30.12,
+        "avg_cpu_iowait_percent": 0.01,
+        "max_cpu_iowait_percent": 0.24,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 242123.37,
+        "max_context_switches_per_sec": 262489.81
+      }
+    },
+    {
+      "run": "03-full",
+      "mode": "full",
+      "successful": 2000000,
+      "failed": 0,
+      "qps": 27557.525,
+      "sampled_p95_ms": 10.761,
+      "latency_sample_count": 20000,
+      "system_summary": {
+        "avg_cpu_busy_percent": 27.56,
+        "max_cpu_busy_percent": 40.77,
+        "avg_cpu_user_percent": 7.11,
+        "max_cpu_user_percent": 11.49,
+        "avg_cpu_system_percent": 20.46,
+        "max_cpu_system_percent": 30.34,
+        "avg_cpu_iowait_percent": 0.02,
+        "max_cpu_iowait_percent": 1.17,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 192010.53,
+        "max_context_switches_per_sec": 257917.05
+      }
+    },
+    {
+      "run": "04-full",
+      "mode": "full",
+      "successful": 2000000,
+      "failed": 0,
+      "qps": 27464.863,
+      "sampled_p95_ms": 10.563,
+      "latency_sample_count": 20000,
+      "system_summary": {
+        "avg_cpu_busy_percent": 27.25,
+        "max_cpu_busy_percent": 41.2,
+        "avg_cpu_user_percent": 6.98,
+        "max_cpu_user_percent": 11.57,
+        "avg_cpu_system_percent": 20.27,
+        "max_cpu_system_percent": 29.65,
+        "avg_cpu_iowait_percent": 0.01,
+        "max_cpu_iowait_percent": 0.24,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 190770.21,
+        "max_context_switches_per_sec": 263678.62
+      }
+    },
+    {
+      "run": "05-off",
+      "mode": "off",
+      "successful": 2000000,
+      "failed": 0,
+      "qps": 31776.939,
+      "sampled_p95_ms": 9.829,
+      "latency_sample_count": 20000,
+      "system_summary": {
+        "avg_cpu_busy_percent": 31.44,
+        "max_cpu_busy_percent": 41.51,
+        "avg_cpu_user_percent": 7.89,
+        "max_cpu_user_percent": 11.7,
+        "avg_cpu_system_percent": 23.55,
+        "max_cpu_system_percent": 29.82,
+        "avg_cpu_iowait_percent": 0.03,
+        "max_cpu_iowait_percent": 2.08,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 215562.4,
+        "max_context_switches_per_sec": 263828.26
+      }
+    },
+    {
+      "run": "06-snapshot",
+      "mode": "snapshot",
+      "successful": 2000000,
+      "failed": 0,
+      "qps": 31835.731,
+      "sampled_p95_ms": 10.018,
+      "latency_sample_count": 20000,
+      "system_summary": {
+        "avg_cpu_busy_percent": 30.19,
+        "max_cpu_busy_percent": 40.98,
+        "avg_cpu_user_percent": 7.53,
+        "max_cpu_user_percent": 11.48,
+        "avg_cpu_system_percent": 22.67,
+        "max_cpu_system_percent": 29.51,
+        "avg_cpu_iowait_percent": 0.01,
+        "max_cpu_iowait_percent": 0.24,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 216762.77,
+        "max_context_switches_per_sec": 262156.47
+      }
+    },
+    {
+      "run": "07-snapshot",
+      "mode": "snapshot",
+      "successful": 2000000,
+      "failed": 0,
+      "qps": 33493.499,
+      "sampled_p95_ms": 9.421,
+      "latency_sample_count": 20000,
+      "system_summary": {
+        "avg_cpu_busy_percent": 31.85,
+        "max_cpu_busy_percent": 39.96,
+        "avg_cpu_user_percent": 7.89,
+        "max_cpu_user_percent": 11.68,
+        "avg_cpu_system_percent": 23.96,
+        "max_cpu_system_percent": 29.91,
+        "avg_cpu_iowait_percent": 0.03,
+        "max_cpu_iowait_percent": 1.62,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 223530.9,
+        "max_context_switches_per_sec": 270054.16
+      }
+    },
+    {
+      "run": "08-full",
+      "mode": "full",
+      "successful": 2000000,
+      "failed": 0,
+      "qps": 31435.422,
+      "sampled_p95_ms": 10.367,
+      "latency_sample_count": 20000,
+      "system_summary": {
+        "avg_cpu_busy_percent": 30.95,
+        "max_cpu_busy_percent": 42.09,
+        "avg_cpu_user_percent": 7.97,
+        "max_cpu_user_percent": 11.94,
+        "avg_cpu_system_percent": 22.98,
+        "max_cpu_system_percent": 31.03,
+        "avg_cpu_iowait_percent": 0.01,
+        "max_cpu_iowait_percent": 0.24,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 211427.83,
+        "max_context_switches_per_sec": 261808.15
+      }
+    },
+    {
+      "run": "09-off",
+      "mode": "off",
+      "successful": 2000000,
+      "failed": 0,
+      "qps": 31933.946,
+      "sampled_p95_ms": 10.322,
+      "latency_sample_count": 20000,
+      "system_summary": {
+        "avg_cpu_busy_percent": 32.96,
+        "max_cpu_busy_percent": 56.67,
+        "avg_cpu_user_percent": 8.17,
+        "max_cpu_user_percent": 13.55,
+        "avg_cpu_system_percent": 24.79,
+        "max_cpu_system_percent": 44.0,
+        "avg_cpu_iowait_percent": 0.13,
+        "max_cpu_iowait_percent": 4.68,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 214912.28,
+        "max_context_switches_per_sec": 265416.23
+      }
+    }
+  ],
+  "monitoring": [
+    {
+      "run": "03-full",
+      "measured_poll_cycles": 36,
+      "poll_errors": 0,
+      "measured_process_summary": [
+        {
+          "role": "monitor",
+          "pid": 14457,
+          "name": "epoll-monitor",
+          "max_rss_kib": 17952,
+          "max_threads": 8,
+          "avg_cpu_percent": 0.47,
+          "max_cpu_percent": 1.0
+        },
+        {
+          "role": "monitor_db",
+          "pid": 11776,
+          "name": "mysqld",
+          "max_rss_kib": 283032,
+          "max_threads": 34,
+          "avg_cpu_percent": 0.54,
+          "max_cpu_percent": 1.0
+        }
+      ]
+    },
+    {
+      "run": "04-full",
+      "measured_poll_cycles": 36,
+      "poll_errors": 0,
+      "measured_process_summary": [
+        {
+          "role": "monitor",
+          "pid": 15523,
+          "name": "epoll-monitor",
+          "max_rss_kib": 17356,
+          "max_threads": 8,
+          "avg_cpu_percent": 0.49,
+          "max_cpu_percent": 1.0
+        },
+        {
+          "role": "monitor_db",
+          "pid": 11776,
+          "name": "mysqld",
+          "max_rss_kib": 283032,
+          "max_threads": 34,
+          "avg_cpu_percent": 0.54,
+          "max_cpu_percent": 1.0
+        }
+      ]
+    },
+    {
+      "run": "08-full",
+      "measured_poll_cycles": 31,
+      "poll_errors": 0,
+      "measured_process_summary": [
+        {
+          "role": "monitor",
+          "pid": 19631,
+          "name": "epoll-monitor",
+          "max_rss_kib": 17512,
+          "max_threads": 8,
+          "avg_cpu_percent": 0.47,
+          "max_cpu_percent": 1.0
+        },
+        {
+          "role": "monitor_db",
+          "pid": 11776,
+          "name": "mysqld",
+          "max_rss_kib": 283036,
+          "max_threads": 34,
+          "avg_cpu_percent": 0.48,
+          "max_cpu_percent": 1.0
+        }
+      ]
+    }
+  ],
+  "target": {
+    "qps_drop_percent_max": 5,
+    "sampled_p95_increase_percent_max": 10,
+    "request_failures": 0
+  },
+  "verdict": "not_met_qps",
+  "functional_checks": "passed; all polling complete, detector running, store ok; real historical report import/readback passed",
+  "checks": {
+    "regression_tests_passed": 26,
+    "boundary_tests_rechecked": 4,
+    "private_mysql_lifecycle": "passed",
+    "smoke_successful": 90000,
+    "offline_raw_results_hashes_and_counts": "passed",
+    "owned_process_identity_and_ports": "independently confirmed exited/closed",
+    "private_mysql_directory": "removed after SHUTDOWN and wait",
+    "preexisting_mysql": "PID 2398 still running; port 3306 reachable",
+    "local_config": "original hash unchanged"
+  },
+  "limitations": [
+    "same-host Debug Ping, no production capacity claim",
+    "no AI requests or fault-injection load",
+    "Redis/monitoring MySQL inherit runner affinity; TCP/monitor share CPUs 0-3",
+    "three polling endpoints every two seconds, no interactive browser",
+    "historical baseline is context only, not the comparison denominator",
+    "Three rounds per condition; visible time variation; no confidence interval or proven causal mechanism.",
+    "Snapshot group faster is an observation, not a claim that sampling improves throughput.",
+    "Throughput target not met; performance root cause remains unconfirmed; no optimization or repeat selection performed."
+  ]
+}

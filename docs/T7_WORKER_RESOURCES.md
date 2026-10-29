@@ -1,5 +1,7 @@
 # T7第一批：Worker CPU与RSS
 
+当前状态（2026-10-30）：本页CPU/RSS首批已交付，后续子项未做；下文“正式开销未覆盖”只指当批，如今已[完成测量但吞吐未达标](MONITOR_OVERHEAD.md)。优先级见[统一待办](CURRENT_STATUS.md)。
+
 范围：独立C++监控进程读取Linux `/proc/PID/stat`，沿用Master/Worker身份核验。TCP业务及文件快照格式不变；不增加线程级分析、请求耗时、资源告警或自动修复。此批只完成T7的CPU/RSS子项。
 
 ## 数据契约
