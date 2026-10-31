@@ -14,7 +14,7 @@ Worker 样本最多有效 3000 ms。内存缓存期限从本轮文件读取**开
 
 这是周期采样，进程退出或名单变化在下一轮才会反映，最多可在上述缓存期限内报告先前有效结果。响应 `timestamp_unix_ms` 是生成响应的时间；`data.collected_at_unix_ms` 及 Worker `age_ms` 是采集时的信息，不随每次请求改写。沿用阶段 1 的非事务快照语义。
 
-`tcp_health=not_probed` 表示没有主动连接或执行 TCP Ping。`complete` 仅表示当前支持的基础指标完整，不证明业务线程正在处理请求或数据库正常。health 的 HTTP 200 仅用于监控进程自身存活；判断 TCP 业务健康仍需独立协议探测。
+`tcp_health=not_probed`表示未启用主动探测。2026-10-31已增加[主动TCP Ping](TCP_ACTIVE_PROBE.md)：配置本机TCP端口后，HTTP返回缓存的reachable/unreachable/unknown状态及耗时、时间和原因。`complete`表示基础指标采集完整，health的HTTP 200表示监控进程存活；Ping结果单独读取。
 
 ## 构建与启动
 
@@ -66,7 +66,7 @@ curl -sS -H "Authorization: Bearer ${EPOLL_MONITOR_TOKEN}" \
 
 | GET 路径 | data |
 |---|---|
-| `/api/v1/health` | monitor=ok、tcp_health=not_probed、collection_status、reason |
+| `/api/v1/health` | monitor=ok、tcp_health、tcp_probe、collection_status、reason；TCP探测默认未启用 |
 | `/api/v1/overview` | 读取结果去掉 Worker 明细，保留 Master 名单、有效数量、完整总量与部分和 |
 | `/api/v1/workers` | 读取结果去掉 totals/partial_sums，保留 Worker 身份、状态与基础指标 |
 | `/api/v1/metrics` | 读取结果去掉 master/workers，保留有效数量、完整总量、部分和及 unsupported_metrics |

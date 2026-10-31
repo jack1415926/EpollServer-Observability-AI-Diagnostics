@@ -78,5 +78,17 @@ console.log("PASS: support provenance, exclusions and failed-run record renderin
   delete worker.resources;
   context.renderLiveTest(overview, {data:{workers:[worker]}});
   assert(texts(elements.get("worker-rows")).includes("未采集"));
+  overview.data.tcp_health = "reachable";
+  overview.data.tcp_probe = {rtt_ms: 1.25, reason: "ping_ok", checked_at_unix_ms: 1793000000000};
+  context.renderLiveTest(overview, {data:{workers:[worker]}});
+  assert(texts(elements.get("tcp-probe")).includes("响应正常"));
+  assert(texts(elements.get("tcp-probe")).includes("1.25 ms"));
+  overview.data.tcp_health = "unreachable";
+  overview.data.tcp_probe = {rtt_ms: null, reason: "timeout"};
+  context.renderLiveTest(overview, {data:{workers:[worker]}});
+  assert(texts(elements.get("tcp-probe")).includes("请求超时"));
+  assert(!texts(elements.get("tcp-probe")).includes("1.25 ms"));
+  vm.runInContext("clearLive()", context);
+  assert.equal(elements.get("tcp-probe").childElementCount, 0);
 }
 console.log("PASS: Worker CPU/RSS, warmup null, zero, stale business and legacy rendering");

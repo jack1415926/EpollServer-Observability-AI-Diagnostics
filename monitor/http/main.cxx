@@ -2,6 +2,7 @@
 #include "experiments.h"
 #include "events.h"
 #include "diagnoses.h"
+#include "tcp_probe.h"
 #include "web_assets.h"
 #include <drogon/drogon.h>
 #include <charconv>
@@ -133,6 +134,7 @@ int main(int argc, char **argv)
                      "Required environment: EPOLL_MONITOR_TOKEN (32..256 characters: letters, digits, -._~+/=)\n"
                      "Binds 127.0.0.1 only. Dashboard: /; metrics and experiment APIs: /api/v1/.\n"
                      "Optional MySQL: EPOLL_MONITOR_DB_NAME, _HOST, _PORT, _USER, _PASSWORD.\n"
+                     "TCP Ping: EPOLL_MONITOR_TCP_PORT enables local probing; _TCP_INTERVAL_MS=5000, _TCP_TIMEOUT_MS=1000.\n"
                      "Events: EPOLL_MONITOR_EVENT_TRIGGER_MS / _RECOVERY_MS (default 3000),\n"
                      "EPOLL_MONITOR_RECEIVE_QUEUE_THRESHOLD / EPOLL_MONITOR_SEND_QUEUE_THRESHOLD (default 1024).\n";
         return 0;
@@ -156,6 +158,9 @@ int main(int argc, char **argv)
     try { experiments = std::make_unique<epoll_monitor::ExperimentStore>(); }
     catch (const std::exception &) { std::cerr << "Invalid monitoring database configuration\n"; return 64; }
     Sampler sampler(argv[1]);
+    std::unique_ptr<epoll_monitor::TcpProbe> tcpProbe;
+    try { tcpProbe = std::make_unique<epoll_monitor::TcpProbe>(epoll_monitor::ReadTcpProbeConfig(), [&] { return sampler.Read(); }); }
+    catch (const std::exception &) { std::cerr << "Invalid TCP probe configuration\n"; return 64; }
     std::unique_ptr<epoll_monitor::EventService> events;
     try {
         events = std::make_unique<epoll_monitor::EventService>(epoll_monitor::ReadEventConfig(),
@@ -240,12 +245,15 @@ int main(int argc, char **argv)
         app.registerHandler("/api/v1/" + endpoint,
             [&, endpoint](const drogon::HttpRequestPtr &, std::function<void(const drogon::HttpResponsePtr &)> &&callback) {
                 MonitorJson value = sampler.Read();
+                const auto probe = tcpProbe->Read(value["master"]);
+                value["tcp_probe"] = probe;
+                value["tcp_health"] = probe["status"];
                 const auto status = value["status"].get<std::string>();
                 const bool valid = status == "complete";
                 const bool unavailable = status == "unavailable" || status == "instance_changed";
                 MonitorJson data;
                 if (endpoint == "health") {
-                    data = {{"monitor", "ok"}, {"tcp_health", "not_probed"},
+                    data = {{"monitor", "ok"}, {"tcp_health", probe["status"]}, {"tcp_probe", probe},
                             {"collection_status", status}, {"reason", value["reason"]}};
                 } else {
                     data = value;

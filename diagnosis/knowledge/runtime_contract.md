@@ -4,7 +4,7 @@
 
 ## 采集完整、连接计数与业务健康
 
-complete只说明当前支持的基础快照完整。connections_current是被动采集的TCP连接数量，不是登录用户数量。tcp_health=not_probed表示没有主动业务探测；它不阻止连接计数本身被采集。监控健康接口200只表示监控自身存活。业务、MySQL或Redis是否健康需要各自证据。
+complete说明当前支持的基础快照完整。connections_current是被动采集的TCP连接数量，不是登录用户数量。HTTP配置EPOLL_MONITOR_TCP_PORT后，tcp_health表示最近一次本机Ping结果：reachable为协议往返成功，unreachable为连接/超时/协议等失败，unknown为身份不可用、变化或结果过期，not_probed为未启用。tcp_probe提供reason、rtt_ms、checked_at_unix_ms、age_ms及instance；失败或过期时rtt_ms为null。默认间隔5秒、总超时1秒；配置端口须属于当前Master。监控健康接口200表示监控自身存活，MySQL/Redis操作和每个Worker响应使用各自证据。CLI只读快照，继续返回not_probed。
 
 ## 缺失、过期和部分和
 

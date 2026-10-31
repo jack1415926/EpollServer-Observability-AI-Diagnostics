@@ -22,6 +22,7 @@ def main():
     parser.add_argument("--binary", type=Path, default=Path("server/nginx"))
     parser.add_argument("--monitor", type=Path, default=Path("monitor/build/epoll-monitor"))
     parser.add_argument("--resources", action="store_true", help="verify independent CPU/RSS; Ping-only profile disables Redis rate limiting in the private config")
+    parser.add_argument("--tcp-probe", action="store_true", help="verify background Ping, timeout and recovery against this private TCP instance")
     parser.add_argument("--output", type=Path, help="new evidence directory; existing paths are rejected")
     parser.add_argument("--hold", action="store_true", help="hold resumed services for browser QA, at most 300 seconds")
     args = parser.parse_args()
@@ -42,7 +43,7 @@ def main():
     config.write_text(source + f"\nWorkerSnapshotEnable = 1\nWorkerSnapshotDirectory = {metrics}\n")
     config.chmod(0o600)
     (root/'parameters.json').write_text(json.dumps({'tcp_port':tcp_port,'http_port':http_port,
-        'resources':args.resources,'redis_rate_limit_enabled':False if args.resources else 'from_local_config',
+        'resources':args.resources,'tcp_probe':args.tcp_probe,'redis_rate_limit_enabled':False if args.resources else 'from_local_config',
         'scope':'functional Ping and resource observation, not a performance measurement'})+'\n')
     tcp = monitor = None
     workers = []
@@ -58,8 +59,13 @@ def main():
             workers = children(tcp.pid)
             manifest = next(metrics.glob("master-*.json"))
             def start_monitor():
+                environment = {k:v for k,v in os.environ.items() if not k.startswith('EPOLL_MONITOR_TCP_')}
+                environment['EPOLL_MONITOR_TOKEN'] = TOKEN
+                if args.tcp_probe:
+                    environment.update(EPOLL_MONITOR_TCP_PORT=str(tcp_port), EPOLL_MONITOR_TCP_INTERVAL_MS='500',
+                                       EPOLL_MONITOR_TCP_TIMEOUT_MS='200')
                 return subprocess.Popen([str(monitor_binary), str(manifest), str(http_port)], cwd=root,
-                                        env={**os.environ, "EPOLL_MONITOR_TOKEN": TOKEN},
+                                        env=environment,
                                         stdout=http_log, stderr=subprocess.STDOUT)
             def complete():
                 require(monitor.poll() is None, "HTTP exited during startup")
@@ -78,7 +84,9 @@ def main():
 
             monitor = start_monitor()
             wait_for(complete)
-            require(save("complete")["data"]["totals"]["connections_current"] == 0, "unexpected initial connections")
+            initial = save("complete")
+            if not args.tcp_probe:
+                require(initial["data"]["totals"]["connections_current"] == 0, "unexpected initial connections")
             if args.resources:
                 wait_for(lambda: all(w['resources']['cpu_percent'] is not None for w in request(http_port,'workers')[1]['data']['workers']))
                 resource = save('resources-idle', 'workers')
@@ -86,10 +94,27 @@ def main():
             with connect(tcp_port, "127.0.10.1") as client:
                 send_pkg(client, 0, b"")
                 require(recv_pkg(client) == (0, b""), "initial Ping failed")
-                wait_for(lambda: request(http_port)[1]["data"]["totals"]["connections_current"] == 1)
+                wait_for(lambda: request(http_port)[1]["data"]["totals"]["connections_current"] >= 1)
                 save("connection-one")
             wait_for(lambda: request(http_port)[1]["data"]["totals"]["connections_current"] == 0)
             print("PASS: HTTP reports live TCP connections 0 -> 1 -> 0", flush=True)
+
+            if args.tcp_probe:
+                def probe_reason(reason):
+                    return request(http_port, 'health')[1]['data']['tcp_probe']['reason'] == reason
+                wait_for(lambda: probe_reason('ping_ok'))
+                save('probe-success', 'health')
+                for worker in workers: os.kill(worker, signal.SIGSTOP)
+                try:
+                    wait_for(lambda: probe_reason('timeout'))
+                    failed = save('probe-timeout', 'health')
+                    require(failed['data']['monitor']=='ok' and failed['data']['tcp_health']=='unreachable',
+                            'probe timeout did not retain monitor liveness')
+                finally:
+                    for worker in workers: os.kill(worker, signal.SIGCONT)
+                wait_for(lambda: probe_reason('ping_ok'))
+                save('probe-recovered', 'health')
+                print('PASS: real TCP probe success -> stopped Workers timeout -> resumed success', flush=True)
 
             os.kill(workers[0], signal.SIGSTOP)
             try:
@@ -132,7 +157,7 @@ def main():
             save("tcp-exited")
             if args.resources: save('resources-tcp-exited', 'workers')
             health = save("health-after-tcp-exit", "health")
-            require(health["data"]["monitor"] == "ok" and health["data"]["tcp_health"] == "not_probed",
+            require(health["data"]["monitor"] == "ok" and health["data"]["tcp_health"] == ("unknown" if args.tcp_probe else "not_probed"),
                     "HTTP health confused with TCP health")
             monitor.terminate()
             require(monitor.wait(timeout=10) == 0, "HTTP did not stop cleanly")

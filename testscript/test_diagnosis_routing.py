@@ -5,6 +5,30 @@ import httpx
 from diagnosis.agent import Tools, diagnose
 
 class RoutingTests(unittest.IsolatedAsyncioTestCase):
+    async def test_tcp_health_observation_uses_probe_and_current_report_limits(self):
+        class Provider:
+            model = 'test'
+            async def structured(self, messages, schema):
+                if 'intent' in schema['properties']:
+                    return json.dumps({'intent':'runtime', 'runtime_sources':['health'], 'search_query':'', 'clarification':''})
+                return json.dumps({'summary':'TCP Ping响应正常', 'facts':[{
+                    'text':'TCP Ping响应正常', 'basis':'observation', 'evidence_ids':['E1'],
+                    'support':[{'evidence_id':'E1','pointer':'/response/data/tcp_health','value':'reachable','quote':''}]}],
+                    'unknowns':[], 'next_steps':[]})
+            async def chat(self, *args, **kwargs):
+                raise AssertionError('plain health observation must use only the selected evidence')
+        master={'boot_id':'test-boot','master_pid':12,'master_start_ticks':34}
+        def transport(request):
+            self.assertEqual(request.url.path, '/api/v1/health')
+            return httpx.Response(200,json={'data':{'monitor':'ok','tcp_health':'reachable',
+                'tcp_probe':{'status':'reachable','reason':'ping_ok','rtt_ms':1.25,'instance':master}}})
+        async with httpx.AsyncClient(transport=httpx.MockTransport(transport)) as client:
+            report=await diagnose('监控是否存活，当前TCP Ping结果如何？',Provider(),Tools(client,None))
+        self.assertEqual(report['answer_mode'],'observation')
+        self.assertEqual(report['target']['master'],master)
+        self.assertFalse(any('未主动探测' in text for text in report['limits']))
+        self.assertEqual(report['analysis']['facts'][0]['support'][0]['value'],'reachable')
+
     async def test_experiment_detail_reads_only_the_uuid_in_the_question(self):
         key='20000000-0000-0000-0000-000000000001'
         seen=[]

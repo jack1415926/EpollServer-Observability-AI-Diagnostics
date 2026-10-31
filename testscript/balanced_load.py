@@ -2,8 +2,10 @@
 import collections
 import concurrent.futures
 import json
+import math
 import multiprocessing
 import os
+from fractions import Fraction
 from pathlib import Path
 import socket
 import struct
@@ -57,13 +59,27 @@ def socket_owners(context, endpoints, proc=Path('/proc')):
     return result
 
 
+def allocation_bounds(concurrency, workers, tolerance_percent=0):
+    require(workers > 0 and concurrency >= workers, 'concurrency must cover every Worker')
+    require(math.isfinite(tolerance_percent) and 0 <= tolerance_percent < 100,
+            'balance tolerance must be finite and in [0, 100) percent')
+    target = Fraction(concurrency, workers)
+    tolerance = Fraction(str(tolerance_percent)) / 100
+    lower = max(1, math.ceil(target * (1 - tolerance)))
+    upper = min(concurrency, math.floor(target * (1 + tolerance)))
+    require(lower * workers <= concurrency <= upper * workers,
+            'no feasible integer allocation within tolerance; increase tolerance or change concurrency')
+    return {'target_connections_per_worker': float(target), 'tolerance_percent': tolerance_percent,
+            'min_connections_per_worker': lower, 'max_connections_per_worker': upper}
+
+
 def prepare_connections(args, context):
     from tcp_stress_test import configure_connected_socket
     check_identities(context)
     workers = [w['pid'] for w in context['workers']]
-    require(len(set(workers)) == len(workers) and args.concurrency % len(workers) == 0,
-            'concurrency must divide evenly across distinct Workers')
-    quota = args.concurrency // len(workers)
+    require(len(set(workers)) == len(workers), 'Workers must be distinct')
+    bounds = allocation_bounds(args.concurrency, len(workers), getattr(args, 'balance_tolerance_percent', 0))
+    lower, upper = bounds['min_connections_per_worker'], bounds['max_connections_per_worker']
     counts = collections.Counter()
     retained, pending = [], []
     attempts, deadline = 0, time.monotonic() + 30
@@ -93,7 +109,10 @@ def prepare_connections(args, context):
                     time.sleep(0.01)
             for item in pending:
                 pid = owners[item['endpoint']]
-                if counts[pid] < quota:
+                # Reserve enough remaining slots to bring every other Worker to its lower bound.
+                deficits = sum(max(0, lower - counts[w] - (w == pid)) for w in workers)
+                if (len(retained) < args.concurrency and counts[pid] < upper and
+                        args.concurrency - len(retained) - 1 >= deficits):
                     item['worker_pid'] = pid
                     retained.append(item)
                     counts[pid] += 1
@@ -101,7 +120,8 @@ def prepare_connections(args, context):
                     item['socket'].close()
             pending = []
         return retained, {'candidate_connections': attempts, 'discarded_connections': attempts - len(retained),
-                          'quota_per_worker': quota, 'preparation_verified_counts': dict(counts)}
+                          **bounds, 'quota_per_worker': lower if lower == upper else None,
+                          'preparation_verified_counts': dict(counts)}
     except BaseException:
         for item in [*pending, *retained]:
             item['socket'].close()
@@ -163,7 +183,8 @@ def run_balanced(args):
     release, output = mp.Event(), mp.Queue()
     processes = []
     stage = 'client_startup'
-    evidence = {'method': 'verified_worker_quota_v1', **prepared, 'master_pid': context['master_pid'],
+    method = 'verified_worker_range_v1' if prepared['tolerance_percent'] else 'verified_worker_quota_v1'
+    evidence = {'method': method, **prepared, 'master_pid': context['master_pid'],
                 'master_start_ticks': context['master_start_ticks'], 'verified_counts': {}}
     try:
         evidence['verified_counts']['before_warmup'] = verified_counts(context, connections)

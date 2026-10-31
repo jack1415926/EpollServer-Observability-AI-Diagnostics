@@ -112,6 +112,8 @@ class Tools:
             data = value.get('response', {}).get('data') or {}
             if name == 'get_worker_metrics':
                 self.target['master'] = data.get('master')
+            if name == 'get_server_health':
+                self.target['master'] = (data.get('tcp_probe') or {}).get('instance')
             if name == 'get_recent_events':
                 self.target['instance'] = data.get('detection', {}).get('instance')
             return self.record(simple[name], value,
@@ -159,7 +161,7 @@ class Tools:
 
 
 TOOL_DESCRIPTIONS = {
-    'get_server_health': 'Read monitor liveness and collection state; TCP is not actively probed.',
+    'get_server_health': 'Read monitor liveness, collection state and cached TCP Ping status, timing and failure reason when configured.',
     'get_worker_metrics': 'Read Worker identities and current sampled metrics; missing remains null.',
     'get_recent_events': 'Read stored current/historical instance events; active is not proof of current anomaly.',
     'read_server_logs': 'Read a bounded redacted tail of the operator-configured log; instance association is unverified.',
@@ -452,7 +454,7 @@ async def diagnose(question, provider, tools):
     limits = {
         'knowledge': ['基于技术资料回答；未读取当前实例运行数据', '引用存在性已校验；内容支持关系仍需核对'],
         'experiments': ['历史实验不代表本次测量；条件差异不能直接用于因果归因', '引用存在性已校验；解释仍需核对'],
-        'runtime': ['只读工具；TCP业务未主动探测', '日志与历史资料不保证属于当前实例',
+        'runtime': ['只读工具；TCP Ping按health证据中的配置、实例和探测时间解释', '日志与历史资料不保证属于当前实例',
                     '引用存在性已校验；自然语言推断仍需人工核对']}.get(route.intent, ['未读取运行指标、日志或实验记录'])
     return {'schema_version': 1, 'kind': route.intent, 'question': question, 'target': target, 'model': provider.model,
             'routing': {**route.model_dump(), 'status': route_status},

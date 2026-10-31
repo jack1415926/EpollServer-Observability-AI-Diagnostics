@@ -53,6 +53,8 @@ def parse_args():
     )
     parser.add_argument("--json-out", type=Path)
     parser.add_argument("--balance-context", type=Path, help="local test context with verified Master/Worker identities")
+    parser.add_argument("--balance-tolerance-percent", type=float, default=0,
+                        help="per-Worker connection tolerance in percent; 0 keeps exact quotas")
     parser.add_argument("--warmup-per-client", type=int, default=500, help="preconnected balanced-mode warmup")
     args = parser.parse_args()
     require(args.concurrency > 0, "concurrency must be positive")
@@ -64,7 +66,11 @@ def parse_args():
     require(args.worker_threads is None or args.worker_threads > 0, "worker-threads must be positive")
     require(math.isfinite(args.timeout) and args.timeout > 0, "timeout must be finite and positive")
     require(args.warmup_per_client >= 0, "warmup-per-client must be nonnegative")
+    require(args.balance_context or args.balance_tolerance_percent == 0, 'balance tolerance requires --balance-context')
     if args.balance_context:
+        from balanced_load import allocation_bounds
+        require(args.server_workers is not None, 'balanced mode requires --server-workers')
+        allocation_bounds(args.concurrency, args.server_workers, args.balance_tolerance_percent)
         require(args.host == "127.0.0.1" and args.socket_mode != "blocking",
                 "balanced mode requires local IPv4 and bounded socket timeouts")
     return args
@@ -366,7 +372,7 @@ def main():
         }
         if allocation is not None:
             result["allocation"] = allocation
-            result["load"]["connection_allocation"] = "verified_worker_quota_v1"
+            result["load"]["connection_allocation"] = allocation['method']
             result["load"]["timing_basis"] = "barrier_to_completion_excludes_setup_warmup_teardown"
         print(json.dumps(result, ensure_ascii=False, indent=2))
         if args.json_out:

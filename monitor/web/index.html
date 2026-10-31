@@ -39,7 +39,7 @@
       </div>
       <div class="two-columns">
         <article class="panel"><div class="panel-title"><h2>实例与采集</h2><span class="subtle">LIVE SNAPSHOT</span></div><dl id="instance"></dl></article>
-        <article class="panel"><div class="panel-title"><h2>数据边界</h2><span class="badge">基础指标</span></div><p class="boundary">TCP 业务健康：<strong>未主动探测</strong></p><p>快照完整表示基础指标可用，不表示业务线程、MySQL 或 Redis 健康。</p><p>Worker 已接入 CPU 和 RSS；累计网络与业务计数、数据库内部指标尚未接入。</p><p id="partial-note" class="subtle">缺失指标显示「—」，不会补零。部分数据不作为实例完整总量。</p></article>
+        <article class="panel"><div class="panel-title"><h2>服务响应</h2><span class="subtle">TCP PING</span></div><dl id="tcp-probe"><div><dt>监控服务</dt><dd>待连接</dd></div><div><dt>TCP 响应</dt><dd>待采样</dd></div></dl><p class="subtle">Ping 验证一次协议往返。Worker 资源与数据库操作分别按各自观测判断。</p><p id="partial-note" class="subtle">缺失指标显示「—」，部分数据按有效 Worker 展示。</p></article>
       </div>
     </section>
     <section id="workers" class="page" hidden aria-labelledby="workers-heading">
@@ -61,7 +61,7 @@
     <section id="events" class="page" hidden aria-labelledby="events-heading">
       <article class="panel"><div class="panel-title"><div><h2 id="events-heading">异常事件</h2><p>最近 100 条持久化事件 · 持续异常去重，有效观测后自动恢复</p></div><span class="subtle">DETERMINISTIC RULES</span></div>
         <p id="event-notice" role="status" aria-live="polite">连接后读取事件记录。</p>
-        <p>检测采集缺失或过期、Worker 进程异常、收发队列持续积压。数据缺失及正常停机不作为恢复证据；待恢复观测表示尚未观测到恢复。TCP 业务健康未主动探测。</p>
+        <p>检测采集缺失或过期、Worker 进程异常、收发队列持续积压。TCP Ping 的最新结果见运行总览。</p>
         <div class="table-wrap" tabindex="0" role="region" aria-label="异常事件表，可横向滚动"><table><thead><tr><th>触发 / 恢复时间</th><th>规则 / 实例</th><th>Worker</th><th>状态</th><th>观测值 / 阈值 / 窗口</th></tr></thead><tbody id="event-rows"></tbody></table></div>
       </article>
     </section>

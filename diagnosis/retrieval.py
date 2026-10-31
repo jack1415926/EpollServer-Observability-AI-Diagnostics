@@ -40,6 +40,7 @@ def documents(root=ROOT, corpus='current'):
     policy = load_policy(root)
     paths = [root / 'README.md', root / 'docs/DECISIONS.md', root / 'docs/DEVELOPMENT_ISSUES.md']
     paths.append(root / 'docs/T7_WORKER_RESOURCES.md')
+    paths.append(root / 'docs/TCP_ACTIVE_PROBE.md')
     paths += sorted((root / 'docs').glob('STAGE_*.md'))
     paths += sorted((root / 'docs/upstream').glob('*.md'))
     paths += sorted((root / 'docs/knowledge').glob('*.md'))

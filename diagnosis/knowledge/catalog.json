@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "main-integration-20261029",
+  "revision": "tcp-probe-20261031",
   "entries": [
     {
       "path": "diagnosis/knowledge/runtime_contract.md",
@@ -10,10 +10,11 @@
         "monitor/collector",
         "monitor/http"
       ],
-      "revision": "T7+process-resources-20261029",
+      "revision": "tcp-probe-20261031",
       "sources": [
         "monitor/collector/collector.cxx",
-        "monitor/http/main.cxx"
+        "monitor/http/main.cxx",
+        "monitor/http/tcp_probe.cxx"
       ]
     },
     {

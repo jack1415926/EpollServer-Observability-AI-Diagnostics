@@ -1,5 +1,5 @@
 {
-  "version": "balanced-load-review-20261031",
+  "version": "tcp-probe-review-20261031",
   "reviewed_on": "2026-10-31",
   "sources": {
     "README.md": {
@@ -10,7 +10,7 @@
         "project"
       ],
       "source_quality": "project_maintained_contract",
-      "reviewed_sha256": "4eafb2f8afa92d4bfd776052e63e0d1323aec8a152e4c8f5ce49f63b4bbc2ec4",
+      "reviewed_sha256": "be2e7e44aec88e7a2fc9daa67ed29ebf8b21f36bbccb85785e6aa87a85bf3841",
       "sections": {
         "从哪里开始": {
           "layer": "planning_progress",
@@ -30,7 +30,7 @@
         "project"
       ],
       "source_quality": "project_progress_or_proposal",
-      "reviewed_sha256": "f94caf8f90923f06e96d8895d1500e1399cc87e8e943df5474cf2d23acdd2442",
+      "reviewed_sha256": "4b72ac516926aee20e766f53a92adfd3e9a9b1f412a526ff659a18c9a4c778d9",
       "sections": {
         "阶段 5 确认范围（2026-10-25）": {
           "layer": "current_contract",
@@ -138,7 +138,7 @@
         "project"
       ],
       "source_quality": "project_case_record",
-      "reviewed_sha256": "ea4c93b125d758d8dfc1b49b18418d9f540f1bc1c726ba90c171596d894c382d",
+      "reviewed_sha256": "5753d1f7856160062920c3ba889d826e12337487bcfb06bda9f31372be3c014d",
       "sections": {
         "2026-10-26：诊断格式契约与Recall审计": {
           "layer": "historical_case",
@@ -187,6 +187,16 @@
           "published_on": "2026-10-31"
         },
         "2026-10-31：均衡客户端原型与共享监听FD识别": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-31"
+        },
+        "2026-10-31：容差分配的整数可行性与结果契约": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-31"
+        },
+        "2026-10-31：主动TCP Ping与诊断联调配置": {
           "layer": "planning_progress",
           "source_quality": "project_progress_or_proposal",
           "published_on": "2026-10-31"
@@ -364,7 +374,7 @@
         "monitor"
       ],
       "source_quality": "project_progress_or_proposal",
-      "reviewed_sha256": "d0203162c407540e9a7648acf7cf6749545ebec8bd8ad01c608a4dcd06efa237",
+      "reviewed_sha256": "b2b803ed5ef4cde85daf89e0995348e22fb5b952daac395353d465f80b2bf9f8",
       "sections": {
         "结构与采样语义": {
           "layer": "current_contract",
@@ -896,6 +906,23 @@
           "layer": "current_contract",
           "source_quality": "project_maintained_contract",
           "published_on": "2026-10-29"
+        }
+      }
+    },
+    "docs/TCP_ACTIVE_PROBE.md": {
+      "layer": "current_contract",
+      "published_on": "2026-10-31",
+      "applicable_version": "project_worktree_snapshot; runtime_commit_not_bound",
+      "components": [
+        "monitor/http",
+        "diagnosis"
+      ],
+      "source_quality": "project_maintained_contract",
+      "reviewed_sha256": "d9e9a704c6920a8c14aaf8523002ab5e88fe1f2139ecd9085dc5748a55a9f593",
+      "sections": {
+        "验证入口": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal"
         }
       }
     }

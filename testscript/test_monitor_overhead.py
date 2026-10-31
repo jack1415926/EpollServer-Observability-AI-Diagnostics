@@ -1,5 +1,6 @@
 """Workload identity, acceptance arithmetic and failure retention; no performance load."""
 from pathlib import Path
+import copy
 import tempfile
 import threading
 import unittest
@@ -9,6 +10,30 @@ import benchmark_monitor_overhead as benchmark
 
 
 class MonitorOverheadTests(unittest.TestCase):
+    def test_range_acceptance_checks_all_phases_and_actual_request_counts(self):
+        counts = {'1': 49, '2': 51, '3': 50, '4': 50}
+        metadata = {'workers': [{'pid': int(pid)} for pid in counts]}
+        allocation = {**benchmark.allocation_bounds(200, 4, 2), 'preparation_verified_counts': counts,
+                      'verified_counts': {phase: dict(counts) for phase in
+                                         ('before_warmup', 'after_warmup', 'after_measurement')},
+                      'workers': {pid: {'connections': n, 'attempted': n * 10, 'successful': n * 10,
+                                        'failed': 0, 'warmup_successful': n * 3} for pid, n in counts.items()}}
+        benchmark.validate_allocation(allocation, metadata, 10, 3, 2)
+        for defect in ('changed', 'missing', 'requests', 'warmup', 'bounds'):
+            broken = copy.deepcopy(allocation)
+            if defect == 'changed':
+                broken['verified_counts']['after_measurement'].update({'1': 50, '3': 49})
+            elif defect == 'missing':
+                del broken['verified_counts']['after_warmup']
+            elif defect == 'requests':
+                broken['workers']['1']['successful'] = 500
+            elif defect == 'warmup':
+                broken['workers']['1']['warmup_successful'] -= 1
+            else:
+                broken['max_connections_per_worker'] = 52
+            with self.subTest(defect=defect), self.assertRaises(ValueError):
+                benchmark.validate_allocation(broken, metadata, 10, 3, 2)
+
     def test_matched_config_only_changes_snapshot_switch(self):
         source = 'MysqlPassword = retained-secret\nWorkerProcesses = 1\n'
         configs = [benchmark.configure(source, 18080, mode) for mode in ('off', 'snapshot', 'full', 'collector', 'events')]

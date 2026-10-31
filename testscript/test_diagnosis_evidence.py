@@ -1,10 +1,14 @@
 """Production evidence selection and report support trust boundaries."""
 import json
 import asyncio
+import tempfile
+from pathlib import Path
 import unittest
 from unittest.mock import patch
 
 import httpx
+import numpy as np
+from diagnosis.corpus import policy_digest
 
 from diagnosis.agent import Tools, diagnose
 from diagnosis.evaluate import ReplayTools, read
@@ -19,6 +23,16 @@ from diagnosis.selection import contracts
 
 
 class EvidenceTests(unittest.IsolatedAsyncioTestCase):
+    def offline_index(self):
+        folder = tempfile.TemporaryDirectory(prefix='epoll-evidence-index-')
+        self.addCleanup(folder.cleanup)
+        path = Path(folder.name)/'index.npz'
+        chunk = {'id':'fixture', 'path':'missing.md', 'heading':'fixture', 'text':'fixture', 'sha256':'fixture',
+                 'corpus':{'layer':'current_contract', 'superseded_by':[]}}
+        np.savez(path, vectors=np.array([[1, 0]]), metadata=json.dumps([chunk]),
+                 model='Qwen/Qwen3-Embedding-8B', corpus_policy_sha256=policy_digest())
+        return path
+
     def test_resource_nulls_do_not_become_zero(self):
         tools = Tools(None, None)
         tools.record('workers', {'response':{'data':{'workers':[{'worker_index':0,
@@ -359,7 +373,7 @@ class EvidenceTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn('private-api-key',telemetry)
         self.assertEqual(provider.telemetry[0]['error'],'deepseek_http_401')
         self.assertIsNone(provider.telemetry[0]['usage'])
-        original=Retriever(None)
+        original=Retriever(None, self.offline_index())
         first,second=original.for_task(object()),original.for_task(object())
         first.traces.append({'query':'first'})
         self.assertEqual(second.traces,[]);self.assertEqual(original.traces,[])
@@ -393,7 +407,8 @@ class EvidenceTests(unittest.IsolatedAsyncioTestCase):
             return response({k:v for k,v in value.items() if k in payload['text']['format']['schema']['properties']})
         store=MemoryStore()
         with patch.dict(os.environ,{'EPOLL_DIAG_TOKEN':TOKEN,'DEEPSEEK_API_KEY':'private-test-key',
-                                   'DEEPSEEK_BASE_URL':'https://api.deepseek.com'}):
+                                   'DEEPSEEK_BASE_URL':'https://api.deepseek.com',
+                                   'EPOLL_DIAG_INDEX_PATH':str(self.offline_index())}):
             app=create_app(store)
             network=httpx.AsyncClient(transport=httpx.MockTransport(transport))
             async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app),base_url='http://test',
@@ -431,7 +446,7 @@ class EvidenceTests(unittest.IsolatedAsyncioTestCase):
         self_test = self
         fixture = read(ROOT/'evaluation/knowledge_t5/fixtures.json')['unreadable']
         async with httpx.AsyncClient(transport=httpx.MockTransport(forbidden)) as client:
-            tools = ReplayTools(client, Retriever(None), fixture)
+            tools = ReplayTools(client, Retriever(None, self.offline_index()), fixture)
             await diagnose('请核对process_unavailable，是否已经退出并会自动重启？', Provider(), tools)
 
     async def test_final_report_checks_typed_values_not_just_existing_ids(self):

@@ -13,7 +13,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 import balanced_load
-from balanced_load import process_identity, socket_owners, run_balanced
+from balanced_load import allocation_bounds, process_identity, socket_owners, run_balanced
 from protocol import recv_pkg, send_pkg
 
 
@@ -38,6 +38,42 @@ def echo_worker(listener, bad_response):
 
 
 class BalancedLoadTests(unittest.TestCase):
+    def test_integer_bounds_and_infeasible_nondivisible_loads(self):
+        for concurrency, workers, tolerance, limits in [(200, 4, 2, (49, 51)), (400, 4, 2, (98, 102)),
+                                                       (200, 4, 0, (50, 50)), (201, 4, 2, (50, 51)),
+                                                       (9, 2, 12, (4, 5))]:
+            bounds = allocation_bounds(concurrency, workers, tolerance)
+            self.assertEqual((bounds['min_connections_per_worker'], bounds['max_connections_per_worker']), limits)
+        for concurrency, workers, tolerance in [(201, 4, 0), (9, 2, 2), (2, 4, 2), (200, 4, -1),
+                                                 (200, 4, 100), (200, 4, float('nan')), (200, 4, float('inf'))]:
+            with self.subTest(concurrency=concurrency, tolerance=tolerance), self.assertRaises(ValueError):
+                allocation_bounds(concurrency, workers, tolerance)
+
+    def test_range_preparation_reserves_lower_bounds_and_closes_excess(self):
+        sockets = []
+        def create(*_):
+            sock = Mock()
+            sock.getsockname.return_value = ('127.0.0.1', 40000 + len(sockets))
+            sock.getpeername.return_value = ('127.0.0.1', 18000)
+            sockets.append(sock)
+            return sock
+        def owners(_, keys):
+            return {key: 11 + min((key[1] - 40000) // 60, 3) for key in keys}
+        args = SimpleNamespace(concurrency=200, balance_tolerance_percent=2, host='127.0.0.1', port=18000,
+                               timeout=1, source_ip=None, socket_mode='kernel-timeout')
+        context = {'workers': [{'pid': pid} for pid in range(11, 15)]}
+        with patch.object(balanced_load, 'check_identities'), patch.object(balanced_load.socket, 'socket', side_effect=create), \
+             patch.object(balanced_load, 'socket_owners', side_effect=owners), patch('tcp_stress_test.configure_connected_socket'):
+            retained, evidence = balanced_load.prepare_connections(args, context)
+        try:
+            self.assertEqual(len(retained), 200)
+            self.assertEqual(evidence['preparation_verified_counts'], {11: 51, 12: 51, 13: 49, 14: 49})
+            held = {id(item['socket']) for item in retained}
+            self.assertTrue(all(not s.close.called if id(s) in held else s.close.called for s in sockets))
+        finally:
+            for item in retained:
+                item['socket'].close()
+
     def write_process(self, root, pid, parent, ticks):
         directory = root / str(pid)
         directory.mkdir()
@@ -96,7 +132,7 @@ class BalancedLoadTests(unittest.TestCase):
                     process.join(timeout=3)
                     self.assertFalse(process.is_alive())
 
-    def run_real_balanced(self, bad_response=False):
+    def run_real_balanced(self, bad_response=False, concurrency=8, tolerance=0):
         mp = multiprocessing.get_context('fork')
         processes = []
         previous_children = {p.pid for p in mp.active_children()}
@@ -114,7 +150,8 @@ class BalancedLoadTests(unittest.TestCase):
                            'workers': [{'pid': p.pid, 'start_ticks': process_identity(p.pid)[0]} for p in processes]}
                 path = folder / 'context.json'
                 path.write_text(json.dumps(context))
-                args = SimpleNamespace(balance_context=path, concurrency=8, processes=2, server_workers=2,
+                args = SimpleNamespace(balance_context=path, concurrency=concurrency, processes=2, server_workers=2,
+                                       balance_tolerance_percent=tolerance,
                                        host='127.0.0.1', port=context['tcp_port'], source_ip=None, timeout=1,
                                        socket_mode='kernel-timeout', receive_mode='into', validation_mode='strict',
                                        warmup_per_client=3, requests_per_client=10, latency_mode='sampled',
@@ -127,12 +164,14 @@ class BalancedLoadTests(unittest.TestCase):
                 else:
                     groups, duration, allocation = run_balanced(args)
                     self.assertGreater(duration, 0)
-                    self.assertEqual(sum(g[1] for g in groups), 80)
-                    self.assertEqual(sum(len(g[2]) for g in groups), 40)
+                    self.assertEqual(sum(g[1] for g in groups), concurrency * 10)
+                    self.assertEqual(sum(len(g[2]) for g in groups), concurrency * 5)
                     self.assertTrue(all(not g[3] for g in groups))
-                    self.assertTrue(all(sorted(counts.values()) == [4, 4] for counts in allocation['verified_counts'].values()))
+                    expected = [4, 5] if concurrency == 9 else [4, 4]
+                    self.assertTrue(all(sorted(counts.values()) == expected for counts in allocation['verified_counts'].values()))
+                    self.assertEqual(allocation['method'], 'verified_worker_range_v1' if tolerance else 'verified_worker_quota_v1')
                     self.assertEqual(len(allocation['client_process_pids']), 2)
-                    self.assertTrue(all(w['successful'] == 40 and w['warmup_successful'] == 12
+                    self.assertTrue(all(w['successful'] == w['connections'] * 10 and w['warmup_successful'] == w['connections'] * 3
                                         for w in allocation['workers'].values()))
                 self.assertEqual({p.pid for p in mp.active_children()}, {p.pid for p in processes})
             finally:
@@ -147,6 +186,9 @@ class BalancedLoadTests(unittest.TestCase):
 
     def test_real_balanced_warmup_barriers_and_per_worker_counts(self):
         self.run_real_balanced()
+
+    def test_real_range_mode_with_nondivisible_concurrency(self):
+        self.run_real_balanced(concurrency=9, tolerance=12)
 
     def test_bad_warmup_aborts_before_measurement_and_reaps_clients(self):
         self.run_real_balanced(bad_response=True)

@@ -99,6 +99,7 @@ function clearLive() {
   $("expected-workers").textContent = "预期数量待采集"; $("instance").replaceChildren(); $("worker-rows").replaceChildren();
   $("worker-empty").hidden = false; $("worker-empty").textContent = "当前没有有效采集结果。"; $("worker-count").textContent = "暂无数据";
   $("updated").textContent = "尚未采集"; $("partial-note").textContent = "缺失指标显示「—」，不会补零。部分数据不作为实例完整总量。";
+  $("tcp-probe").replaceChildren();
 }
 function renderLive(overview, workers) {
   const data = overview.data, totals = data.totals || {};
@@ -106,6 +107,10 @@ function renderLive(overview, workers) {
   $("valid-workers").textContent = fmt(data.valid_workers); $("expected-workers").textContent = `预期 ${fmt(data.expected_workers)} 个 Worker`;
   const entries = [["采集状态", labels[overview.validity] || overview.validity], ["Master PID", data.master?.master_pid ?? "—"], ["实例启动刻度", data.master?.master_start_ticks ?? "—"], ["名单状态", data.master?.state ?? "—"], ["数据年龄上限", `${data.max_age_ms} ms`], ["采集原因", data.reason]];
   $("instance").replaceChildren(...entries.map(([key, value]) => { const row = document.createElement("div"); row.append(text("dt", key), text("dd", value)); return row; }));
+  const probe = data.tcp_probe || {}, probeLabels = {reachable: "响应正常", unreachable: "响应失败", unknown: "待确认", not_probed: "未启用"};
+  const reasons = {ping_ok: "Ping 成功", disabled: "未配置探测端口", initializing: "等待首次探测", identity_changed: "实例变化，等待重新探测", identity_unavailable: "实例身份暂不可用", target_mismatch: "端口属于其他实例", not_listening: "目标端口未监听", timeout: "请求超时", protocol_error: "响应协议错误", connection_closed: "连接提前关闭", connect_failed: "连接失败", socket_error: "连接读写失败", target_unavailable: "目标信息不可读取", stale: "探测结果已过期", collection_error: "等待实例采集"};
+  const probeEntries = [["监控服务", "可达"], ["TCP 响应", probeLabels[data.tcp_health] || "待确认"], ["往返耗时", probe.rtt_ms == null ? "—" : `${fmt(probe.rtt_ms, 2)} ms`], ["最近探测", probe.checked_at_unix_ms == null ? "—" : new Date(probe.checked_at_unix_ms).toLocaleTimeString("zh-CN")], ["探测结果", reasons[probe.reason] || probe.reason || "等待采样"]];
+  $("tcp-probe").replaceChildren(...probeEntries.map(([key, value]) => { const row = document.createElement("div"); row.append(text("dt", key), text("dd", value)); return row; }));
   $("connection").replaceWith(Object.assign(badge(overview.validity), {id: "connection"}));
   const rows = workers.data.workers || [];
   $("worker-count").textContent = `${rows.length} 个 Worker`;
@@ -124,7 +129,7 @@ function renderLive(overview, workers) {
   if (overview.validity !== "complete") $("partial-note").textContent = `完整总量不可用。有效部分：连接 ${fmt(data.partial_sums?.connections_current)}，接收队列 ${fmt(data.partial_sums?.receive_queue_messages)}，发送队列 ${fmt(data.partial_sums?.send_queue_messages)}；仅代表已采集 Worker。`;
   else $("partial-note").textContent = "当前连接与队列快照完整；CPU/RSS 按各 Worker 的资源采集状态判断。逐字段采样，不是同一瞬间的事务快照。";
   $("updated").textContent = data.collected_at_unix_ms ? `采集于 ${new Date(data.collected_at_unix_ms).toLocaleTimeString("zh-CN")} · 每 2 秒刷新` : "当前无有效采集时间";
-  notice(overview.validity === "complete" ? "已连接 · 实时指标每 2 秒刷新。TCP 业务健康未主动探测。" : `监控服务可达，采集状态：${labels[overview.validity] || overview.validity} · ${data.reason}`, overview.validity !== "complete");
+  notice(`监控已连接 · ${labels[overview.validity] || overview.validity} · TCP ${probeLabels[data.tcp_health] || "待确认"} · 每 2 秒刷新`, overview.validity !== "complete" || data.tcp_health === "unreachable");
 }
 async function refreshLive() {
   if (!token || refreshing) return;

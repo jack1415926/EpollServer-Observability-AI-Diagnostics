@@ -14,10 +14,11 @@ class ImportExperimentTests(unittest.TestCase):
             root = Path(directory)
             fixture = valid_report()
             result, resources = root / 'result.json', root / 'resources.json'
-            result.write_text(json.dumps({**fixture['benchmark'], 'allocation': {'method': 'verified_worker_quota_v1'}}))
             resources.write_text('{}')
-            with self.assertRaisesRegex(ValueError, 'new experiment schema'):
-                prepare_report('balanced', result, resources, fixture['context'])
+            for method in ('verified_worker_quota_v1', 'verified_worker_range_v1'):
+                result.write_text(json.dumps({**fixture['benchmark'], 'allocation': {'method': method}}))
+                with self.subTest(method=method), self.assertRaisesRegex(ValueError, 'new experiment schema'):
+                    prepare_report('balanced', result, resources, fixture['context'])
 
     def test_report_preserves_result_and_binds_resources_by_hash(self):
         with tempfile.TemporaryDirectory() as directory:

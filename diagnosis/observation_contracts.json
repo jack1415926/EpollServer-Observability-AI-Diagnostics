@@ -1,6 +1,6 @@
 {
-  "version": "documentation-source-review-20261030",
-  "reviewed_on": "2026-10-30",
+  "version": "tcp-probe-contract-20261031",
+  "reviewed_on": "2026-10-31",
   "topics": {
     "sampling": {
       "title": "文件快照、fresh/stale与null",
@@ -82,13 +82,19 @@
     },
     "capabilities": {
       "title": "当前能力与日志范围",
-      "text": "当前Worker进程CPU与近似RSS已支持，须按resources实际可用状态判断；逐线程状态、请求耗时、累计业务/错误计数及MySQL/Redis内部指标仍不受支持；历史实验资源摘要不代表当前资源。health的HTTP 200只证明监控存活，tcp_health=not_probed不是业务健康。固定日志尾部未核验实例与故障时间窗，只是未核验线索；不能把日志中的数值或错误当作当前实例事实。业务库与监控库不同。用户陈述可以记录为未核验用户信息，不能借用health/workers的引用证明用户说过的话。 用户在另一台主机测量只说明客户端位置，不说明请求目标不同；目标主机/端口和网络路径未核实时不能判断与当前实例无关。",
+      "text": "当前Worker进程CPU与近似RSS已支持，须按resources实际可用状态判断；逐线程状态、请求耗时、累计业务/错误计数及MySQL/Redis内部指标仍不受支持；历史实验资源摘要不代表当前资源。health的HTTP 200表示监控存活。配置本机TCP端口后，tcp_health=reachable表示最近一次Ping协议往返成功，unreachable表示失败，unknown表示身份不可用/变化或结果过期，not_probed表示未启用。tcp_probe包含原因、往返耗时、观测时间和被核验实例；它与基础采集状态分别解释，失败/过期耗时为null。一次Ping不覆盖每个Worker及MySQL/Redis业务操作。固定日志尾部未核验实例与故障时间窗，只是未核验线索；不能把日志中的数值或错误当作当前实例事实。业务库与监控库不同。用户陈述可以记录为未核验用户信息，不能借用health/workers的引用证明用户说过的话。 用户在另一台主机测量只说明客户端位置，不说明请求目标不同；目标主机/端口和网络路径未核实时不能判断与当前实例无关。",
       "references": [
         {
           "path": "docs/DIAGNOSIS_COVERAGE.md",
           "start_line": 1,
           "end_line": 20,
-          "sha256": "8f61dbff3aa2289c461ea3aa8dda6784412cee828ca23e139cd83392b4df5260"
+          "sha256": "9b6bb99de5159caa8c2ea2e6732af34dedb149f940a09b6e34c32db7d4105f5d"
+        },
+        {
+          "path": "docs/TCP_ACTIVE_PROBE.md",
+          "start_line": 7,
+          "end_line": 43,
+          "sha256": "d9e9a704c6920a8c14aaf8523002ab5e88fe1f2139ecd9085dc5748a55a9f593"
         }
       ]
     },

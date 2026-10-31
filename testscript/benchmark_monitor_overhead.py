@@ -18,6 +18,7 @@ import threading
 import time
 
 from benchmark_worker_snapshot import configuration
+from balanced_load import allocation_bounds
 from import_experiment import upload
 from performance_sampler import process_summary, sample_processes
 from process_group import run_process_group, start_process_group, stop_process_group
@@ -116,6 +117,26 @@ def exploration_summary(runs):
             'interpretation': 'exploratory_only_not_formal_acceptance_or_proven_cause'}
 
 
+def validate_allocation(allocation, metadata, count, warmup, tolerance):
+    bounds = allocation_bounds(200, 4, tolerance)
+    require(all(allocation.get(k) == v for k, v in bounds.items()), 'allocation bounds mismatch')
+    expected = {str(w['pid']) for w in metadata['workers']}
+    verified = allocation['verified_counts']
+    require(set(verified) == {'before_warmup', 'after_warmup', 'after_measurement'},
+            'missing allocation verification phase')
+    prepared = allocation['preparation_verified_counts']
+    for counts in [prepared, *verified.values()]:
+        require(set(counts) == expected and sum(counts.values()) == 200 and
+                all(bounds['min_connections_per_worker'] <= n <= bounds['max_connections_per_worker']
+                    for n in counts.values()) and counts == prepared, 'balanced allocation changed or outside range')
+    require(set(allocation['workers']) == expected, 'per-Worker request identities mismatch')
+    for pid, worker in allocation['workers'].items():
+        connections = prepared[pid]
+        require(worker['connections'] == connections and worker['attempted'] == worker['successful'] == connections * count
+                and worker['failed'] == 0 and worker['warmup_successful'] == connections * warmup,
+                'per-Worker balanced requests incomplete')
+
+
 def poll_monitor(port, process, database, client_cpus, stopped, records, errors, state, mode='full'):
     # Pin this polling thread away from the four TCP/monitor CPUs.
     os.sched_setaffinity(0, client_cpus)
@@ -201,7 +222,7 @@ def run_round(args, root, index, mode, environment, database):
                 code, stored, _ = request(http_port, f'experiments/{key}')
                 require(code == 200, 'real existing experiment write/read failed')
                 write(directory / 'import-readback.json', stored)
-        if mode == 'full' or args.explore:
+        if mode == 'full' or args.explore or args.balanced:
             stopped = threading.Event()
             thread = threading.Thread(target=poll_monitor, args=(http_port, monitor, database, range(4, 12), stopped, records, errors, state, mode))
             def stop_polling():
@@ -226,6 +247,7 @@ def run_round(args, root, index, mode, environment, database):
                     '--json-out', str(directory / f'{phase}.json')]
             if args.balanced:
                 load += ['--balance-context', str(directory / 'context.json'), '--warmup-per-client', '50' if args.smoke else '500']
+                load += ['--balance-tolerance-percent', str(args.balance_tolerance_percent)]
                 metadata['timing_basis'] = 'balanced_preconnected_barrier_v1'
             command = [sys.executable, str(ROOT / 'testscript/performance_sampler.py'), '--master-pid', str(tcp.pid),
                        '--label', f'{index}-{mode}-{phase}', '--interval', '0.5', '--log', str(directory / 'server.log'),
@@ -242,16 +264,14 @@ def run_round(args, root, index, mode, environment, database):
             results[phase] = result
             if args.balanced:
                 allocation = raw['allocation']
-                require(all(sorted(counts.values()) == [50] * 4 for counts in allocation['verified_counts'].values()),
-                        'balanced quotas were not maintained')
-                require(all(w['connections'] == 50 and w['successful'] == 50 * count and w['failed'] == 0
-                            for w in allocation['workers'].values()), 'per-Worker balanced requests incomplete')
+                validate_allocation(allocation, metadata, count, 50 if args.smoke else 500,
+                                    args.balance_tolerance_percent)
         if mode == 'off':
             require(not (directory / 'metrics').exists(), 'off condition generated snapshots')
         else:
             samples = [json.loads(p.read_text()) for p in (directory / 'metrics').glob('worker-*.json')]
             require(len(samples) == 4 and all(s['sequence'] >= 2 for s in samples), 'publisher did not sample repeatedly')
-        if mode == 'full' or args.explore:
+        if mode == 'full' or args.explore or args.balanced:
             stop_polling()
             require(not errors, f'monitor polling errors: {errors}')
         if has_monitor:
@@ -281,13 +301,17 @@ def main():
     parser.add_argument('--smoke', action='store_true', help='three short conditions; never formal acceptance')
     parser.add_argument('--explore', nargs='+', choices=EXPLORATION_MODES,
                         help='explicit exploratory conditions/order; same load, no formal verdict')
-    parser.add_argument('--balanced', action='store_true', help='verified 50 connections per Worker, embedded warmup and barrier timing')
+    parser.add_argument('--balanced', action='store_true', help='verified per-Worker connections, embedded warmup and barrier timing')
+    parser.add_argument('--balance-tolerance-percent', type=float, default=0,
+                        help='per-Worker tolerance in percent; 0 preserves the exact-quota baseline')
     args = parser.parse_args()
-    require(not args.balanced or args.explore, 'balanced mode requires an explicit exploratory order')
+    require(args.balanced or args.balance_tolerance_percent == 0, 'balance tolerance requires --balanced')
+    if args.balanced:
+        allocation_bounds(200, 4, args.balance_tolerance_percent)
     order = args.explore or (ORDER[:3] if args.smoke else ORDER)
     scope = ('exploratory_smoke' if args.smoke else 'exploratory_decomposition') if args.explore else ('smoke' if args.smoke else 'formal')
     if args.balanced:
-        scope = 'balanced_smoke' if args.smoke else 'balanced_exploration'
+        scope = 'balanced_smoke' if args.smoke else ('balanced_exploration' if args.explore else 'balanced_formal')
     for key in ('binary', 'monitor', 'report'):
         setattr(args, key, getattr(args, key).resolve(strict=True))
     report = json.loads(args.report.read_text())
@@ -311,6 +335,7 @@ def main():
           'hashes': {str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p): sha(p) for p in files},
           'local_config_sha256': local_config_hash, 'affinity': sorted(os.sched_getaffinity(0)),
           'balanced': args.balanced,
+          'allocation_bounds': allocation_bounds(200, 4, args.balance_tolerance_percent) if args.balanced else None,
           'meminfo_before': Path('/proc/meminfo').read_text(), 'order': list(order),
           'targets': None if args.explore else {'qps_drop_percent_max': 5, 'sampled_p95_increase_percent_max': 10, 'request_failures': 0},
           'mode_features': {mode: {'monitor': mode in ('collector', 'events', 'full'),

@@ -1,0 +1,210 @@
+{
+  "scope": "TCP Ping functional delivery",
+  "source_directory": "artifacts/tcp-probe-live-20261031",
+  "source_sha256": {
+    "monitor/http/tcp_probe.cxx": "bfe5ebdcc8e2201da6d9649521c1333f4c1f13bfbdab05a16c7509ad3dc2c2d1",
+    "monitor/http/tcp_probe.h": "6e04950a6c7797b3b3b9b2edf8d8d5888748490f5a21f3d5a1d50f37948debfe",
+    "monitor/http/main.cxx": "be38958280f9039cebd7e6878fef8613409333396daeee8964f84879778e7a4c",
+    "monitor/makefile": "e474a8176f4249f23dd967328a421ce40f4ce65e01b4eb5429b0c0210518b590",
+    "monitor/web/index.html": "dbeed5658abafc70d3bf6aa04050445473fd51dd6681c55702dd790fb0a817d3",
+    "monitor/web/app.js": "8cb63370757e831e0027cd92fcd4c7f32c79d38c92158ab9961f954429f720b7",
+    "diagnosis/agent.py": "9928ae230596b60a8c7cdf7796c26f5ae3d780713d47d13d3992963258cc4abc",
+    "diagnosis/routing.py": "572544a8e4766ef00f15286f0cc4a8bb9321216d378e42facaadfbdaa2e3f046",
+    "diagnosis/retrieval.py": "72247eb76481da8c50e7e966690f5ab194d8ff3fd63957f365abb40430218e09",
+    "testscript/test_tcp_probe.py": "90e66b7ac0457ecbcac00733812b1bc7b56efe055d84f76c0cbf476cb08f078a",
+    "testscript/test_tcp_probe_http.py": "ff0b5711c7ba5bac9b352b8a775859d694986a8b51d8db82a847c6d51a5c7a33",
+    "testscript/tcp_probe_driver.cxx": "b7ef12f74f470362e15036481b8466b56c7259b6ea91f0c340961ffc45cc56c4",
+    "testscript/test_http_monitor_live.py": "740342e3a6be207488546307decb1dbd896ae5e58d2612fc25c02bb99f2de7d1",
+    "testscript/test_diagnosis_evidence.py": "694ae2285cd3eb6c172d1f03731b1bcc8e57dc19c4e1b29381b947d0eb0765fd",
+    "testscript/test_diagnosis_routing.py": "699b35d844da785594f810d93c6cfbf5586aa3315b23b598069d915ff250f019",
+    "testscript/test_diagnosis_render.js": "ba0f0f62a42ba3921d853e49532a509de0c42a2c8f705e118b451b5d60b9f152",
+    "diagnosis/observation_contracts.json": "24bf521096dbebf6f778a9b9f38a5e7c15d80969780f05a223bb5a8e2c8859ad",
+    "diagnosis/corpus_policy.json": "f87beec0b9569fc2642f1a8b75c496cb8f251cda0e6d162f91637ac6602bea82",
+    "diagnosis/knowledge/catalog.json": "aa44675abc58c0e88bb57a212197c3606c0a15c82bcff61141f5d774035fa6f4",
+    "diagnosis/knowledge/runtime_contract.md": "dae0fff0f90f6d7794198aaa78c1cf77020c2ae6862bcb49629ab7a63bff2616"
+  },
+  "monitor_binary_sha256": "7eee3285b2c1cdeb497df7495994a10dbddb1e3f65bd4ffd687bddacaa7385c4",
+  "artifact_sha256": {
+    "artifacts/tcp-probe-live-20261031/tcp-exited.json": "5dd0b3630b94491b6c743bc3b8edc0200f81c38bb9d09ff2492d8b83c6ffd798",
+    "artifacts/tcp-probe-live-20261031/probe-recovered.json": "e564065b1cd7c80be6e3ce087b6c35d4ffd5bc81cad4e00344597994e668ffd7",
+    "artifacts/tcp-probe-live-20261031/complete.json": "a766a48a8322ad1fb5287b54b759b903d32c6514d92b5aafab40357dea07baf3",
+    "artifacts/tcp-probe-live-20261031/parameters.json": "a35d159584d9fadf686c3e08cb286fc6efd3adab34c7cb9f0a733d5cb5e8df98",
+    "artifacts/tcp-probe-live-20261031/probe-success.json": "553e8a1e08a905b8525d45a2e099d0c2012fafcb17365317207e779af603bc93",
+    "artifacts/tcp-probe-live-20261031/invalid-manifest.json": "d6ee16a5f1b3d7d06d1a50e890eeb7dd2ae88d464a6116214ea0ce4e83625738",
+    "artifacts/tcp-probe-live-20261031/probe-timeout.json": "f9a1bf243a8c0b948f9812534a09a39287d54201734fba5a6428b794d8aab2f4",
+    "artifacts/tcp-probe-live-20261031/health-after-tcp-exit.json": "96d5470584fbd7220047f618d623bce57921edabcd552f248b1d847a2411785c",
+    "artifacts/tcp-probe-live-20261031/resources-tcp-exited.json": "32cebb1e89b144564cc4ee87671c92a8196d712c2e2e5684e1d7b088de1c1f8e",
+    "artifacts/tcp-probe-live-20261031/resources-paused.json": "442307a833999b788cfd40db30e07e2ea170883121c51f31e6e610a7a98c8ff6",
+    "artifacts/tcp-probe-live-20261031/partial.json": "d48fcfd08d7c21e8f58f08cefe504c84b6641436217b7f01a41a3bd375fa7dae",
+    "artifacts/tcp-probe-live-20261031/connection-one.json": "05f1bc6286e7cc5b687cbb6000e3e0529490307148897b5eec72baaddd39ce75",
+    "artifacts/tcp-probe-live-20261031/resources-resumed.json": "b2d9570fa60c646b2a3ded7ad82844240ecf2b1bed997153dedd86233c10cdc1",
+    "artifacts/tcp-probe-live-20261031/resources-idle.json": "137c1adb9e3a8a1efcd95f0c74e177ff51b48006902da7dcf8be6c7c6fb94a47"
+  },
+  "live_states": {
+    "probe-success": {
+      "http_status": 200,
+      "code": "ok",
+      "data": {
+        "collection_status": "complete",
+        "monitor": "ok",
+        "reason": "all_expected_workers_fresh",
+        "tcp_health": "reachable",
+        "tcp_probe": {
+          "age_ms": 1,
+          "checked_at_unix_ms": 1793437594290,
+          "host": "127.0.0.1",
+          "instance": {
+            "boot_id": "3d5b3fe8-861e-4a40-bc35-9abb6dd0d13a",
+            "master_pid": 40657,
+            "master_start_ticks": 665111
+          },
+          "interval_ms": 500,
+          "max_age_ms": 1200,
+          "port": 55775,
+          "reason": "ping_ok",
+          "rtt_ms": 0.580255,
+          "status": "reachable",
+          "timeout_ms": 200
+        }
+      },
+      "data_valid": true,
+      "schema_version": 1,
+      "timestamp_unix_ms": 1793437594292,
+      "validity": "complete"
+    },
+    "probe-timeout": {
+      "http_status": 200,
+      "code": "ok",
+      "data": {
+        "collection_status": "complete",
+        "monitor": "ok",
+        "reason": "all_expected_workers_fresh",
+        "tcp_health": "unreachable",
+        "tcp_probe": {
+          "age_ms": 20,
+          "checked_at_unix_ms": 1793437594991,
+          "host": "127.0.0.1",
+          "instance": {
+            "boot_id": "3d5b3fe8-861e-4a40-bc35-9abb6dd0d13a",
+            "master_pid": 40657,
+            "master_start_ticks": 665111
+          },
+          "interval_ms": 500,
+          "max_age_ms": 1200,
+          "port": 55775,
+          "reason": "timeout",
+          "rtt_ms": null,
+          "status": "unreachable",
+          "timeout_ms": 200
+        }
+      },
+      "data_valid": true,
+      "schema_version": 1,
+      "timestamp_unix_ms": 1793437595011,
+      "validity": "complete"
+    },
+    "probe-recovered": {
+      "http_status": 200,
+      "code": "ok",
+      "data": {
+        "collection_status": "complete",
+        "monitor": "ok",
+        "reason": "all_expected_workers_fresh",
+        "tcp_health": "reachable",
+        "tcp_probe": {
+          "age_ms": 33,
+          "checked_at_unix_ms": 1793437595492,
+          "host": "127.0.0.1",
+          "instance": {
+            "boot_id": "3d5b3fe8-861e-4a40-bc35-9abb6dd0d13a",
+            "master_pid": 40657,
+            "master_start_ticks": 665111
+          },
+          "interval_ms": 500,
+          "max_age_ms": 1200,
+          "port": 55775,
+          "reason": "ping_ok",
+          "rtt_ms": 0.328049,
+          "status": "reachable",
+          "timeout_ms": 200
+        }
+      },
+      "data_valid": true,
+      "schema_version": 1,
+      "timestamp_unix_ms": 1793437595525,
+      "validity": "complete"
+    },
+    "health-after-tcp-exit": {
+      "http_status": 200,
+      "code": "missing",
+      "data": {
+        "collection_status": "unavailable",
+        "monitor": "ok",
+        "reason": "missing",
+        "tcp_health": "unknown",
+        "tcp_probe": {
+          "age_ms": null,
+          "checked_at_unix_ms": null,
+          "host": "127.0.0.1",
+          "instance": null,
+          "interval_ms": 500,
+          "max_age_ms": 1200,
+          "port": 55775,
+          "reason": "identity_changed",
+          "rtt_ms": null,
+          "status": "unknown",
+          "timeout_ms": 200
+        }
+      },
+      "data_valid": false,
+      "schema_version": 1,
+      "timestamp_unix_ms": 1793437862003,
+      "validity": "unavailable"
+    }
+  },
+  "checks": {
+    "probe_http_regressions": 24,
+    "diagnosis_corpus_contract_regressions": 47,
+    "js_render_and_syntax": true,
+    "owned_tcp_workers_exited": true,
+    "owned_http_exited": true,
+    "owned_ports_closed": true,
+    "private_tcp_config_removed": true,
+    "browser_session_closed": true,
+    "local_config_unchanged": true,
+    "local_config_sha256": "47824137d3869b5bd495d8cf8df4d0864e86c03c993731a95dbfb23186e39b2f",
+    "original_business_mysql": {
+      "pid": 2305,
+      "start_ticks": 1041,
+      "port_3306_reachable": true
+    }
+  },
+  "browser": {
+    "session": "epoll-tcp-probe",
+    "tool": "agent-browser 0.41.0",
+    "tcp_status": "响应正常",
+    "disconnect_probe_text": "",
+    "viewport_width": 390,
+    "document_scroll_width": 390,
+    "axe_version": "4.12.1",
+    "axe_violations": 0,
+    "axe_incomplete": 0,
+    "screenshot_sha256": {
+      "desktop.png": "e6307dfbc42f5973a4cd288ca9e5499e6073230a13d4dde08ceb273dba8332b3",
+      "mobile.png": "0c651cf36e5878df28db21d65ec77f75330f399f27280ce83f7cf11ca5978f32"
+    }
+  },
+  "measurement_profile": {
+    "tcp_port": 55775,
+    "http_port": 46143,
+    "resources": true,
+    "tcp_probe": true,
+    "redis_rate_limit_enabled": false,
+    "scope": "functional Ping and resource observation, not a performance measurement"
+  },
+  "notes": [
+    "Functional Ping and fault isolation; monitoring overhead is recorded in its separate versioned experiment.",
+    "No monitoring database created; original business MySQL retained.",
+    "Knowledge metadata and contracts updated; existing remote embedding index retained for later refresh."
+  ]
+}
