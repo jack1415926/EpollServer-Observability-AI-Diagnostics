@@ -1,0 +1,1122 @@
+{
+  "recorded_on": "2026-10-31",
+  "scope": "exploratory decomposition and reverse pair; not formal acceptance",
+  "git_checkpoint": "63ed10691d5ddb703abebbf850be14885f84a8e8e",
+  "roots": [
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g"
+  ],
+  "successful_new_measured": 12000000,
+  "successful_new_warmup": 600000,
+  "successful_smoke_total": 120000,
+  "failed": 0,
+  "source_hashes": {
+    "monitor-overhead-exploratory_decomposition-3oraf1m6": {
+      "server/nginx": "c0d7f70c1e15b2f28fcad3c315272c759a53caf968333996a7c097b4a600f24a",
+      "monitor/build/epoll-monitor": "368e3dbd2609d7acd3eb96b28b0c0662505aaf22b36d6c36826f914f69600e25",
+      "artifacts/stage3-live-dvpeok8b/experiments/round-1-experiment.json": "3b36b1a9514c6d4c0399561d0c31004707f95fda63718f0dc4ae68c6f1eab64c",
+      "testscript/benchmark_monitor_overhead.py": "4ad8b9662a17802ff3aa952005b3e008c4943cc89a5240443e2ee28bb8a5cff5",
+      "testscript/tcp_stress_test.py": "9c3474af69d529986246906de1426f4baecd59197d22e0463128a57d22183b7c",
+      "testscript/performance_sampler.py": "f3165e33f7c0c3342ea9d832b526cae5da6a19e1c60715c4f538004503ff25fb",
+      "testscript/benchmark_worker_snapshot.py": "c255efc02fcdd7ad530edab71773f4222227403266160a93be22380d6ac11f25",
+      "testscript/process_group.py": "3466b97e53c2f8bbc8551620871979224c59e9fd359874d599b561759287a21e",
+      "testscript/test_stage3_live.py": "fb05e1fdfe19f8b1784b7e33b7f3eddfd3219f5f62f0602b0704a2110dfd0f5c",
+      "testscript/test_shutdown.py": "c09adf4b45cd275fa5f7248f7a9d326900434d9070879bfd8f1bda5aa486da0e"
+    },
+    "monitor-overhead-exploratory_decomposition-x4_y1t8g": {
+      "server/nginx": "c0d7f70c1e15b2f28fcad3c315272c759a53caf968333996a7c097b4a600f24a",
+      "monitor/build/epoll-monitor": "368e3dbd2609d7acd3eb96b28b0c0662505aaf22b36d6c36826f914f69600e25",
+      "artifacts/stage3-live-dvpeok8b/experiments/round-1-experiment.json": "3b36b1a9514c6d4c0399561d0c31004707f95fda63718f0dc4ae68c6f1eab64c",
+      "testscript/benchmark_monitor_overhead.py": "4ad8b9662a17802ff3aa952005b3e008c4943cc89a5240443e2ee28bb8a5cff5",
+      "testscript/tcp_stress_test.py": "9c3474af69d529986246906de1426f4baecd59197d22e0463128a57d22183b7c",
+      "testscript/performance_sampler.py": "f3165e33f7c0c3342ea9d832b526cae5da6a19e1c60715c4f538004503ff25fb",
+      "testscript/benchmark_worker_snapshot.py": "c255efc02fcdd7ad530edab71773f4222227403266160a93be22380d6ac11f25",
+      "testscript/process_group.py": "3466b97e53c2f8bbc8551620871979224c59e9fd359874d599b561759287a21e",
+      "testscript/test_stage3_live.py": "fb05e1fdfe19f8b1784b7e33b7f3eddfd3219f5f62f0602b0704a2110dfd0f5c",
+      "testscript/test_shutdown.py": "c09adf4b45cd275fa5f7248f7a9d326900434d9070879bfd8f1bda5aa486da0e"
+    }
+  },
+  "evidence_sha256": {
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/01-snapshot/context.json": "7f6f5ffaca814dfb381354dbfb18d05f977f99393e16dbe0d4d4406ff94b53f0",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/01-snapshot/measured.json": "e07535123b54ab7351975a390848e65b12359dfd2f0e79f41d2b96036bdbce8f",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/01-snapshot/measured-resources.json": "74132ec64a010f6b377692d8b0e7fef1aeddc59ac1fd09b5b45da3ee2ffb6977",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/01-snapshot/server.log": "13ca30984bd9fc8045940583e4e238f042cabbf665e3b6a44f4c9c7a8f7feacd",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/01-snapshot/cleanup.json": "33c2c1db9990361286809006c18d9ce13dd4c2fa248739549b27c1c52d60c2e1",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/01-snapshot/http-samples.json": "ff356aa3712c885f50932fb5f1867a8c285ccef616a7a74a5e76db8f7bd7ad69",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/01-snapshot/warmup.json": "e2759ef4ab7d994fa1fbcb381b245a98db6bb6aa112a60b4b62f4c828784a674",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/02-collector/context.json": "888d93a8a6de05c516bcda728ca5d866dea8787671e69dd26ea4b8fd0865037b",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/02-collector/measured.json": "9b5b6a1aa3222f8c80a83b25a6ea5869f0e3bd938ea91d8c3e5972f1baf546e6",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/02-collector/measured-resources.json": "a772cb7e677272b9d81fa3a8662a4758ddef175c7f37a066eed9b4fc55b287f7",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/02-collector/server.log": "3e72d340740dae874cec4c70d21e48617998f80dec649146c20231e5c3d1a9c9",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/02-collector/cleanup.json": "49c42323725afc3bd836ee1cdd61d4e3b811767d7938aaaafec82236416bdced",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/02-collector/http-samples.json": "ce960e1c5e04254441b92ca1161d75ab6c30aaa7335847a6902cec50a0298cc5",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/02-collector/monitor-before.json": "0faae930fa49388d5eeaef62784653e7e767128fc32451fed35cfe94a31ea20b",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/02-collector/monitor-after.json": "d5e2ef7cb825fce35a98ab34279eab4a6ad85fa671d1dbcd241632a0262ea328",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/02-collector/warmup.json": "3ea5a9f44fe12f9fa12ab485869bd1d8cd723a35ef219f1c7e409e3a72c7b568",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/03-events/context.json": "f183f972569f7a343d7d46b64f63450313f27cc09b718f3f9abd51d28dd67630",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/03-events/measured.json": "f8772a3c76a06781d829f891e6b9da772257e65fddd3f300a68621840932466d",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/03-events/measured-resources.json": "6310fc0d88d47cb341bd1aab806fbb7cbd6a0c86b844b84d96b4efed7446adb4",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/03-events/server.log": "b9a50f92ee53f002b4924f92e81e898a3f98fb4652cd1485a56a69f153dcef08",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/03-events/cleanup.json": "47100fcc0a7aef51c3aee8b97caf69e51188362733c6657e9c744258bf2d2bb7",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/03-events/http-samples.json": "3e99226d89c81e98a9cff9e9f19f6dc7905de22b41a21c9113ec79cc0921f861",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/03-events/monitor-before.json": "284d2635e0a601bd20b13e3007ccb769499d3f887d196894c3d1f5c2bce83dc0",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/03-events/monitor-after.json": "27e0b46ea182085a171d70ab8eff0a10fc5559a75204f8794fdad70d92aefe6c",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/03-events/warmup.json": "aab06e02ad249398cf04c8f0d847fe5c221272bf46cd10503086fa17c3b8c070",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/04-full/context.json": "34eb1cb9976de4f791cc16b7cea910e9d109948ab27d4a07bfa01bbb3e59ed3c",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/04-full/measured.json": "2dde5e973cbe4ab48ccf9d588a259e3db15e054ac19201e964bb12872662daba",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/04-full/measured-resources.json": "d068277bf679a77a45983ff1084f0f9cc23696ea92df3d2ded17dd9d8ed5965b",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/04-full/server.log": "0a8c2f327da6b0c12d8d99e807c29f76374c55028588e583947f08c2a6776e59",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/04-full/cleanup.json": "2bbdb45852157b7dd84becde28e5fd76ed1fe9bbebd9e37a749eeb3611db88ba",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/04-full/http-samples.json": "0d9a9efdf844cd0f88c05cbf274362a87648bd7b60668a7b4371666d340789f7",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/04-full/monitor-before.json": "cd4057f692706b68165607959c818f6e680f9b9b3f283a6d646a9a45e7bb6720",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/04-full/monitor-after.json": "b482bc6276327ff963898227dda2cd78d6b429ceeee7d04e3c8bc100ccf07386",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/04-full/warmup.json": "b91b044a0076941baeb3e30626bb78e394cc27f02e3f4304c89500d365f8634c",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/manifest.json": "0d694aac87162f1854341c0a7a303eb41f6e6ebfdca094d8b202359fbed2cb33",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/owned-services.json": "5efdbc751e658b61c178959e011e4ba0e753083aba376998f152acf6d14ef33a",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/runs.json": "9492e2d253e21788e5e04c626e14bcdae36766cc3210556d6ee67420fadc2377",
+    "artifacts/monitor-overhead-exploratory_decomposition-3oraf1m6/summary.json": "0ceeec0b92d17f579007cbe30c9bda99ec1be8c9e464efcc448d57bfc18e7dbb",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/01-collector/context.json": "07dc96e97b1f685800da1ac7aac978552b786cf0b08587d70acc3572cf6258a8",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/01-collector/measured.json": "0dcc2632b292c5d919e672ea1f5724460ec7d902d9cb97ccafa341178fcb9360",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/01-collector/measured-resources.json": "fcf89bbb1fff81c12ad851364df67994974fe099826c91346b64049c8ef9e003",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/01-collector/server.log": "d38f51c6b4ca1d290557ecc3f712808cc40287a98a870f801cd07077a5887634",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/01-collector/cleanup.json": "37bcf5ec23605d43310519585cd33de15b041abb4fb72baaea93f86107fb334c",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/01-collector/http-samples.json": "d4f5d026d21d33cfa48a08567916da1335b50bc7976e2953db177ea993220e2d",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/01-collector/monitor-before.json": "025c54414ddc1ad1f8fa6e56df9750137a60195c7a36f00f2d4dc8597942782b",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/01-collector/monitor-after.json": "ab00c9fd2168e8fe001b1f9f110e40fdab892c2ceec8901546cdea1ef3948ce1",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/01-collector/warmup.json": "3ba53095bb699b61a307d7ad483a392ddcad6d5db0d3ad7979a7aea2ba27ac80",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/02-snapshot/context.json": "db5c5b64fb5f188ad60e639b00e4c878e9cc7a76440860f262ab06f1210b2408",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/02-snapshot/measured.json": "039d84961fabfaad2eed3329a1dd37451a22a9a11cd0143bd2b3c9c46de16b57",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/02-snapshot/measured-resources.json": "b236dbfdf9298860d1fa5d389ef5829173ad98440ed826613e6a56a9e918d3fa",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/02-snapshot/server.log": "2e95831abe559d797dc1ef22c9d78dcb754eec0beca62d2228ca2aa824a24d85",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/02-snapshot/cleanup.json": "a0d87006595f03ec032a345dc0a33b023a2057365a6e0e6b63ce70770c4f2842",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/02-snapshot/http-samples.json": "44ae7281d27c2e5ff37a488df04d99e0885dbed08c1cccf835bea0b880f7c04b",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/02-snapshot/warmup.json": "10a8f8a5b0171e216bbb64f02735db69657ac6270028b00ff576d94454ebde25",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/manifest.json": "6cced09678ec548688fcb5232af55b517bbf86aca557a81427061ac4286f8c96",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/owned-services.json": "3b87dd085b44a72da0dc9b7bb39f361fad57dc12cd4cc11e67e8d56ce1d3ab27",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/runs.json": "78268a8772724c67d4cacb17f3d49ab8f88aed9cd77df41059f6f554892b2b6d",
+    "artifacts/monitor-overhead-exploratory_decomposition-x4_y1t8g/summary.json": "709ddf0f9dae0e00f590388f80bddb98c1d17a50acda7afe05c014e6d5f23ba6",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/01-off/context.json": "3e172afff5ce851b25feb7ed5e0c68b4781d94cc10a999890d2f89e80fb9bb45",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/01-off/measured.json": "f82fb123cd80e9e34df0138ee0deb19f5c0d13cf5b004185720e666cd81dc092",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/01-off/measured-resources.json": "99ce6153d5d5c649943b856254bb19e1a7a394f78521c95d8b6c98aa2ed17630",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/01-off/server.log": "8eb3ab4cedb9b05ea87f7ca80c5fe14945333b56f6dcee1dcf42fcf0e453f9fc",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/01-off/cleanup.json": "e4443e0060514de9efe5100589800f8bdcec9178fbff587dd3811f2cf3dfbf3d",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/01-off/warmup.json": "a5584f1008254b68cf62eaf2866aecee6a3ccfd37ede60499cf86617a62b47ee",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/02-snapshot/context.json": "5579fd7601df92aed62eb920831a0fa530f9aa892203b3a3c225d27663ad574e",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/02-snapshot/measured.json": "53467f521cf82c6f637ad25cb1f1eb1948eed2c1962c86f7ce85ec2705f79553",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/02-snapshot/measured-resources.json": "d1bed8a4c8f0dc0d960408125e6646f8c518736189aa1c43b503ac5b43d428e0",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/02-snapshot/server.log": "b9b772df528392b89a3eed290fded95ad30a7956dbb9d5b94d71b2fb989547cf",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/02-snapshot/cleanup.json": "3e3bd2f1b01d478e67c72a7ff26e24fd84d4307e07a79aeb190f653bfdcf3b23",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/02-snapshot/warmup.json": "1eedbfac85bc2692e525267581bc81aad2fc8c469bfd391f3596b3afec37e261",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/03-full/context.json": "6ba3bf3a4aa0b41cb6bf8d0bef039a4f0f616a0d4ed919b7b7ea421288363a81",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/03-full/measured.json": "31dadeb3a26971ae79826221be700089063fc0a592410fedde7b1e87c11c9179",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/03-full/measured-resources.json": "352c3127264710bf788a9a3ab9f9b683cd120e625baf19c212730799f830eab7",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/03-full/server.log": "4a76ae56fe71f3101ca52b48e08272230d1b290c1db6114e62a8c2e06199988d",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/03-full/cleanup.json": "fce466dd4bd1cdef9d198df404585b5aa858b41b2d28ea0eec343d32da172a95",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/03-full/http-samples.json": "148f66f790b224622d3a663a59312183796fe347d21bcf4360ce20caf0b9f24b",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/03-full/warmup.json": "de1dea91ffd564a2ec369565704638a9fa3763e7df6d16ad63cd9174277e1df7",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/04-full/context.json": "517a22e2ea45d860d785b0df39831df1761fc5a151fcd0b14e5d458f5d9b8633",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/04-full/measured.json": "43459e24dbd51369d1230624a09dfe25fc67831af22253992f5e5727a673856c",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/04-full/measured-resources.json": "9e3f7711c52932670a41400f7453cc79ee882d654f1657f7d47b2937d5529f27",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/04-full/server.log": "34d9715227a44f7f8bb2acae78ab9b07ec33892fa3a0b272f2cdb768fb569205",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/04-full/cleanup.json": "8ac61b97406f37f084ee642ee8136c49b1d23c8a4cb8b44e564b553047ca34cc",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/04-full/http-samples.json": "6802bd595a86e19f1b2cf4159320bf97a379793662c10f1399a817393fbff87e",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/04-full/warmup.json": "d29d151b8744f66e0d29f8e9ce08e9a628adf1cb926d8445fb2574fffdad0fa1",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/05-off/context.json": "7db9a318e72555502c8adaffb09aa51c767420ca5781e7e25401adc635ebbedc",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/05-off/measured.json": "778af8479314c66c1f29993491ee026a4476072d91997d9502510a99d3af5d8e",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/05-off/measured-resources.json": "540cec214e1403c7214aaa4db593e1a84c609f23063cf77e8a265f2edce44ef7",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/05-off/server.log": "9dc3e52283baffab229d73a642b902ce94e7ded1e225e1571090b10f883d6f30",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/05-off/cleanup.json": "0968aec4a08a0d6ef601fb4c9ac01e8d672ccecbc83ccb9589b6f61e12ee7dfe",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/05-off/warmup.json": "024284b1cf8d913d581153d2b611aa39ca2fd9292a67371a3a48f744bedc9235",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/06-snapshot/context.json": "b353feb55912e0a8296ad4fc72c866c9df0a169a77eafed227444c255d5f49be",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/06-snapshot/measured.json": "5b149dcc458ca694a2c93741dfe77ca9b1d1b98ffb642710ecaf88a6e5d250fe",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/06-snapshot/measured-resources.json": "5385a9aa7f018d8c602c850d3475d965e972704c8e3b848e34b47acfdaa95d2d",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/06-snapshot/server.log": "7bed0bd658420dea0373a96615e6e8f1f96c3a1841f1e683042a13666ec1c0ed",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/06-snapshot/cleanup.json": "885c0e0cd348b43c0c6a15b213396ba7e72de8017ecbf5c4defca82f9b29aa8f",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/06-snapshot/warmup.json": "004a59f45aafbc41e204e68749e5c1b0658c5ba8cd3680b206352b0db2e41ad8",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/07-snapshot/context.json": "7e7bfaec70ade2b41ed14eb940eb9ba9e0593d9cc12063f5b617e7818b39bfbb",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/07-snapshot/measured.json": "2785c97c508b4ea2ea687c0f7c69de077d730568f33993690f939468f71ec557",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/07-snapshot/measured-resources.json": "48cd87c59cba2f2deea336b2126b5c570ccfca56e643a4b7df735673b451ad97",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/07-snapshot/server.log": "b77b8593dd9a14d63b3fce76e3a944130e560bba75cb7f1858cea2d0bad8034b",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/07-snapshot/cleanup.json": "ef816a4982a293d43949063801d1ff6c6c97988dab4418823595572dbbb59aa1",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/07-snapshot/warmup.json": "8cfe831d775f1b62d9da7ab293c7ac541b3782b42ecddef078a92d996697b618",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/08-full/context.json": "ffd05f49a116acf8f2243cf4767fe38a73f2c22d32c7ad966b97b2f001c87c6d",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/08-full/measured.json": "a31cc30f7604ce45863a2d27768c4871e622211b4d72cd5bb5d0fbcd4f5f8c39",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/08-full/measured-resources.json": "fca6e466a51b1422379a24a48804c5070a47f07a7973c614121308685d3840e4",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/08-full/server.log": "754b9b147092f55e7fbdbd36f77ac814101587e6760c041502514470dac0ea92",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/08-full/cleanup.json": "d6ea11896ef663c7084a25684630c83a21b6cc22f79e15a00a58028eb085d049",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/08-full/http-samples.json": "6b9be2787f3438d805ed4af20d3c77ce0ef80e50c02fc864702629d05b2ff679",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/08-full/warmup.json": "e706e264cf9e76ed2532cda5ce33dc7bc12a45c17d6fcfe2ffb1b2f56978bae0",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/09-off/context.json": "5b3b7ff6e8e03006e2dc993848e5e54a8edf538b4484c2c838ee87458e690476",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/09-off/measured.json": "50e0023b0b7dff600b45beaed3148e830cd4f1f3a4042a361f9f0eba7b52268b",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/09-off/measured-resources.json": "7406a689044486e5f0f45a2ed0ca42c9c024b59c2aa46988c2639c518dae80f3",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/09-off/server.log": "cab25933c12c6f5e1f37475a05aa3ffd1401ec5abff134d1bba30e52231e95ed",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/09-off/cleanup.json": "0cec8e887af94a377bb5629e246e73321560b2229641fa14f8f7e13be1e62145",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/09-off/warmup.json": "33054c114776a8bbc43fe0e47bcf4cb86c38c5988d74c4fdada0e88fa3fd60ae",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/manifest.json": "0ffcdefaba21fe2998ea044017b65ba3de3ffd628a1fafff5a4ba6b4c2d88eab",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/owned-services.json": "2e000497a59100d660f1888e208e32de698e8cf7f27511bc6bfa3630d1fbb708",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/runs.json": "f0cf50d0934206e30f04aceab93c27ff59cf0a2084ecc7c8e60ba2ef19025012",
+    "artifacts/monitor-overhead-formal-3cqzcz2j/summary.json": "7925278940c84c21ae0f02d6e8c63d7f1ea3183a1f77472803d2951f3f216693",
+    "artifacts/monitor-overhead-exploratory_smoke-9mv39w9m/manifest.json": "bb536a198d519f868fe13d419a5732be7da6cfd8242b565b0a1b42f866cb8add",
+    "artifacts/monitor-overhead-exploratory_smoke-9mv39w9m/owned-services.json": "487334909fa1ded9ec4239c1ece8a446e35ae08b127b2c091625bc0a2cc5a40e",
+    "artifacts/monitor-overhead-exploratory_smoke-9mv39w9m/summary.json": "ed6c312d38ee30b11bf8b8f9ae67b67d04e0dc42900687865d1202ea3f437797",
+    "artifacts/monitor-overhead-exploratory_smoke-9mv39w9m/01-snapshot/cleanup.json": "93946c8d7724e7beba82687d50208861a96a8f22da9f8f332d74dfb926aa0d7f",
+    "artifacts/monitor-overhead-exploratory_smoke-9mv39w9m/02-collector/cleanup.json": "589c223a02418f73683d19e1d4b1263defd826b496dc7372bf172e97abeed7ee",
+    "artifacts/monitor-overhead-exploratory_smoke-9mv39w9m/03-events/cleanup.json": "6be0960e4042dadb24b3f40ae4f934906cbbf11c21253b7db6a1f3594b67558d",
+    "artifacts/monitor-overhead-exploratory_smoke-9mv39w9m/04-full/cleanup.json": "9ea9f1ae79f3ee8ba6236c17fe2ac10c3453a401cdad694fd5018a3eb61a1929",
+    "artifacts/monitor-overhead-exploratory_smoke-9mv39w9m/01-snapshot/http-samples.json": "ca12f287931d3b4a0c6386e2e83bb0f37253c471c9124450cb7d97248cd087e1",
+    "artifacts/monitor-overhead-exploratory_smoke-9mv39w9m/02-collector/http-samples.json": "018ba0a9c8aa46e9f5320c228ccf0f5486246960ee0e6a535320d5b9de1cdec7",
+    "artifacts/monitor-overhead-exploratory_smoke-9mv39w9m/03-events/http-samples.json": "4c15e73283961ba92da0732dc7e7f6e0694bfeb507098829ee3fe385cecae7e9",
+    "artifacts/monitor-overhead-exploratory_smoke-9mv39w9m/04-full/http-samples.json": "837edc144e999a6c27402f0026b938dd1137fb699510f331061c128d6c233545"
+  },
+  "runs": [
+    {
+      "root": "monitor-overhead-exploratory_decomposition-3oraf1m6",
+      "run": "01-snapshot",
+      "mode": "snapshot",
+      "qps": 37087.271,
+      "sampled_p95_ms": 8.959,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "14171": 46,
+        "14168": 54,
+        "14170": 51,
+        "14169": 49
+      },
+      "max_worker_connections": 54,
+      "worker_cpu": {
+        "14168": {
+          "avg_cpu_percent": 83.45,
+          "max_cpu_percent": 125.57
+        },
+        "14169": {
+          "avg_cpu_percent": 72.6,
+          "max_cpu_percent": 95.6
+        },
+        "14170": {
+          "avg_cpu_percent": 76.23,
+          "max_cpu_percent": 109.56
+        },
+        "14171": {
+          "avg_cpu_percent": 67.76,
+          "max_cpu_percent": 85.67
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 33.23,
+        "max_cpu_busy_percent": 40.47,
+        "avg_cpu_user_percent": 7.76,
+        "max_cpu_user_percent": 10.33,
+        "avg_cpu_system_percent": 25.46,
+        "max_cpu_system_percent": 30.7,
+        "avg_cpu_iowait_percent": 0.02,
+        "max_cpu_iowait_percent": 0.24,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 246961.62,
+        "max_context_switches_per_sec": 277815.29
+      },
+      "measured_monitor_resources": [
+        {
+          "role": "monitor_db",
+          "pid": 14113,
+          "name": "mysqld",
+          "max_rss_kib": 283124,
+          "max_threads": 33,
+          "avg_cpu_percent": 0.46,
+          "max_cpu_percent": 1.0
+        }
+      ],
+      "poll_errors": 0,
+      "connection_log_observation_count": {
+        "14171": 5,
+        "14168": 5,
+        "14170": 5,
+        "14169": 5
+      }
+    },
+    {
+      "root": "monitor-overhead-exploratory_decomposition-3oraf1m6",
+      "run": "02-collector",
+      "mode": "collector",
+      "qps": 29337.237,
+      "sampled_p95_ms": 10.017,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "15186": 65,
+        "15187": 45,
+        "15185": 43,
+        "15184": 47
+      },
+      "max_worker_connections": 65,
+      "worker_cpu": {
+        "15184": {
+          "avg_cpu_percent": 56.64,
+          "max_cpu_percent": 109.6
+        },
+        "15185": {
+          "avg_cpu_percent": 50.87,
+          "max_cpu_percent": 83.68
+        },
+        "15186": {
+          "avg_cpu_percent": 93.5,
+          "max_cpu_percent": 131.02
+        },
+        "15187": {
+          "avg_cpu_percent": 53.73,
+          "max_cpu_percent": 91.66
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 27.17,
+        "max_cpu_busy_percent": 40.94,
+        "avg_cpu_user_percent": 6.45,
+        "max_cpu_user_percent": 9.43,
+        "avg_cpu_system_percent": 20.72,
+        "max_cpu_system_percent": 31.76,
+        "avg_cpu_iowait_percent": 0.11,
+        "max_cpu_iowait_percent": 4.57,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 202916.33,
+        "max_context_switches_per_sec": 271424.01
+      },
+      "measured_monitor_resources": [
+        {
+          "role": "monitor",
+          "pid": 15739,
+          "name": "epoll-monitor",
+          "max_rss_kib": 13292,
+          "max_threads": 4,
+          "avg_cpu_percent": 0.32,
+          "max_cpu_percent": 1.0
+        },
+        {
+          "role": "monitor_db",
+          "pid": 14113,
+          "name": "mysqld",
+          "max_rss_kib": 283124,
+          "max_threads": 33,
+          "avg_cpu_percent": 0.5,
+          "max_cpu_percent": 1.0
+        }
+      ],
+      "poll_errors": 0,
+      "connection_log_observation_count": {
+        "15186": 6,
+        "15187": 6,
+        "15185": 6,
+        "15184": 6
+      }
+    },
+    {
+      "root": "monitor-overhead-exploratory_decomposition-3oraf1m6",
+      "run": "03-events",
+      "mode": "events",
+      "qps": 31759.016,
+      "sampled_p95_ms": 9.643,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "16255": 46,
+        "16253": 56,
+        "16254": 35,
+        "16256": 63
+      },
+      "max_worker_connections": 63,
+      "worker_cpu": {
+        "16253": {
+          "avg_cpu_percent": 76.04,
+          "max_cpu_percent": 111.63
+        },
+        "16254": {
+          "avg_cpu_percent": 44.85,
+          "max_cpu_percent": 85.51
+        },
+        "16255": {
+          "avg_cpu_percent": 59.93,
+          "max_cpu_percent": 93.61
+        },
+        "16256": {
+          "avg_cpu_percent": 90.92,
+          "max_cpu_percent": 125.5
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 28.31,
+        "max_cpu_busy_percent": 39.2,
+        "avg_cpu_user_percent": 6.7,
+        "max_cpu_user_percent": 9.62,
+        "avg_cpu_system_percent": 21.6,
+        "max_cpu_system_percent": 29.95,
+        "avg_cpu_iowait_percent": 0.02,
+        "max_cpu_iowait_percent": 0.47,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 217487.14,
+        "max_context_switches_per_sec": 277127.53
+      },
+      "measured_monitor_resources": [
+        {
+          "role": "monitor",
+          "pid": 16808,
+          "name": "epoll-monitor",
+          "max_rss_kib": 17992,
+          "max_threads": 8,
+          "avg_cpu_percent": 0.37,
+          "max_cpu_percent": 1.0
+        },
+        {
+          "role": "monitor_db",
+          "pid": 14113,
+          "name": "mysqld",
+          "max_rss_kib": 283296,
+          "max_threads": 34,
+          "avg_cpu_percent": 0.47,
+          "max_cpu_percent": 1.0
+        }
+      ],
+      "poll_errors": 0,
+      "connection_log_observation_count": {
+        "16255": 6,
+        "16253": 6,
+        "16254": 6,
+        "16256": 6
+      }
+    },
+    {
+      "root": "monitor-overhead-exploratory_decomposition-3oraf1m6",
+      "run": "04-full",
+      "mode": "full",
+      "qps": 37023.249,
+      "sampled_p95_ms": 9.052,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "17307": 50,
+        "17308": 45,
+        "17309": 52,
+        "17306": 53
+      },
+      "max_worker_connections": 53,
+      "worker_cpu": {
+        "17306": {
+          "avg_cpu_percent": 81.06,
+          "max_cpu_percent": 121.57
+        },
+        "17307": {
+          "avg_cpu_percent": 74.86,
+          "max_cpu_percent": 93.65
+        },
+        "17308": {
+          "avg_cpu_percent": 66.81,
+          "max_cpu_percent": 83.71
+        },
+        "17309": {
+          "avg_cpu_percent": 78.38,
+          "max_cpu_percent": 105.53
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 33.44,
+        "max_cpu_busy_percent": 38.26,
+        "avg_cpu_user_percent": 7.7,
+        "max_cpu_user_percent": 10.17,
+        "avg_cpu_system_percent": 25.74,
+        "max_cpu_system_percent": 28.84,
+        "avg_cpu_iowait_percent": 0.01,
+        "max_cpu_iowait_percent": 0.47,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 246648.68,
+        "max_context_switches_per_sec": 271211.87
+      },
+      "measured_monitor_resources": [
+        {
+          "role": "monitor",
+          "pid": 17863,
+          "name": "epoll-monitor",
+          "max_rss_kib": 17444,
+          "max_threads": 8,
+          "avg_cpu_percent": 0.46,
+          "max_cpu_percent": 1.0
+        },
+        {
+          "role": "monitor_db",
+          "pid": 14113,
+          "name": "mysqld",
+          "max_rss_kib": 283296,
+          "max_threads": 34,
+          "avg_cpu_percent": 0.46,
+          "max_cpu_percent": 1.0
+        }
+      ],
+      "poll_errors": 0,
+      "connection_log_observation_count": {
+        "17307": 5,
+        "17308": 5,
+        "17309": 5,
+        "17306": 5
+      }
+    },
+    {
+      "root": "monitor-overhead-exploratory_decomposition-x4_y1t8g",
+      "run": "01-collector",
+      "mode": "collector",
+      "qps": 32077.588,
+      "sampled_p95_ms": 9.402,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "18457": 50,
+        "18455": 45,
+        "18458": 61,
+        "18456": 44
+      },
+      "max_worker_connections": 61,
+      "worker_cpu": {
+        "18455": {
+          "avg_cpu_percent": 57.55,
+          "max_cpu_percent": 93.56
+        },
+        "18456": {
+          "avg_cpu_percent": 56.05,
+          "max_cpu_percent": 83.67
+        },
+        "18457": {
+          "avg_cpu_percent": 65.05,
+          "max_cpu_percent": 111.57
+        },
+        "18458": {
+          "avg_cpu_percent": 88.92,
+          "max_cpu_percent": 127.46
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 28.66,
+        "max_cpu_busy_percent": 38.97,
+        "avg_cpu_user_percent": 6.81,
+        "max_cpu_user_percent": 10.29,
+        "avg_cpu_system_percent": 21.85,
+        "max_cpu_system_percent": 29.58,
+        "avg_cpu_iowait_percent": 0.02,
+        "max_cpu_iowait_percent": 0.47,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 217605.38,
+        "max_context_switches_per_sec": 278457.59
+      },
+      "measured_monitor_resources": [
+        {
+          "role": "monitor",
+          "pid": 19012,
+          "name": "epoll-monitor",
+          "max_rss_kib": 13472,
+          "max_threads": 4,
+          "avg_cpu_percent": 0.32,
+          "max_cpu_percent": 1.0
+        },
+        {
+          "role": "monitor_db",
+          "pid": 18401,
+          "name": "mysqld",
+          "max_rss_kib": 282240,
+          "max_threads": 33,
+          "avg_cpu_percent": 0.48,
+          "max_cpu_percent": 1.0
+        }
+      ],
+      "poll_errors": 0,
+      "connection_log_observation_count": {
+        "18457": 6,
+        "18455": 6,
+        "18458": 6,
+        "18456": 6
+      }
+    },
+    {
+      "root": "monitor-overhead-exploratory_decomposition-x4_y1t8g",
+      "run": "02-snapshot",
+      "mode": "snapshot",
+      "qps": 32408.3,
+      "sampled_p95_ms": 9.32,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "19507": 43,
+        "19509": 51,
+        "19508": 45,
+        "19510": 61
+      },
+      "max_worker_connections": 61,
+      "worker_cpu": {
+        "19507": {
+          "avg_cpu_percent": 54.99,
+          "max_cpu_percent": 83.66
+        },
+        "19508": {
+          "avg_cpu_percent": 57.96,
+          "max_cpu_percent": 93.64
+        },
+        "19509": {
+          "avg_cpu_percent": 67.4,
+          "max_cpu_percent": 109.57
+        },
+        "19510": {
+          "avg_cpu_percent": 88.94,
+          "max_cpu_percent": 125.58
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 28.57,
+        "max_cpu_busy_percent": 41.41,
+        "avg_cpu_user_percent": 6.67,
+        "max_cpu_user_percent": 10.82,
+        "avg_cpu_system_percent": 21.89,
+        "max_cpu_system_percent": 30.59,
+        "avg_cpu_iowait_percent": 0.01,
+        "max_cpu_iowait_percent": 0.47,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 219806.53,
+        "max_context_switches_per_sec": 272337.63
+      },
+      "measured_monitor_resources": [
+        {
+          "role": "monitor_db",
+          "pid": 18401,
+          "name": "mysqld",
+          "max_rss_kib": 282240,
+          "max_threads": 33,
+          "avg_cpu_percent": 0.47,
+          "max_cpu_percent": 1.0
+        }
+      ],
+      "poll_errors": 0,
+      "connection_log_observation_count": {
+        "19507": 6,
+        "19509": 6,
+        "19508": 6,
+        "19510": 6
+      }
+    },
+    {
+      "root": "monitor-overhead-formal-3cqzcz2j",
+      "run": "01-off",
+      "mode": "off",
+      "qps": 35632.517,
+      "sampled_p95_ms": 9.152,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "11832": 55,
+        "11831": 46,
+        "11833": 53,
+        "11830": 46
+      },
+      "max_worker_connections": 55,
+      "worker_cpu": {
+        "11830": {
+          "avg_cpu_percent": 65.6,
+          "max_cpu_percent": 81.72
+        },
+        "11831": {
+          "avg_cpu_percent": 65.8,
+          "max_cpu_percent": 83.71
+        },
+        "11832": {
+          "avg_cpu_percent": 82.94,
+          "max_cpu_percent": 123.57
+        },
+        "11833": {
+          "avg_cpu_percent": 78.26,
+          "max_cpu_percent": 109.44
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 32.84,
+        "max_cpu_busy_percent": 39.24,
+        "avg_cpu_user_percent": 7.94,
+        "max_cpu_user_percent": 10.9,
+        "avg_cpu_system_percent": 24.9,
+        "max_cpu_system_percent": 29.81,
+        "avg_cpu_iowait_percent": 0.01,
+        "max_cpu_iowait_percent": 0.45,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 239207.81,
+        "max_context_switches_per_sec": 271615.61
+      },
+      "connection_log_observation_count": {
+        "11832": 5,
+        "11831": 5,
+        "11833": 5,
+        "11830": 5
+      }
+    },
+    {
+      "root": "monitor-overhead-formal-3cqzcz2j",
+      "run": "02-snapshot",
+      "mode": "snapshot",
+      "qps": 36523.936,
+      "sampled_p95_ms": 9.352,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "12828": 52,
+        "12829": 49,
+        "12827": 49,
+        "12826": 50
+      },
+      "max_worker_connections": 52,
+      "worker_cpu": {
+        "12826": {
+          "avg_cpu_percent": 74.74,
+          "max_cpu_percent": 107.53
+        },
+        "12827": {
+          "avg_cpu_percent": 72.95,
+          "max_cpu_percent": 83.62
+        },
+        "12828": {
+          "avg_cpu_percent": 79.5,
+          "max_cpu_percent": 123.53
+        },
+        "12829": {
+          "avg_cpu_percent": 72.87,
+          "max_cpu_percent": 83.63
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 35.37,
+        "max_cpu_busy_percent": 42.79,
+        "avg_cpu_user_percent": 8.79,
+        "max_cpu_user_percent": 12.79,
+        "avg_cpu_system_percent": 26.58,
+        "max_cpu_system_percent": 30.12,
+        "avg_cpu_iowait_percent": 0.01,
+        "max_cpu_iowait_percent": 0.24,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 242123.37,
+        "max_context_switches_per_sec": 262489.81
+      },
+      "connection_log_observation_count": {
+        "12828": 5,
+        "12829": 5,
+        "12827": 5,
+        "12826": 5
+      }
+    },
+    {
+      "root": "monitor-overhead-formal-3cqzcz2j",
+      "run": "03-full",
+      "mode": "full",
+      "qps": 27557.525,
+      "sampled_p95_ms": 10.761,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "13904": 41,
+        "13903": 67,
+        "13905": 41,
+        "13902": 51
+      },
+      "max_worker_connections": 67,
+      "worker_cpu": {
+        "13902": {
+          "avg_cpu_percent": 62.9,
+          "max_cpu_percent": 109.63
+        },
+        "13903": {
+          "avg_cpu_percent": 92.73,
+          "max_cpu_percent": 127.33
+        },
+        "13904": {
+          "avg_cpu_percent": 48.41,
+          "max_cpu_percent": 83.69
+        },
+        "13905": {
+          "avg_cpu_percent": 48.53,
+          "max_cpu_percent": 83.63
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 27.56,
+        "max_cpu_busy_percent": 40.77,
+        "avg_cpu_user_percent": 7.11,
+        "max_cpu_user_percent": 11.49,
+        "avg_cpu_system_percent": 20.46,
+        "max_cpu_system_percent": 30.34,
+        "avg_cpu_iowait_percent": 0.02,
+        "max_cpu_iowait_percent": 1.17,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 192010.53,
+        "max_context_switches_per_sec": 257917.05
+      },
+      "connection_log_observation_count": {
+        "13904": 7,
+        "13903": 7,
+        "13905": 7,
+        "13902": 7
+      }
+    },
+    {
+      "root": "monitor-overhead-formal-3cqzcz2j",
+      "run": "04-full",
+      "mode": "full",
+      "qps": 27464.863,
+      "sampled_p95_ms": 10.563,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "14959": 67,
+        "14957": 43,
+        "14956": 46,
+        "14958": 44
+      },
+      "max_worker_connections": 67,
+      "worker_cpu": {
+        "14956": {
+          "avg_cpu_percent": 53.26,
+          "max_cpu_percent": 109.43
+        },
+        "14957": {
+          "avg_cpu_percent": 48.94,
+          "max_cpu_percent": 81.72
+        },
+        "14958": {
+          "avg_cpu_percent": 50.21,
+          "max_cpu_percent": 93.64
+        },
+        "14959": {
+          "avg_cpu_percent": 93.1,
+          "max_cpu_percent": 125.51
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 27.25,
+        "max_cpu_busy_percent": 41.2,
+        "avg_cpu_user_percent": 6.98,
+        "max_cpu_user_percent": 11.57,
+        "avg_cpu_system_percent": 20.27,
+        "max_cpu_system_percent": 29.65,
+        "avg_cpu_iowait_percent": 0.01,
+        "max_cpu_iowait_percent": 0.24,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 190770.21,
+        "max_context_switches_per_sec": 263678.62
+      },
+      "connection_log_observation_count": {
+        "14959": 7,
+        "14957": 7,
+        "14956": 7,
+        "14958": 7
+      }
+    },
+    {
+      "root": "monitor-overhead-formal-3cqzcz2j",
+      "run": "05-off",
+      "mode": "off",
+      "qps": 31776.939,
+      "sampled_p95_ms": 9.829,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "16011": 48,
+        "16010": 42,
+        "16012": 51,
+        "16009": 59
+      },
+      "max_worker_connections": 59,
+      "worker_cpu": {
+        "16009": {
+          "avg_cpu_percent": 86.49,
+          "max_cpu_percent": 127.49
+        },
+        "16010": {
+          "avg_cpu_percent": 55.95,
+          "max_cpu_percent": 83.69
+        },
+        "16011": {
+          "avg_cpu_percent": 63.97,
+          "max_cpu_percent": 93.63
+        },
+        "16012": {
+          "avg_cpu_percent": 68.96,
+          "max_cpu_percent": 109.57
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 31.44,
+        "max_cpu_busy_percent": 41.51,
+        "avg_cpu_user_percent": 7.89,
+        "max_cpu_user_percent": 11.7,
+        "avg_cpu_system_percent": 23.55,
+        "max_cpu_system_percent": 29.82,
+        "avg_cpu_iowait_percent": 0.03,
+        "max_cpu_iowait_percent": 2.08,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 215562.4,
+        "max_context_switches_per_sec": 263828.26
+      },
+      "connection_log_observation_count": {
+        "16011": 6,
+        "16010": 6,
+        "16012": 6,
+        "16009": 6
+      }
+    },
+    {
+      "root": "monitor-overhead-formal-3cqzcz2j",
+      "run": "06-snapshot",
+      "mode": "snapshot",
+      "qps": 31835.731,
+      "sampled_p95_ms": 10.018,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "17038": 39,
+        "17039": 59,
+        "17037": 61,
+        "17036": 41
+      },
+      "max_worker_connections": 61,
+      "worker_cpu": {
+        "17036": {
+          "avg_cpu_percent": 53.69,
+          "max_cpu_percent": 95.63
+        },
+        "17037": {
+          "avg_cpu_percent": 87.04,
+          "max_cpu_percent": 123.49
+        },
+        "17038": {
+          "avg_cpu_percent": 50.87,
+          "max_cpu_percent": 81.71
+        },
+        "17039": {
+          "avg_cpu_percent": 82.79,
+          "max_cpu_percent": 109.43
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 30.19,
+        "max_cpu_busy_percent": 40.98,
+        "avg_cpu_user_percent": 7.53,
+        "max_cpu_user_percent": 11.48,
+        "avg_cpu_system_percent": 22.67,
+        "max_cpu_system_percent": 29.51,
+        "avg_cpu_iowait_percent": 0.01,
+        "max_cpu_iowait_percent": 0.24,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 216762.77,
+        "max_context_switches_per_sec": 262156.47
+      },
+      "connection_log_observation_count": {
+        "17038": 6,
+        "17039": 6,
+        "17037": 6,
+        "17036": 6
+      }
+    },
+    {
+      "root": "monitor-overhead-formal-3cqzcz2j",
+      "run": "07-snapshot",
+      "mode": "snapshot",
+      "qps": 33493.499,
+      "sampled_p95_ms": 9.421,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "18069": 49,
+        "18066": 44,
+        "18067": 57,
+        "18068": 50
+      },
+      "max_worker_connections": 57,
+      "worker_cpu": {
+        "18066": {
+          "avg_cpu_percent": 59.11,
+          "max_cpu_percent": 81.73
+        },
+        "18067": {
+          "avg_cpu_percent": 83.62,
+          "max_cpu_percent": 123.52
+        },
+        "18068": {
+          "avg_cpu_percent": 68.41,
+          "max_cpu_percent": 107.54
+        },
+        "18069": {
+          "avg_cpu_percent": 66.47,
+          "max_cpu_percent": 89.67
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 31.85,
+        "max_cpu_busy_percent": 39.96,
+        "avg_cpu_user_percent": 7.89,
+        "max_cpu_user_percent": 11.68,
+        "avg_cpu_system_percent": 23.96,
+        "max_cpu_system_percent": 29.91,
+        "avg_cpu_iowait_percent": 0.03,
+        "max_cpu_iowait_percent": 1.62,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 223530.9,
+        "max_context_switches_per_sec": 270054.16
+      },
+      "connection_log_observation_count": {
+        "18069": 5,
+        "18066": 5,
+        "18067": 5,
+        "18068": 5
+      }
+    },
+    {
+      "root": "monitor-overhead-formal-3cqzcz2j",
+      "run": "08-full",
+      "mode": "full",
+      "qps": 31435.422,
+      "sampled_p95_ms": 10.367,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "19078": 61,
+        "19079": 58,
+        "19076": 28,
+        "19077": 53
+      },
+      "max_worker_connections": 61,
+      "worker_cpu": {
+        "19076": {
+          "avg_cpu_percent": 36.96,
+          "max_cpu_percent": 79.71
+        },
+        "19077": {
+          "avg_cpu_percent": 71.02,
+          "max_cpu_percent": 95.61
+        },
+        "19078": {
+          "avg_cpu_percent": 84.95,
+          "max_cpu_percent": 125.41
+        },
+        "19079": {
+          "avg_cpu_percent": 78.9,
+          "max_cpu_percent": 107.51
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 30.95,
+        "max_cpu_busy_percent": 42.09,
+        "avg_cpu_user_percent": 7.97,
+        "max_cpu_user_percent": 11.94,
+        "avg_cpu_system_percent": 22.98,
+        "max_cpu_system_percent": 31.03,
+        "avg_cpu_iowait_percent": 0.01,
+        "max_cpu_iowait_percent": 0.24,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 211427.83,
+        "max_context_switches_per_sec": 261808.15
+      },
+      "connection_log_observation_count": {
+        "19078": 6,
+        "19079": 6,
+        "19076": 6,
+        "19077": 6
+      }
+    },
+    {
+      "root": "monitor-overhead-formal-3cqzcz2j",
+      "run": "09-off",
+      "mode": "off",
+      "qps": 31933.946,
+      "sampled_p95_ms": 10.322,
+      "successful": 2000000,
+      "failed": 0,
+      "worker_log_peak_connections": {
+        "20123": 59,
+        "20121": 45,
+        "20120": 38,
+        "20122": 58
+      },
+      "max_worker_connections": 59,
+      "worker_cpu": {
+        "20120": {
+          "avg_cpu_percent": 51.15,
+          "max_cpu_percent": 81.68
+        },
+        "20121": {
+          "avg_cpu_percent": 60.87,
+          "max_cpu_percent": 89.69
+        },
+        "20122": {
+          "avg_cpu_percent": 81.69,
+          "max_cpu_percent": 107.56
+        },
+        "20123": {
+          "avg_cpu_percent": 83.74,
+          "max_cpu_percent": 115.52
+        }
+      },
+      "resource_system_summary": {
+        "avg_cpu_busy_percent": 32.96,
+        "max_cpu_busy_percent": 56.67,
+        "avg_cpu_user_percent": 8.17,
+        "max_cpu_user_percent": 13.55,
+        "avg_cpu_system_percent": 24.79,
+        "max_cpu_system_percent": 44.0,
+        "avg_cpu_iowait_percent": 0.13,
+        "max_cpu_iowait_percent": 4.68,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 214912.28,
+        "max_context_switches_per_sec": 265416.23
+      },
+      "connection_log_observation_count": {
+        "20123": 6,
+        "20121": 6,
+        "20120": 6,
+        "20122": 6
+      }
+    }
+  ],
+  "formal_acceptance_verdict": null,
+  "finding": "The earlier large collector/snapshot difference did not repeat in the reverse pair. Existing logs show unequal per-Worker connection distribution; this is an uncontrolled workload confound, not proof of a monitor bottleneck or of zero overhead.",
+  "extraction": {
+    "window": "resource sampler started_utc through duration_sec; only context Worker PIDs",
+    "log_timezone": "Asia/Shanghai (+08:00)",
+    "statistic": "maximum observed active-connection count for each Worker within its measured log window; samples are periodic and not atomic across Workers",
+    "assertions": [
+      "4 expected Worker PIDs present in each log window",
+      "per-Worker sampled peaks sum to 200 in all 15 rounds",
+      "2 million successes/20,000 latency samples in each measured round",
+      "all original formal evidence hashes unchanged"
+    ]
+  },
+  "checks": {
+    "targeted_regressions": 21,
+    "four_condition_smoke": "passed; controls and cleanup checked",
+    "new_monitor_and_snapshot_binaries": "same hashes as previous formal run",
+    "old_formal_evidence": "unchanged",
+    "new_process_and_port_cleanup": "independently verified for smoke and both exploration batches",
+    "preexisting_business_mysql": {
+      "pid": 2305,
+      "start_ticks": 1041
+    },
+    "business_mysql_port_3306": "reachable"
+  },
+  "limitations": [
+    "Single forward sweep and one reverse pair; no new formal performance acceptance.",
+    "Connection imbalance and CPU/timing are associated; no controlled balanced allocation or per-Worker completed-request counter was added.",
+    "No product-code fix, paid model, index rebuild, deployment or push."
+  ],
+  "smoke_evidence_root": "artifacts/monitor-overhead-exploratory_smoke-9mv39w9m"
+}

@@ -1,0 +1,895 @@
+{
+  "recorded_on": "2026-10-31",
+  "scope": "new balanced preconnected barrier method; ABBA exploratory only",
+  "baseline_commit": "63ed10691d5ddb703abebbf850be14885f84a8e8",
+  "evidence_root": "artifacts/monitor-overhead-balanced_exploration-4j_5_z47",
+  "smoke_root": "artifacts/monitor-overhead-balanced_smoke-u7i16mbb",
+  "source_hashes": {
+    "server/nginx": "c0d7f70c1e15b2f28fcad3c315272c759a53caf968333996a7c097b4a600f24a",
+    "monitor/build/epoll-monitor": "368e3dbd2609d7acd3eb96b28b0c0662505aaf22b36d6c36826f914f69600e25",
+    "artifacts/stage3-live-dvpeok8b/experiments/round-1-experiment.json": "3b36b1a9514c6d4c0399561d0c31004707f95fda63718f0dc4ae68c6f1eab64c",
+    "testscript/benchmark_monitor_overhead.py": "a2e5bfc2477fb747c07f439b1a360440becdb28550e49fb040bcdc9ff5da024f",
+    "testscript/tcp_stress_test.py": "90e56c268b35707a009b6d21138d59a7a97257e05c216a73677f00566ee4f91c",
+    "testscript/performance_sampler.py": "f3165e33f7c0c3342ea9d832b526cae5da6a19e1c60715c4f538004503ff25fb",
+    "testscript/benchmark_worker_snapshot.py": "c255efc02fcdd7ad530edab71773f4222227403266160a93be22380d6ac11f25",
+    "testscript/process_group.py": "3466b97e53c2f8bbc8551620871979224c59e9fd359874d599b561759287a21e",
+    "testscript/test_stage3_live.py": "fb05e1fdfe19f8b1784b7e33b7f3eddfd3219f5f62f0602b0704a2110dfd0f5c",
+    "testscript/test_shutdown.py": "c09adf4b45cd275fa5f7248f7a9d326900434d9070879bfd8f1bda5aa486da0e",
+    "testscript/balanced_load.py": "0c3faad8fd550badbd520efbc770bbe742e0fb27a19bfa765d8bd003d63b8724"
+  },
+  "evidence_sha256": {
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/01-off/cleanup.json": "de45718962042a2df7adf37c6ceb6ed8853da2907c909f1f4fe2500497a48ef6",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/01-off/context.json": "d62726fb3ff144149a7b4fd303b80b3375edda27d70d9b39aad6b3192799fed3",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/01-off/http-samples.json": "fecebb4e1d7acf99a9db8dfb5ec8b6f095eb4c20d0161732aedca7fc00edf332",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/01-off/measured-resources.json": "52def6d30692ee0eb9eeee5e7fa8ac3be35029764e07ca2e4131a773c22bc62e",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/01-off/measured.json": "8744ac0912e4dafa5737947f4b762c850c007826e5dcf46fa2fc1f920c534e95",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/02-full/cleanup.json": "b84a7ec676ced05cbac4c9307f5d3e56457b07a941bdbd591421a45396d596c4",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/02-full/context.json": "a11a2ad712d54047e6c3b0685e4e5b7129aabc8443b3de925115ed618a437453",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/02-full/http-samples.json": "69553b9db7e0baaab3de663035b9f9a8f41acf08a72120711e96340b74a2c377",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/02-full/import-readback.json": "1f4339dd2250523d24f0852a9cc04cfd48cc366b44f313b3d8edf71434abd8fa",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/02-full/measured-resources.json": "52576c26f35c3455c5eca8c97277a76316e64a50b7539ea578ca990125479596",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/02-full/measured.json": "6c8bdcc6544dc0f9275df36f763548600dea5506a2dd516962dfeb4492d04bde",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/02-full/monitor-after.json": "0e2df0788bebee9cd4e87662fe594e3cfdfb6a40201b182c3097307b1e50fd3b",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/02-full/monitor-before.json": "37b975c388fbe0d367c29e4be48a77d9188dcf327b020e21ff1575d56de03e8a",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/03-full/cleanup.json": "75ac8ec7a6521e7201aa815518f853cb4cd37d756a4298500d7d2c2ee8c19556",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/03-full/context.json": "b397cea3685437c78df98236dbf915ec7699a007a5d341ae129f114028dddd92",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/03-full/http-samples.json": "404b87c75761c2b65c4393c2e694b54c1a939dece9f16bd9f75f107177c31673",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/03-full/import-readback.json": "b1023e6bce7d4b98700ccb504d02438f21ec8b974f2f69a9473fa704a7fdeed2",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/03-full/measured-resources.json": "1e40acb9d59f93b477101ac8e80eb6c0a35c4ae9b5214dfb0eb22d83e90b3d49",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/03-full/measured.json": "98c785abc5045dee1761f610b3d1d4a6707fecb63a2674008fc9b286e7570d53",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/03-full/monitor-after.json": "6d4ac99207ca9bec80b545a199a620f8b4fea0a8a0638ba08b7e7c5bcd1591ef",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/03-full/monitor-before.json": "089a5bb39a200ff68b7e13526b187278a9dfca85dafba413f9078eb0e9cafaa8",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/04-off/cleanup.json": "ba32af6cb66d44ec93225c70d121e14370ebfa7d193047ee272486dd25e4e21f",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/04-off/context.json": "1ccfd25ec9d742768b9b00205d974bc763fa31306ec731d6f5eac09fe3d9d0e6",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/04-off/http-samples.json": "098501c56752b111cffebc690b2943d50f631743a28dae57fe70da1f2c4834f2",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/04-off/measured-resources.json": "411179ce4ff7eaa87701e677404e6971209cc0b8e3d13071e0766156afcdf854",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/04-off/measured.json": "27de2147bf5366626c16560375878ca0ae792b4e4562cd390b0eb5aeb61c442c",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/manifest.json": "748c206a6df8c59069f965e888636d9073063d971eccae86ccda46c3e20f7f11",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/owned-services.json": "151e5dc894844bca5a99a3cf4663c6c929d7d10f6877a1dae23e16d88428a42b",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/runs.json": "e3c41ea6821b440132ddb3207c104664a2456d98e779e6a6f9a80c323436b0f6",
+    "artifacts/monitor-overhead-balanced_exploration-4j_5_z47/summary.json": "930c79f2b2d197f159039fe77a045941614c38267a6b8d9b71dd4b578b71df90",
+    "artifacts/monitor-overhead-balanced_smoke-u7i16mbb/manifest.json": "d42d324b6ff3b41ace8cd298f0e1d4ecec0c9df6bab288bf7942dbc8dbd49605",
+    "artifacts/monitor-overhead-balanced_smoke-u7i16mbb/summary.json": "6f5ff21612935462f571e53b7e4de2ed0fad9db7753c553328a71d3a5d5af127",
+    "artifacts/monitor-overhead-balanced_smoke-u7i16mbb/owned-services.json": "9f91852834d597e3ecaac3e6094e53a17acfe529a9f54862c8d86e4db83223dc",
+    "artifacts/monitor-overhead-balanced_smoke-u7i16mbb/01-off/measured.json": "d1ee596199161d6fc27d53af6651ab6955081d089ac87aa398b2f7e11c1d4e26",
+    "artifacts/monitor-overhead-balanced_smoke-u7i16mbb/02-full/measured.json": "c8d86154a9e8e157cb914609e6bb42374e828a619b559e7ea4365e99bd092172",
+    "artifacts/monitor-overhead-balanced_smoke-u7i16mbb/01-off/cleanup.json": "52551c12bf74ae74635fbe0a297a2f1d2ac0e2b0dd11767d79b294980f02addd",
+    "artifacts/monitor-overhead-balanced_smoke-u7i16mbb/02-full/cleanup.json": "5b9afc86a971d97501e8ab785a1df44d092260c5758e1ed3c880c3bb61eaebd0"
+  },
+  "measured_successful": 8000000,
+  "measured_failed": 0,
+  "embedded_warmup_successful": 400000,
+  "smoke_measurement_and_warmup_successful": 60000,
+  "groups": {
+    "off": {
+      "rounds": 2,
+      "median_qps": 38654.763,
+      "median_sampled_p95_ms": 9.1735,
+      "qps_range": [
+        38533.882,
+        38775.644
+      ]
+    },
+    "full": {
+      "rounds": 2,
+      "median_qps": 37893.0655,
+      "median_sampled_p95_ms": 9.286999999999999,
+      "qps_range": [
+        37867.411,
+        37918.72
+      ],
+      "qps_change_percent": -1.9705139571027819,
+      "p95_change_percent": 1.237259497465515
+    }
+  },
+  "runs": [
+    {
+      "run": "01-off",
+      "mode": "off",
+      "qps": 38533.882,
+      "sampled_p95_ms": 9.206,
+      "successful": 2000000,
+      "failed": 0,
+      "latency_samples": 20000,
+      "worker_load": {
+        "23855": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        },
+        "23858": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        },
+        "23856": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        },
+        "23857": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        }
+      },
+      "verified_counts": {
+        "before_warmup": {
+          "23857": 50,
+          "23856": 50,
+          "23858": 50,
+          "23855": 50
+        },
+        "after_warmup": {
+          "23857": 50,
+          "23856": 50,
+          "23858": 50,
+          "23855": 50
+        },
+        "after_measurement": {
+          "23857": 50,
+          "23856": 50,
+          "23858": 50,
+          "23855": 50
+        }
+      },
+      "candidate_connections": 284,
+      "discarded_connections": 84,
+      "client_process_count": 6,
+      "client_start_skew_ms": 18.532562000018515,
+      "measurement_resource_samples": 103,
+      "measurement_process_summary": [
+        {
+          "role": "client",
+          "pid": 24408,
+          "name": "python3",
+          "max_rss_kib": 20948,
+          "max_threads": 1,
+          "avg_cpu_percent": 0.0,
+          "max_cpu_percent": 0.0
+        },
+        {
+          "role": "client_worker",
+          "pid": 24409,
+          "name": "python3",
+          "max_rss_kib": 18352,
+          "max_threads": 35,
+          "avg_cpu_percent": 23.22,
+          "max_cpu_percent": 25.92
+        },
+        {
+          "role": "client_worker",
+          "pid": 24410,
+          "name": "python3",
+          "max_rss_kib": 18352,
+          "max_threads": 35,
+          "avg_cpu_percent": 23.32,
+          "max_cpu_percent": 25.92
+        },
+        {
+          "role": "client_worker",
+          "pid": 24411,
+          "name": "python3",
+          "max_rss_kib": 18328,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.39,
+          "max_cpu_percent": 25.86
+        },
+        {
+          "role": "client_worker",
+          "pid": 24415,
+          "name": "python3",
+          "max_rss_kib": 18332,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.49,
+          "max_cpu_percent": 25.91
+        },
+        {
+          "role": "client_worker",
+          "pid": 24434,
+          "name": "python3",
+          "max_rss_kib": 18336,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.51,
+          "max_cpu_percent": 25.9
+        },
+        {
+          "role": "client_worker",
+          "pid": 24467,
+          "name": "python3",
+          "max_rss_kib": 18344,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.47,
+          "max_cpu_percent": 23.93
+        },
+        {
+          "role": "master",
+          "pid": 23854,
+          "name": "nginx",
+          "max_rss_kib": 7840,
+          "max_threads": 1,
+          "avg_cpu_percent": 0.0,
+          "max_cpu_percent": 0.0
+        },
+        {
+          "role": "redis",
+          "pid": 23752,
+          "name": "redis-server",
+          "max_rss_kib": 15296,
+          "max_threads": 6,
+          "avg_cpu_percent": 67.0,
+          "max_cpu_percent": 69.81
+        },
+        {
+          "role": "worker",
+          "pid": 23855,
+          "name": "nginx",
+          "max_rss_kib": 33920,
+          "max_threads": 124,
+          "avg_cpu_percent": 78.43,
+          "max_cpu_percent": 83.75
+        },
+        {
+          "role": "worker",
+          "pid": 23856,
+          "name": "nginx",
+          "max_rss_kib": 33896,
+          "max_threads": 124,
+          "avg_cpu_percent": 78.45,
+          "max_cpu_percent": 83.77
+        },
+        {
+          "role": "worker",
+          "pid": 23857,
+          "name": "nginx",
+          "max_rss_kib": 33892,
+          "max_threads": 124,
+          "avg_cpu_percent": 78.35,
+          "max_cpu_percent": 83.66
+        },
+        {
+          "role": "worker",
+          "pid": 23858,
+          "name": "nginx",
+          "max_rss_kib": 33868,
+          "max_threads": 124,
+          "avg_cpu_percent": 78.64,
+          "max_cpu_percent": 97.62
+        }
+      ],
+      "measurement_system_summary": {
+        "avg_cpu_busy_percent": 36.44,
+        "max_cpu_busy_percent": 39.95,
+        "avg_cpu_user_percent": 8.79,
+        "max_cpu_user_percent": 10.71,
+        "avg_cpu_system_percent": 27.65,
+        "max_cpu_system_percent": 30.02,
+        "avg_cpu_iowait_percent": 0.04,
+        "max_cpu_iowait_percent": 2.82,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 256276.24,
+        "max_context_switches_per_sec": 265771.39
+      }
+    },
+    {
+      "run": "02-full",
+      "mode": "full",
+      "qps": 37918.72,
+      "sampled_p95_ms": 9.229,
+      "successful": 2000000,
+      "failed": 0,
+      "latency_samples": 20000,
+      "worker_load": {
+        "24641": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        },
+        "24640": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        },
+        "24643": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        },
+        "24642": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        }
+      },
+      "verified_counts": {
+        "before_warmup": {
+          "24641": 50,
+          "24643": 50,
+          "24642": 50,
+          "24640": 50
+        },
+        "after_warmup": {
+          "24641": 50,
+          "24643": 50,
+          "24642": 50,
+          "24640": 50
+        },
+        "after_measurement": {
+          "24641": 50,
+          "24643": 50,
+          "24642": 50,
+          "24640": 50
+        }
+      },
+      "candidate_connections": 296,
+      "discarded_connections": 96,
+      "client_process_count": 6,
+      "client_start_skew_ms": 18.806270999903063,
+      "measurement_resource_samples": 105,
+      "measurement_process_summary": [
+        {
+          "role": "client",
+          "pid": 25209,
+          "name": "python3",
+          "max_rss_kib": 21112,
+          "max_threads": 1,
+          "avg_cpu_percent": 0.06,
+          "max_cpu_percent": 5.98
+        },
+        {
+          "role": "client_worker",
+          "pid": 25210,
+          "name": "python3",
+          "max_rss_kib": 18460,
+          "max_threads": 35,
+          "avg_cpu_percent": 23.04,
+          "max_cpu_percent": 25.92
+        },
+        {
+          "role": "client_worker",
+          "pid": 25211,
+          "name": "python3",
+          "max_rss_kib": 18464,
+          "max_threads": 35,
+          "avg_cpu_percent": 22.91,
+          "max_cpu_percent": 25.91
+        },
+        {
+          "role": "client_worker",
+          "pid": 25212,
+          "name": "python3",
+          "max_rss_kib": 18440,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.2,
+          "max_cpu_percent": 25.9
+        },
+        {
+          "role": "client_worker",
+          "pid": 25216,
+          "name": "python3",
+          "max_rss_kib": 18440,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.02,
+          "max_cpu_percent": 23.92
+        },
+        {
+          "role": "client_worker",
+          "pid": 25224,
+          "name": "python3",
+          "max_rss_kib": 18440,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.2,
+          "max_cpu_percent": 25.87
+        },
+        {
+          "role": "client_worker",
+          "pid": 25232,
+          "name": "python3",
+          "max_rss_kib": 18440,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.2,
+          "max_cpu_percent": 25.9
+        },
+        {
+          "role": "master",
+          "pid": 24639,
+          "name": "nginx",
+          "max_rss_kib": 8092,
+          "max_threads": 1,
+          "avg_cpu_percent": 0.0,
+          "max_cpu_percent": 0.0
+        },
+        {
+          "role": "redis",
+          "pid": 23752,
+          "name": "redis-server",
+          "max_rss_kib": 15292,
+          "max_threads": 6,
+          "avg_cpu_percent": 65.88,
+          "max_cpu_percent": 69.73
+        },
+        {
+          "role": "worker",
+          "pid": 24640,
+          "name": "nginx",
+          "max_rss_kib": 34632,
+          "max_threads": 125,
+          "avg_cpu_percent": 77.81,
+          "max_cpu_percent": 93.61
+        },
+        {
+          "role": "worker",
+          "pid": 24641,
+          "name": "nginx",
+          "max_rss_kib": 34644,
+          "max_threads": 125,
+          "avg_cpu_percent": 77.03,
+          "max_cpu_percent": 83.72
+        },
+        {
+          "role": "worker",
+          "pid": 24642,
+          "name": "nginx",
+          "max_rss_kib": 34636,
+          "max_threads": 125,
+          "avg_cpu_percent": 77.24,
+          "max_cpu_percent": 83.72
+        },
+        {
+          "role": "worker",
+          "pid": 24643,
+          "name": "nginx",
+          "max_rss_kib": 34612,
+          "max_threads": 125,
+          "avg_cpu_percent": 77.07,
+          "max_cpu_percent": 83.68
+        }
+      ],
+      "measurement_system_summary": {
+        "avg_cpu_busy_percent": 36.34,
+        "max_cpu_busy_percent": 39.12,
+        "avg_cpu_user_percent": 8.8,
+        "max_cpu_user_percent": 10.19,
+        "avg_cpu_system_percent": 27.53,
+        "max_cpu_system_percent": 29.58,
+        "avg_cpu_iowait_percent": 0.0,
+        "max_cpu_iowait_percent": 0.24,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 250859.13,
+        "max_context_switches_per_sec": 263990.33
+      }
+    },
+    {
+      "run": "03-full",
+      "mode": "full",
+      "qps": 37867.411,
+      "sampled_p95_ms": 9.345,
+      "successful": 2000000,
+      "failed": 0,
+      "latency_samples": 20000,
+      "worker_load": {
+        "25457": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        },
+        "25456": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        },
+        "25459": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        },
+        "25458": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        }
+      },
+      "verified_counts": {
+        "before_warmup": {
+          "25457": 50,
+          "25459": 50,
+          "25456": 50,
+          "25458": 50
+        },
+        "after_warmup": {
+          "25457": 50,
+          "25459": 50,
+          "25456": 50,
+          "25458": 50
+        },
+        "after_measurement": {
+          "25457": 50,
+          "25459": 50,
+          "25456": 50,
+          "25458": 50
+        }
+      },
+      "candidate_connections": 438,
+      "discarded_connections": 238,
+      "client_process_count": 6,
+      "client_start_skew_ms": 23.05986400006077,
+      "measurement_resource_samples": 106,
+      "measurement_process_summary": [
+        {
+          "role": "client",
+          "pid": 26022,
+          "name": "python3",
+          "max_rss_kib": 21260,
+          "max_threads": 1,
+          "avg_cpu_percent": 0.06,
+          "max_cpu_percent": 5.98
+        },
+        {
+          "role": "client_worker",
+          "pid": 26023,
+          "name": "python3",
+          "max_rss_kib": 18476,
+          "max_threads": 35,
+          "avg_cpu_percent": 22.98,
+          "max_cpu_percent": 25.92
+        },
+        {
+          "role": "client_worker",
+          "pid": 26024,
+          "name": "python3",
+          "max_rss_kib": 18480,
+          "max_threads": 35,
+          "avg_cpu_percent": 22.96,
+          "max_cpu_percent": 25.92
+        },
+        {
+          "role": "client_worker",
+          "pid": 26025,
+          "name": "python3",
+          "max_rss_kib": 18452,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.03,
+          "max_cpu_percent": 23.93
+        },
+        {
+          "role": "client_worker",
+          "pid": 26026,
+          "name": "python3",
+          "max_rss_kib": 18452,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.12,
+          "max_cpu_percent": 23.93
+        },
+        {
+          "role": "client_worker",
+          "pid": 26029,
+          "name": "python3",
+          "max_rss_kib": 18456,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.18,
+          "max_cpu_percent": 25.91
+        },
+        {
+          "role": "client_worker",
+          "pid": 26034,
+          "name": "python3",
+          "max_rss_kib": 18464,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.05,
+          "max_cpu_percent": 23.93
+        },
+        {
+          "role": "master",
+          "pid": 25455,
+          "name": "nginx",
+          "max_rss_kib": 8060,
+          "max_threads": 1,
+          "avg_cpu_percent": 0.0,
+          "max_cpu_percent": 0.0
+        },
+        {
+          "role": "redis",
+          "pid": 23752,
+          "name": "redis-server",
+          "max_rss_kib": 15292,
+          "max_threads": 6,
+          "avg_cpu_percent": 65.48,
+          "max_cpu_percent": 69.78
+        },
+        {
+          "role": "worker",
+          "pid": 25456,
+          "name": "nginx",
+          "max_rss_kib": 34444,
+          "max_threads": 125,
+          "avg_cpu_percent": 77.48,
+          "max_cpu_percent": 83.73
+        },
+        {
+          "role": "worker",
+          "pid": 25457,
+          "name": "nginx",
+          "max_rss_kib": 34480,
+          "max_threads": 125,
+          "avg_cpu_percent": 77.8,
+          "max_cpu_percent": 85.51
+        },
+        {
+          "role": "worker",
+          "pid": 25458,
+          "name": "nginx",
+          "max_rss_kib": 34484,
+          "max_threads": 125,
+          "avg_cpu_percent": 77.85,
+          "max_cpu_percent": 91.72
+        },
+        {
+          "role": "worker",
+          "pid": 25459,
+          "name": "nginx",
+          "max_rss_kib": 34468,
+          "max_threads": 125,
+          "avg_cpu_percent": 77.61,
+          "max_cpu_percent": 83.73
+        }
+      ],
+      "measurement_system_summary": {
+        "avg_cpu_busy_percent": 36.5,
+        "max_cpu_busy_percent": 39.26,
+        "avg_cpu_user_percent": 8.91,
+        "max_cpu_user_percent": 10.65,
+        "avg_cpu_system_percent": 27.59,
+        "max_cpu_system_percent": 29.79,
+        "avg_cpu_iowait_percent": 0.0,
+        "max_cpu_iowait_percent": 0.23,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 249063.61,
+        "max_context_switches_per_sec": 261129.49
+      }
+    },
+    {
+      "run": "04-off",
+      "mode": "off",
+      "qps": 38775.644,
+      "sampled_p95_ms": 9.141,
+      "successful": 2000000,
+      "failed": 0,
+      "latency_samples": 20000,
+      "worker_load": {
+        "26260": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        },
+        "26261": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        },
+        "26263": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        },
+        "26262": {
+          "connections": 50,
+          "attempted": 500000,
+          "successful": 500000,
+          "failed": 0,
+          "warmup_successful": 25000
+        }
+      },
+      "verified_counts": {
+        "before_warmup": {
+          "26262": 50,
+          "26263": 50,
+          "26260": 50,
+          "26261": 50
+        },
+        "after_warmup": {
+          "26262": 50,
+          "26263": 50,
+          "26260": 50,
+          "26261": 50
+        },
+        "after_measurement": {
+          "26262": 50,
+          "26263": 50,
+          "26260": 50,
+          "26261": 50
+        }
+      },
+      "candidate_connections": 248,
+      "discarded_connections": 48,
+      "client_process_count": 6,
+      "client_start_skew_ms": 18.40754900013053,
+      "measurement_resource_samples": 102,
+      "measurement_process_summary": [
+        {
+          "role": "client",
+          "pid": 26814,
+          "name": "python3",
+          "max_rss_kib": 21208,
+          "max_threads": 1,
+          "avg_cpu_percent": 0.0,
+          "max_cpu_percent": 0.0
+        },
+        {
+          "role": "client_worker",
+          "pid": 26815,
+          "name": "python3",
+          "max_rss_kib": 18508,
+          "max_threads": 35,
+          "avg_cpu_percent": 23.53,
+          "max_cpu_percent": 25.92
+        },
+        {
+          "role": "client_worker",
+          "pid": 26816,
+          "name": "python3",
+          "max_rss_kib": 18508,
+          "max_threads": 35,
+          "avg_cpu_percent": 23.42,
+          "max_cpu_percent": 25.92
+        },
+        {
+          "role": "client_worker",
+          "pid": 26817,
+          "name": "python3",
+          "max_rss_kib": 18488,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.75,
+          "max_cpu_percent": 23.93
+        },
+        {
+          "role": "client_worker",
+          "pid": 26818,
+          "name": "python3",
+          "max_rss_kib": 18488,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.58,
+          "max_cpu_percent": 23.93
+        },
+        {
+          "role": "client_worker",
+          "pid": 26821,
+          "name": "python3",
+          "max_rss_kib": 18488,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.48,
+          "max_cpu_percent": 23.93
+        },
+        {
+          "role": "client_worker",
+          "pid": 26825,
+          "name": "python3",
+          "max_rss_kib": 18488,
+          "max_threads": 34,
+          "avg_cpu_percent": 22.66,
+          "max_cpu_percent": 25.91
+        },
+        {
+          "role": "master",
+          "pid": 26259,
+          "name": "nginx",
+          "max_rss_kib": 7828,
+          "max_threads": 1,
+          "avg_cpu_percent": 0.0,
+          "max_cpu_percent": 0.0
+        },
+        {
+          "role": "redis",
+          "pid": 23752,
+          "name": "redis-server",
+          "max_rss_kib": 15292,
+          "max_threads": 6,
+          "avg_cpu_percent": 67.38,
+          "max_cpu_percent": 71.77
+        },
+        {
+          "role": "worker",
+          "pid": 26260,
+          "name": "nginx",
+          "max_rss_kib": 33832,
+          "max_threads": 124,
+          "avg_cpu_percent": 78.92,
+          "max_cpu_percent": 83.71
+        },
+        {
+          "role": "worker",
+          "pid": 26261,
+          "name": "nginx",
+          "max_rss_kib": 33804,
+          "max_threads": 124,
+          "avg_cpu_percent": 79.1,
+          "max_cpu_percent": 85.66
+        },
+        {
+          "role": "worker",
+          "pid": 26262,
+          "name": "nginx",
+          "max_rss_kib": 33840,
+          "max_threads": 124,
+          "avg_cpu_percent": 78.98,
+          "max_cpu_percent": 85.66
+        },
+        {
+          "role": "worker",
+          "pid": 26263,
+          "name": "nginx",
+          "max_rss_kib": 33788,
+          "max_threads": 124,
+          "avg_cpu_percent": 78.88,
+          "max_cpu_percent": 83.73
+        }
+      ],
+      "measurement_system_summary": {
+        "avg_cpu_busy_percent": 36.49,
+        "max_cpu_busy_percent": 40.57,
+        "avg_cpu_user_percent": 8.67,
+        "max_cpu_user_percent": 10.19,
+        "avg_cpu_system_percent": 27.82,
+        "max_cpu_system_percent": 30.9,
+        "avg_cpu_iowait_percent": 0.01,
+        "max_cpu_iowait_percent": 0.24,
+        "avg_cpu_steal_percent": 0.0,
+        "max_cpu_steal_percent": 0.0,
+        "avg_context_switches_per_sec": 257584.67,
+        "max_context_switches_per_sec": 265185.55
+      }
+    }
+  ],
+  "formal_acceptance_verdict": null,
+  "checks": {
+    "focused_regressions": "32 passed",
+    "per_worker_quota_and_request_counts": "all four rounds verified 50 sockets and 500,000 measured successes per Worker",
+    "resources_cleanup": "independently verified: all owned service identities and client PIDs exited, ports closed, private DB dirs/configs removed",
+    "local_config_sha256": "47824137d3869b5bd495d8cf8df4d0864e86c03c993731a95dbfb23186e39b2f",
+    "original_business_mysql": {
+      "pid": 2305,
+      "start_ticks": 1041,
+      "port_3306_reachable": true
+    }
+  },
+  "limitations": [
+    "Two rounds per condition, new timing/allocation method; not the previous formal three-round-per-condition acceptance.",
+    "Connection preparation, embedded warmup and teardown excluded from QPS; original CPU affinity and TCP/monitor binaries retained.",
+    "Resource summaries filtered to complete sampling intervals inside the measured window; raw resource files cover the whole pipeline.",
+    "Current importer rejects allocation/timing metadata instead of silently comparing with legacy measurements.",
+    "No server scheduling/product changes; no proof that connection imbalance explains every previous throughput difference.",
+    "Previous results retained; no paid models, deployment or push."
+  ]
+}

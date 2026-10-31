@@ -52,6 +52,8 @@ def parse_args():
         "--rate-limit-mode", choices=("enabled", "disabled", "unknown"), default="unknown",
     )
     parser.add_argument("--json-out", type=Path)
+    parser.add_argument("--balance-context", type=Path, help="local test context with verified Master/Worker identities")
+    parser.add_argument("--warmup-per-client", type=int, default=500, help="preconnected balanced-mode warmup")
     args = parser.parse_args()
     require(args.concurrency > 0, "concurrency must be positive")
     require(args.requests_per_client > 0, "requests-per-client must be positive")
@@ -61,6 +63,10 @@ def parse_args():
     require(args.server_workers is None or args.server_workers > 0, "server-workers must be positive")
     require(args.worker_threads is None or args.worker_threads > 0, "worker-threads must be positive")
     require(math.isfinite(args.timeout) and args.timeout > 0, "timeout must be finite and positive")
+    require(args.warmup_per_client >= 0, "warmup-per-client must be nonnegative")
+    if args.balance_context:
+        require(args.host == "127.0.0.1" and args.socket_mode != "blocking",
+                "balanced mode requires local IPv4 and bounded socket timeouts")
     return args
 
 
@@ -124,6 +130,51 @@ def exchange_ping(sock, receive_mode, receive_buffer, validation_mode):
         )
 
 
+def run_connected(sock, request_count, latency_mode="all", latency_sample_every=100,
+                  receive_mode="into", validation_mode="strict"):
+    latencies_ms = []
+    errors = collections.Counter()
+    attempted = successful = 0
+    receive_buffer = bytearray(HEADER.size) if receive_mode == "into" else None
+    if (
+        latency_mode == "off"
+        and receive_mode == "single"
+        and validation_mode == "length-only"
+    ):
+        try:
+            for _ in range(request_count):
+                attempted += 1
+                sock.sendall(PING_PACKET)
+                response = sock.recv(HEADER.size)
+                if len(response) != HEADER.size:
+                    raise ValueError(
+                        f"fragmented Ping response: expected {HEADER.size} bytes, "
+                        f"received {len(response)}"
+                    )
+                successful += 1
+        except Exception as exc:
+            errors[classify_error(exc)] += 1
+        return attempted, successful, latencies_ms, errors
+
+    for request_index in range(request_count):
+        attempted += 1
+        measure_latency = (
+            latency_mode == "all"
+            or latency_mode == "sampled"
+            and request_index % latency_sample_every == 0
+        )
+        started = time.perf_counter() if measure_latency else None
+        try:
+            exchange_ping(sock, receive_mode, receive_buffer, validation_mode)
+            successful += 1
+            if measure_latency:
+                latencies_ms.append((time.perf_counter() - started) * 1000)
+        except Exception as exc:
+            errors[classify_error(exc)] += 1
+            break
+    return attempted, successful, latencies_ms, errors
+
+
 def run_client(
     host, port, timeout, request_count, source_ip=None,
     latency_mode="all", latency_sample_every=100, receive_mode="into",
@@ -133,7 +184,6 @@ def run_client(
     errors = collections.Counter()
     attempted = 0
     successful = 0
-    receive_buffer = bytearray(HEADER.size) if receive_mode == "into" else None
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.settimeout(timeout)
@@ -143,42 +193,8 @@ def run_client(
             sock.connect((host, port))
             configure_connected_socket(sock, timeout, socket_mode)
 
-            if (
-                latency_mode == "off"
-                and receive_mode == "single"
-                and validation_mode == "length-only"
-            ):
-                try:
-                    for _ in range(request_count):
-                        attempted += 1
-                        sock.sendall(PING_PACKET)
-                        response = sock.recv(HEADER.size)
-                        if len(response) != HEADER.size:
-                            raise ValueError(
-                                f"fragmented Ping response: expected {HEADER.size} bytes, "
-                                f"received {len(response)}"
-                            )
-                        successful += 1
-                except Exception as exc:
-                    errors[classify_error(exc)] += 1
-                return attempted, successful, latencies_ms, errors
-
-            for request_index in range(request_count):
-                attempted += 1
-                measure_latency = (
-                    latency_mode == "all"
-                    or latency_mode == "sampled"
-                    and request_index % latency_sample_every == 0
-                )
-                started = time.perf_counter() if measure_latency else None
-                try:
-                    exchange_ping(sock, receive_mode, receive_buffer, validation_mode)
-                    successful += 1
-                    if measure_latency:
-                        latencies_ms.append((time.perf_counter() - started) * 1000)
-                except Exception as exc:
-                    errors[classify_error(exc)] += 1
-                    break
+            return run_connected(sock, request_count, latency_mode, latency_sample_every,
+                                 receive_mode, validation_mode)
     except Exception as exc:
         attempted = 1
         errors[classify_error(exc)] += 1
@@ -264,22 +280,27 @@ def main():
         print(f"Load: {args.concurrency} clients x {args.requests_per_client} requests = {requested}")
         print(f"Label: {args.label}")
 
-        started = time.perf_counter()
-        group_args = [
-            (
-                args.host, args.port, args.timeout, group_concurrency,
-                args.requests_per_client, args.source_ip, args.latency_mode,
-                args.latency_sample_every, args.receive_mode, args.validation_mode,
-                args.socket_mode,
-            )
-            for group_concurrency in distribute_clients(args.concurrency, args.processes)
-        ]
-        if args.processes == 1:
-            group_results = [run_thread_group(*group_args[0])]
+        allocation = None
+        if args.balance_context:
+            from balanced_load import run_balanced
+            group_results, duration, allocation = run_balanced(args)
         else:
-            with concurrent.futures.ProcessPoolExecutor(max_workers=args.processes) as pool:
-                group_results = list(pool.map(run_thread_group_from_tuple, group_args))
-        duration = time.perf_counter() - started
+            started = time.perf_counter()
+            group_args = [
+                (
+                    args.host, args.port, args.timeout, group_concurrency,
+                    args.requests_per_client, args.source_ip, args.latency_mode,
+                    args.latency_sample_every, args.receive_mode, args.validation_mode,
+                    args.socket_mode,
+                )
+                for group_concurrency in distribute_clients(args.concurrency, args.processes)
+            ]
+            if args.processes == 1:
+                group_results = [run_thread_group(*group_args[0])]
+            else:
+                with concurrent.futures.ProcessPoolExecutor(max_workers=args.processes) as pool:
+                    group_results = list(pool.map(run_thread_group_from_tuple, group_args))
+            duration = time.perf_counter() - started
 
         attempted = 0
         successful = 0
@@ -343,6 +364,10 @@ def main():
                 "errors": dict(sorted(errors.items())),
             },
         }
+        if allocation is not None:
+            result["allocation"] = allocation
+            result["load"]["connection_allocation"] = "verified_worker_quota_v1"
+            result["load"]["timing_basis"] = "barrier_to_completion_excludes_setup_warmup_teardown"
         print(json.dumps(result, ensure_ascii=False, indent=2))
         if args.json_out:
             args.json_out.parent.mkdir(parents=True, exist_ok=True)

@@ -1,6 +1,6 @@
 {
-  "version": "documentation-status-20261030",
-  "reviewed_on": "2026-10-30",
+  "version": "balanced-load-review-20261031",
+  "reviewed_on": "2026-10-31",
   "sources": {
     "README.md": {
       "layer": "current_contract",
@@ -10,7 +10,7 @@
         "project"
       ],
       "source_quality": "project_maintained_contract",
-      "reviewed_sha256": "25d1bc5873d3d222b5294674abbac2b62c8154e1d285eaeeebeed0f8b914d53d",
+      "reviewed_sha256": "4eafb2f8afa92d4bfd776052e63e0d1323aec8a152e4c8f5ce49f63b4bbc2ec4",
       "sections": {
         "从哪里开始": {
           "layer": "planning_progress",
@@ -30,7 +30,7 @@
         "project"
       ],
       "source_quality": "project_progress_or_proposal",
-      "reviewed_sha256": "1949442dc5763c9a7e581251161a71e13677ef2d468ccacc869ab2b21cbec645",
+      "reviewed_sha256": "f94caf8f90923f06e96d8895d1500e1399cc87e8e943df5474cf2d23acdd2442",
       "sections": {
         "阶段 5 确认范围（2026-10-25）": {
           "layer": "current_contract",
@@ -138,7 +138,7 @@
         "project"
       ],
       "source_quality": "project_case_record",
-      "reviewed_sha256": "6a391325b339483abd10678620d8fcb177bdaeeddf694c8ed158de71344f11af",
+      "reviewed_sha256": "ea4c93b125d758d8dfc1b49b18418d9f540f1bc1c726ba90c171596d894c382d",
       "sections": {
         "2026-10-26：诊断格式契约与Recall审计": {
           "layer": "historical_case",
@@ -180,6 +180,16 @@
           "layer": "planning_progress",
           "source_quality": "project_progress_or_proposal",
           "published_on": "2026-10-30"
+        },
+        "2026-10-31：监控开销分项探索发现Worker负载分配未控制": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-31"
+        },
+        "2026-10-31：均衡客户端原型与共享监听FD识别": {
+          "layer": "planning_progress",
+          "source_quality": "project_progress_or_proposal",
+          "published_on": "2026-10-31"
         }
       }
     },

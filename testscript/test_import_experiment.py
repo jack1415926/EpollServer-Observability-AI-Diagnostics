@@ -9,6 +9,16 @@ from experiment_fixture import valid_report
 
 
 class ImportExperimentTests(unittest.TestCase):
+    def test_balanced_timing_cannot_be_silently_imported_as_legacy_measurement(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fixture = valid_report()
+            result, resources = root / 'result.json', root / 'resources.json'
+            result.write_text(json.dumps({**fixture['benchmark'], 'allocation': {'method': 'verified_worker_quota_v1'}}))
+            resources.write_text('{}')
+            with self.assertRaisesRegex(ValueError, 'new experiment schema'):
+                prepare_report('balanced', result, resources, fixture['context'])
+
     def test_report_preserves_result_and_binds_resources_by_hash(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -29,6 +29,8 @@ def read_json(path):
 
 def prepare_report(name, result_path, resource_path, context):
     benchmark, result_hash = read_json(result_path)
+    if 'allocation' in benchmark:
+        raise ValueError('balanced-load allocation/timing requires a new experiment schema; retain as standalone evidence')
     resources, resource_hash = read_json(resource_path)
     if benchmark["label"] != resources["label"]:
         raise ValueError("benchmark/resource labels do not match")

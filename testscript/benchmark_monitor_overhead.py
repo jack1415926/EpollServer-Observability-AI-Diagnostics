@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Matched off/snapshot/full monitoring experiment; private Redis and monitoring MySQL."""
+"""Matched monitoring overhead and explicit decomposition; private Redis and monitoring MySQL."""
 import argparse
 from contextlib import ExitStack
 import hashlib
@@ -28,6 +28,7 @@ from test_stage3_live import TestDatabase
 
 ROOT = Path(__file__).resolve().parents[1]
 ORDER = ('off', 'snapshot', 'full', 'full', 'off', 'snapshot', 'snapshot', 'full', 'off')
+EXPLORATION_MODES = ('off', 'snapshot', 'collector', 'events', 'full')
 
 
 def write(path, value):
@@ -83,19 +84,54 @@ def stop_owned(process, ports, config=None):
         config.unlink(missing_ok=True)
 
 
-def poll_monitor(port, process, database, client_cpus, stopped, records, errors, state):
+def monitor_environment(environment, mode):
+    return {k: v for k, v in environment.items()
+            if mode != 'collector' or not k.startswith('EPOLL_MONITOR_DB_')}
+
+
+def observe_monitor(port, mode):
+    code, workers, _ = request(port, 'workers')
+    require(code == 200 and workers['validity'] == 'complete' and
+            all(w['resources']['cpu_percent'] is not None for w in workers['data']['workers']),
+            'no complete CPU/RSS sample')
+    code, events, _ = request(port, 'events')
+    if mode == 'collector':
+        require(code == 503 and events['code'] == 'event_store_disabled', 'database was not disabled')
+    else:
+        require(code == 200 and events['data']['detection']['status'] == 'running' and
+                events['data']['detection']['store_status'] == 'ok', 'event detector/store not ready')
+    return {'workers': workers, 'events': {'http_status': code, **events}}
+
+
+def exploration_summary(runs):
+    require(runs and all(r['successful'] == 2000000 and r['failed'] == r['not_attempted'] == 0
+                        for r in runs), 'exploratory workload incomplete or failed')
+    groups = {}
+    for mode in dict.fromkeys(r['mode'] for r in runs):
+        group = [r for r in runs if r['mode'] == mode]
+        groups[mode] = {'rounds': len(group), 'median_qps': statistics.median(r['qps'] for r in group),
+                        'median_sampled_p95_ms': statistics.median(r['latency_ms']['p95'] for r in group),
+                        'qps_range': [min(r['qps'] for r in group), max(r['qps'] for r in group)]}
+    return {'groups': groups, 'acceptance_verdict': None,
+            'interpretation': 'exploratory_only_not_formal_acceptance_or_proven_cause'}
+
+
+def poll_monitor(port, process, database, client_cpus, stopped, records, errors, state, mode='full'):
     # Pin this polling thread away from the four TCP/monitor CPUs.
     os.sched_setaffinity(0, client_cpus)
     previous, before = {}, time.monotonic()
     while not stopped.is_set():
         try:
             now = time.monotonic()
-            resources, previous = sample_processes([('monitor', process.pid), ('monitor_db', database.process.pid)],
+            targets = [('monitor_db', database.process.pid)]
+            if process is not None:
+                targets.append(('monitor', process.pid))
+            resources, previous = sample_processes(targets,
                                                   previous, now - before, os.sysconf('SC_CLK_TCK'))
             before = now
             cycle = {'phase': state['phase'], 'boottime_sec': time.clock_gettime(time.CLOCK_BOOTTIME),
                      'processes': resources, 'responses': {}}
-            for endpoint in ('overview', 'workers', 'events'):
+            for endpoint in ('overview', 'workers', 'events') if mode == 'full' else ():
                 code, value, _ = request(port, endpoint)
                 require(code == 200, f'{endpoint} HTTP {code}')
                 if endpoint in ('overview', 'workers'):
@@ -120,6 +156,8 @@ def run_round(args, root, index, mode, environment, database):
     config.write_text(configure(args.binary.with_name('nginx.conf').read_text(), port, mode))
     config.chmod(0o600)
     records, errors, results, state = [], [], {}, {'phase': 'startup'}
+    has_monitor = mode in ('collector', 'events', 'full')
+    monitor = None
     with ExitStack() as cleanup:
         console = cleanup.enter_context((directory / 'tcp.log').open('wb'))
         tcp = start_process_group(['taskset', '-c', '0-3', str(args.binary)], cwd=directory,
@@ -134,37 +172,38 @@ def run_round(args, root, index, mode, environment, database):
         require(len(workers) == 4, 'expected four owned Workers')
         metadata = {'mode': mode, 'tcp_port': port, 'master_pid': tcp.pid, 'master_start_ticks': identity(tcp.pid),
                     'workers': [{'pid': pid, 'start_ticks': identity(pid)} for pid in workers],
-                    'server_cpus': '0-3', 'client_cpus': '4-11', 'monitor_cpus': '0-3' if mode == 'full' else None,
+                    'server_cpus': '0-3', 'client_cpus': '4-11', 'monitor_cpus': '0-3' if has_monitor else None,
+                    'monitor_db_enabled': mode in ('events', 'full'), 'http_polling': mode == 'full',
                     'monitor_pid': None, 'commands': {}}
         if mode != 'off':
             def publishers_ready():
                 samples = [json.loads(p.read_text()) for p in (directory / 'metrics').glob('worker-*.json')]
                 return len(samples) == 4 and all(s['sequence'] >= 2 for s in samples)
             wait_for(publishers_ready, timeout=10)
-        if mode == 'full':
+        if has_monitor:
             manifest = next((directory / 'metrics').glob('master-*.json'))
             output = cleanup.enter_context((directory / 'http.log').open('wb'))
             monitor = start_process_group(['taskset', '-c', '0-3', str(args.monitor), str(manifest), str(http_port)],
-                                          cwd=directory, env=environment, stdout=output, stderr=subprocess.STDOUT)
+                                          cwd=directory, env=monitor_environment(environment, mode), stdout=output, stderr=subprocess.STDOUT)
             cleanup.callback(stop_owned, monitor, [http_port])
             metadata.update(monitor_pid=monitor.pid, monitor_start_ticks=identity(monitor.pid), http_port=http_port)
             def monitor_ready():
                 require(monitor.poll() is None, f'monitor startup failed: {directory}')
                 try:
-                    value = request(http_port, 'workers')[1]
-                    return (value['validity'] == 'complete' and
-                            all(w['resources']['cpu_percent'] is not None for w in value['data']['workers']) and
-                            request(http_port, 'events')[1].get('data', {}).get('detection', {}).get('status') == 'running')
-                except OSError:
+                    observe_monitor(http_port, mode)
+                    return True
+                except (OSError, ValueError):
                     return False
             wait_for(monitor_ready, timeout=20)
-            if index <= 3:
+            write(directory / 'monitor-before.json', observe_monitor(http_port, mode))
+            if index <= 3 and mode in ('events', 'full'):
                 key = upload(f'http://127.0.0.1:{http_port}', json.loads(args.report.read_text()), TOKEN)
                 code, stored, _ = request(http_port, f'experiments/{key}')
                 require(code == 200, 'real existing experiment write/read failed')
                 write(directory / 'import-readback.json', stored)
+        if mode == 'full' or args.explore:
             stopped = threading.Event()
-            thread = threading.Thread(target=poll_monitor, args=(http_port, monitor, database, range(4, 12), stopped, records, errors, state))
+            thread = threading.Thread(target=poll_monitor, args=(http_port, monitor, database, range(4, 12), stopped, records, errors, state, mode))
             def stop_polling():
                 stopped.set()
                 thread.join(timeout=12)
@@ -173,7 +212,10 @@ def run_round(args, root, index, mode, environment, database):
                       'measured_process_summary': process_summary([r for r in records if r['phase'] == 'measured'])})
             cleanup.callback(stop_polling)
             thread.start()
-        for phase, count in (('warmup', 50 if args.smoke else 500), ('measured', 100 if args.smoke else 10000)):
+        phases = [('measured', 100 if args.smoke else 10000)] if args.balanced else [
+            ('warmup', 50 if args.smoke else 500), ('measured', 100 if args.smoke else 10000)]
+        allocation = None
+        for phase, count in phases:
             state['phase'] = phase
             load = ['taskset', '-c', '4-11', sys.executable, str(ROOT / 'testscript/tcp_stress_test.py'),
                     '--port', str(port), '--timeout', '5', '--concurrency', '200', '--processes', '6',
@@ -182,6 +224,9 @@ def run_round(args, root, index, mode, environment, database):
                     '--latency-sample-every', '100', '--label', f'{index}-{mode}-{phase}', '--build-mode', 'debug',
                     '--server-workers', '4', '--worker-threads', '120', '--rate-limit-mode', 'enabled',
                     '--json-out', str(directory / f'{phase}.json')]
+            if args.balanced:
+                load += ['--balance-context', str(directory / 'context.json'), '--warmup-per-client', '50' if args.smoke else '500']
+                metadata['timing_basis'] = 'balanced_preconnected_barrier_v1'
             command = [sys.executable, str(ROOT / 'testscript/performance_sampler.py'), '--master-pid', str(tcp.pid),
                        '--label', f'{index}-{mode}-{phase}', '--interval', '0.5', '--log', str(directory / 'server.log'),
                        '--output', str(directory / f'{phase}-resources.json'), '--', *load]
@@ -189,19 +234,29 @@ def run_round(args, root, index, mode, environment, database):
             write(directory / 'context.json', metadata)
             with (directory / f'{phase}.log').open('wb') as output:
                 run_process_group(command, stdout=output, stderr=subprocess.STDOUT, timeout=300)
-            result = json.loads((directory / f'{phase}.json').read_text())['result']
+            raw = json.loads((directory / f'{phase}.json').read_text())
+            result = raw['result']
             require(result['successful'] == 200 * count and result['failed'] == result['not_attempted'] == 0,
                     f'request failures: {directory}/{phase}.json')
             require(not errors, f'monitor polling errors: {errors}')
             results[phase] = result
+            if args.balanced:
+                allocation = raw['allocation']
+                require(all(sorted(counts.values()) == [50] * 4 for counts in allocation['verified_counts'].values()),
+                        'balanced quotas were not maintained')
+                require(all(w['connections'] == 50 and w['successful'] == 50 * count and w['failed'] == 0
+                            for w in allocation['workers'].values()), 'per-Worker balanced requests incomplete')
         if mode == 'off':
             require(not (directory / 'metrics').exists(), 'off condition generated snapshots')
         else:
             samples = [json.loads(p.read_text()) for p in (directory / 'metrics').glob('worker-*.json')]
             require(len(samples) == 4 and all(s['sequence'] >= 2 for s in samples), 'publisher did not sample repeatedly')
-        if mode == 'full':
+        if mode == 'full' or args.explore:
             stop_polling()
             require(not errors, f'monitor polling errors: {errors}')
+        if has_monitor:
+            write(directory / 'monitor-after.json', observe_monitor(http_port, mode))
+        if mode == 'full':
             require(records and all(w['resources']['cpu_percent'] is not None
                     for w in records[-1]['responses']['workers']['data']['workers']), 'no usable CPU/RSS monitoring sample')
         tcp.send_signal(signal.SIGTERM)
@@ -210,6 +265,8 @@ def run_round(args, root, index, mode, environment, database):
     write(directory / 'cleanup.json', {'confirmed': True, 'tcp_port_closed': closed(port),
                                       'config_removed': not config.exists(), 'worker_pids': workers})
     measured = {'mode': mode, 'directory': directory.name, **results['measured']}
+    if allocation is not None:
+        measured['worker_load'] = allocation['workers']
     print(f"PASS {directory.name}: QPS={measured['qps']}, P95={measured['latency_ms']['p95']} ms; cleanup confirmed", flush=True)
     time.sleep(1)
     return measured
@@ -222,7 +279,15 @@ def main():
     parser.add_argument('--report', type=Path, required=True, help='existing real experiment report for DB preflight')
     parser.add_argument('--output', type=Path, default=ROOT / 'artifacts')
     parser.add_argument('--smoke', action='store_true', help='three short conditions; never formal acceptance')
+    parser.add_argument('--explore', nargs='+', choices=EXPLORATION_MODES,
+                        help='explicit exploratory conditions/order; same load, no formal verdict')
+    parser.add_argument('--balanced', action='store_true', help='verified 50 connections per Worker, embedded warmup and barrier timing')
     args = parser.parse_args()
+    require(not args.balanced or args.explore, 'balanced mode requires an explicit exploratory order')
+    order = args.explore or (ORDER[:3] if args.smoke else ORDER)
+    scope = ('exploratory_smoke' if args.smoke else 'exploratory_decomposition') if args.explore else ('smoke' if args.smoke else 'formal')
+    if args.balanced:
+        scope = 'balanced_smoke' if args.smoke else 'balanced_exploration'
     for key in ('binary', 'monitor', 'report'):
         setattr(args, key, getattr(args, key).resolve(strict=True))
     report = json.loads(args.report.read_text())
@@ -231,20 +296,26 @@ def main():
     require(set(range(12)).issubset(os.sched_getaffinity(0)), 'requires CPUs 0-11, matching baseline placement')
     require(closed(6379), '6379 already occupied; do not touch existing Redis')
     args.output.mkdir(parents=True, exist_ok=True)
-    root = Path(tempfile.mkdtemp(prefix='monitor-overhead-smoke-' if args.smoke else 'monitor-overhead-formal-', dir=args.output.resolve()))
+    root = Path(tempfile.mkdtemp(prefix=f'monitor-overhead-{scope}-', dir=args.output.resolve()))
     root.chmod(0o700)
     local_config_hash = sha(args.binary.with_name('nginx.conf'))
     files = [args.binary, args.monitor, args.report, Path(__file__).resolve(),
              ROOT / 'testscript/tcp_stress_test.py', ROOT / 'testscript/performance_sampler.py',
              ROOT / 'testscript/benchmark_worker_snapshot.py', ROOT / 'testscript/process_group.py',
              ROOT / 'testscript/test_stage3_live.py', ROOT / 'testscript/test_shutdown.py']
-    write(root / 'manifest.json', {'scope': 'smoke' if args.smoke else 'formal matched monitoring overhead',
+    if args.balanced:
+        files += [ROOT / 'testscript/balanced_load.py']
+    write(root / 'manifest.json', {'scope': scope,
           'git_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
           'system': platform.platform(), 'python': platform.python_version(),
           'hashes': {str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p): sha(p) for p in files},
           'local_config_sha256': local_config_hash, 'affinity': sorted(os.sched_getaffinity(0)),
-          'meminfo_before': Path('/proc/meminfo').read_text(), 'order': list(ORDER[:3] if args.smoke else ORDER),
-          'targets': {'qps_drop_percent_max': 5, 'sampled_p95_increase_percent_max': 10, 'request_failures': 0},
+          'balanced': args.balanced,
+          'meminfo_before': Path('/proc/meminfo').read_text(), 'order': list(order),
+          'targets': None if args.explore else {'qps_drop_percent_max': 5, 'sampled_p95_increase_percent_max': 10, 'request_failures': 0},
+          'mode_features': {mode: {'monitor': mode in ('collector', 'events', 'full'),
+                                  'monitor_db_enabled': mode in ('events', 'full'),
+                                  'http_polling': mode == 'full'} for mode in order},
           'limitations': ['same-host Debug Ping, no production capacity claim', 'no AI requests or fault-injection load',
                          'Redis/monitoring MySQL inherit runner affinity; TCP/monitor share CPUs 0-3',
                          'three polling endpoints every two seconds, no interactive browser',
@@ -272,15 +343,16 @@ def main():
         write(root / 'owned-services.json', {'redis_pid': redis.pid, 'redis_start_ticks': identity(redis.pid),
               'redis_port': 6379, 'mysql_pid': database.process.pid, 'mysql_start_ticks': identity(database.process.pid),
               'mysql_port': environment['EPOLL_MONITOR_DB_PORT'], 'mysql_data_root': str(database.root)})
-        for index, mode in enumerate(ORDER[:3] if args.smoke else ORDER, 1):
+        for index, mode in enumerate(order, 1):
             require(redis.poll() is None and database.process.poll() is None, 'owned dependency exited')
             runs.append(run_round(args, root, index, mode, environment, database))
             write(root / 'runs.json', runs)
     require(sha(args.binary.with_name('nginx.conf')) == local_config_hash, 'local config changed')
     require(closed(int(environment['EPOLL_MONITOR_DB_PORT'])) and not database.root.exists(),
             'private database port/directory cleanup incomplete')
-    summary = {'scope': 'smoke' if args.smoke else 'formal', 'runs': runs, 'cleanup_confirmed': True,
-               'local_config_unchanged': True, 'groups': None if args.smoke else summarize(runs)}
+    summary = {'scope': scope, 'runs': runs, 'cleanup_confirmed': True,
+               'local_config_unchanged': True,
+               'groups': None if args.smoke else (exploration_summary(runs) if args.explore else summarize(runs))}
     write(root / 'summary.json', summary)
     print(json.dumps({k: v for k, v in summary.items() if k != 'runs'}, indent=2), flush=True)
 
